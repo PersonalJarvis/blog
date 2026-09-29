@@ -5,7 +5,7 @@
  * the visuals live inside the posts.
  */
 import { CATEGORIES } from "@/content.config";
-import { formatDate, readingMinutes, type Post } from "@/lib";
+import { formatDate, href, readingMinutes, type Post } from "@/lib";
 
 interface Props {
   posts: Post[];
@@ -33,7 +33,7 @@ const used = CATEGORIES.filter((c) => posts.some((p) => p.data.category === c));
   {
     posts.map((p) => (
       <li class="feed-row" data-cat={p.data.category}>
-        <a href={`/${p.id}/`}>
+        <a href={href(`${p.id}/`)}>
           <span class="feed-date mono tnum">{formatDate(p.data.pubDate)}</span>
           <span class="feed-title">
             {p.data.series && <span class="k">{p.data.series}: </span>}

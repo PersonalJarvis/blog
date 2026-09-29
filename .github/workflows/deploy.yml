@@ -1,4 +1,4 @@
-# Build the blog and publish it to GitHub Pages at blog.personaljarvis.ai.
+# Build the blog and publish it to GitHub Pages at personaljarvis.ai/blog.
 name: deploy
 
 on:

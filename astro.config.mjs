@@ -5,7 +5,10 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: "https://blog.personaljarvis.ai",
+  // Served at personaljarvis.ai/blog/: GitHub Pages publishes an org's project
+  // repo under the org site's custom domain, so the blog inherits its HTTPS.
+  site: "https://personaljarvis.ai",
+  base: "/blog",
   trailingSlash: "always",
   integrations: [mdx(), sitemap()],
   markdown: {

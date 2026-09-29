@@ -72,7 +72,7 @@ export async function renderOg(opts: { title: string; label: string; foot?: stri
       h(
         "div",
         { display: "flex", justifyContent: "space-between", fontFamily: "Mono", fontSize: 18, color: "#6d6a62", letterSpacing: 1 },
-        [h("div", {}, "BLOG.PERSONALJARVIS.AI"), h("div", {}, opts.foot ?? "OPEN SOURCE · ANY MODEL · YOUR DESKTOP")],
+        [h("div", {}, "PERSONALJARVIS.AI/BLOG"), h("div", {}, opts.foot ?? "OPEN SOURCE · ANY MODEL · YOUR DESKTOP")],
       ),
     ],
   );

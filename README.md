@@ -1,6 +1,6 @@
 # Personal Jarvis Blog
 
-Source of [blog.personaljarvis.ai](https://blog.personaljarvis.ai): new features, field notes
+Source of [personaljarvis.ai/blog](https://personaljarvis.ai/blog/): new features, field notes
 and tips for [Personal Jarvis](https://personaljarvis.ai), the open-source desktop AI assistant.
 
 Astro 7 + MDX, static, deployed to GitHub Pages. Every infographic is an Astro component

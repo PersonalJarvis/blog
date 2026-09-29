@@ -2,7 +2,7 @@
 import Base from "@/layouts/Base.astro";
 import PostList from "@/components/PostList.astro";
 import { CATEGORIES } from "@/content.config";
-import { getPosts, SITE } from "@/lib";
+import { getPosts, href, SITE } from "@/lib";
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -20,7 +20,7 @@ const title = cat.charAt(0).toUpperCase() + cat.slice(1);
 <Base title={`${title}`} description={`${title} posts from the ${SITE.title}.`}>
   <main class="frame">
     <section class="hero grid12" style="padding-bottom:40px">
-      <div class="mono k" style="grid-column:1/-1;margin-bottom:14px"><a href="/" style="text-decoration:none">Blog</a> / {cat}</div>
+      <div class="mono k" style="grid-column:1/-1;margin-bottom:14px"><a href={href()} style="text-decoration:none">Blog</a> / {cat}</div>
       <h1 class="hero-title">{title}</h1>
     </section>
     <PostList posts={posts} tabs={false} />

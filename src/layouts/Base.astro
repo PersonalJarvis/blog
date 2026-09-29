@@ -5,7 +5,7 @@
  * same product, one subdomain over.
  */
 import "@/styles/global.css";
-import { SITE } from "@/lib";
+import { SITE, href } from "@/lib";
 
 interface Props {
   title: string;
@@ -16,7 +16,7 @@ interface Props {
   jsonLd?: Record<string, unknown>;
 }
 
-const { title, description, image = "/og/default.png", article, jsonLd } = Astro.props;
+const { title, description, image = href("og/default.png"), article, jsonLd } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
 const fullTitle = title === SITE.title ? title : `${title} / ${SITE.title}`;
@@ -38,9 +38,9 @@ const stamp = String.raw`
     <meta name="description" content={description} />
     <meta name="theme-color" content="#060605" />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/gigi.svg" />
-    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" type="image/svg+xml" href={href("gigi.svg")} />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href={href("rss.xml")} />
+    <link rel="sitemap" href={href("sitemap-index.xml")} />
 
     <meta property="og:site_name" content={SITE.title} />
     <meta property="og:title" content={title} />
@@ -61,16 +61,16 @@ const stamp = String.raw`
     <meta name="twitter:image" content={ogImage} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
-  <body>
+  <body data-home={href()} data-rss={href("rss.xml")}>
     <header class="nav">
       <div class="frame">
-        <a class="nav-brand" href="/">
-          <img src="/gigi.svg" alt="" width="28" height="30" />
+        <a class="nav-brand" href={href()}>
+          <img src={href("gigi.svg")} alt="" width="28" height="30" />
           <span>Personal Jarvis <span class="slash">/</span> Blog</span>
         </a>
         <nav class="nav-links mono" aria-label="Main">
-          <a href="/"><span class="k">[B]</span> Blog</a>
-          <a class="hide-sm" href="/rss.xml"><span class="k">[R]</span> RSS</a>
+          <a href={href()}><span class="k">[B]</span> Blog</a>
+          <a class="hide-sm" href={href("rss.xml")}><span class="k">[R]</span> RSS</a>
           <a class="hide-sm" href={SITE.github}><span class="k">[G]</span> GitHub</a>
         </nav>
         <a class="btn btn-solid" href={SITE.main}>Get Jarvis</a>
@@ -83,8 +83,8 @@ const stamp = String.raw`
       <div class="frame">
         <div class="footer-cols">
           <div>
-            <a class="nav-brand" href="/">
-              <img src="/gigi.svg" alt="" width="28" height="30" />
+            <a class="nav-brand" href={href()}>
+              <img src={href("gigi.svg")} alt="" width="28" height="30" />
               <span>Personal Jarvis</span>
             </a>
             <p style="margin:14px 0 0;max-width:340px;font-size:var(--text-small)">{SITE.tagline}</p>
@@ -100,9 +100,9 @@ const stamp = String.raw`
           <div>
             <h4 class="mono">Blog</h4>
             <ul>
-              <li><a href="/">All posts</a></li>
-              <li><a href="/category/agents/">Agents</a></li>
-              <li><a href="/rss.xml">RSS feed</a></li>
+              <li><a href={href()}>All posts</a></li>
+              <li><a href={href("category/agents/")}>Agents</a></li>
+              <li><a href={href("rss.xml")}>RSS feed</a></li>
             </ul>
           </div>
           <div>
@@ -136,7 +136,7 @@ const stamp = String.raw`
         if (e.metaKey || e.ctrlKey || e.altKey) return;
         const t = e.target as HTMLElement;
         if (t.closest("input, textarea, [contenteditable]")) return;
-        const map: Record<string, string> = { b: "/", r: "/rss.xml", g: "https://github.com/PersonalJarvis/PersonalJarvis" };
+        const map: Record<string, string> = { b: document.body.dataset.home ?? "/", r: document.body.dataset.rss ?? "/", g: "https://github.com/PersonalJarvis/PersonalJarvis" };
         const to = map[e.key.toLowerCase()];
         if (to) location.href = to;
       });

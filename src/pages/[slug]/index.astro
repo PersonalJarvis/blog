@@ -2,7 +2,7 @@
 import { render } from "astro:content";
 import Base from "@/layouts/Base.astro";
 import PostList from "@/components/PostList.astro";
-import { getPosts, formatDate, readingMinutes, SITE } from "@/lib";
+import { getPosts, formatDate, href, readingMinutes, SITE } from "@/lib";
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -13,7 +13,7 @@ const { post } = Astro.props;
 const { Content, headings } = await render(post);
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const minutes = readingMinutes(post.body);
-const url = new URL(`/${post.id}/`, Astro.site).toString();
+const url = new URL(href(`${post.id}/`), Astro.site).toString();
 const related = (await getPosts()).filter((p) => p.id !== post.id).slice(0, 5);
 const d = post.data;
 const jsonLd = {
@@ -26,7 +26,7 @@ const jsonLd = {
   author: { "@type": "Organization", name: d.author },
   articleSection: d.category,
   timeRequired: `PT${minutes}M`,
-  image: new URL(`/og/${post.id}.png`, Astro.site).toString(),
+  image: new URL(href(`og/${post.id}.png`), Astro.site).toString(),
   mainEntityOfPage: url,
   publisher: { "@type": "Organization", name: "Personal Jarvis", url: SITE.main },
 };
@@ -40,7 +40,7 @@ const share = [
 <Base
   title={d.title}
   description={d.description}
-  image={`/og/${post.id}.png`}
+  image={href(`og/${post.id}.png`)}
   article={{ published: d.pubDate, modified: d.updatedDate, section: d.category, author: d.author }}
   jsonLd={jsonLd}
 >
@@ -49,7 +49,7 @@ const share = [
     <header class="article-head frame">
       <div class="grid12">
         <div class="chip-col">
-          <a class="chip mono" href={`/category/${d.category}/`}><span class="dot"></span>{d.category}</a>
+          <a class="chip mono" href={href(`category/${d.category}/`)}><span class="dot"></span>{d.category}</a>
         </div>
         <div class="title-col">
           {d.series && <div class="mono" style="color:var(--ink-4);margin-bottom:14px">{d.series}</div>}

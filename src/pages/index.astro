@@ -1,7 +1,7 @@
 ---
 import Base from "@/layouts/Base.astro";
 import PostList from "@/components/PostList.astro";
-import { getPosts, formatDate, readingMinutes, SITE } from "@/lib";
+import { getPosts, formatDate, href, readingMinutes, SITE } from "@/lib";
 
 const posts = await getPosts();
 const featured = posts.find((p) => p.data.featured) ?? posts[0];
@@ -24,12 +24,12 @@ const jsonLd = {
         New features, the numbers behind them, and tips you can try in the next five minutes. Written by the people
         building Personal Jarvis.
       </p>
-      <img class="hero-mascot" src="/gigi.svg" alt="" width="180" height="195" />
+      <img class="hero-mascot" src={href("gigi.svg")} alt="" width="180" height="195" />
     </section>
 
     {
       featured && (
-        <a class="featured" href={`/${featured.id}/`}>
+        <a class="featured" href={href(`${featured.id}/`)}>
           <div class="featured-meta mono">
             <span style="color:var(--gold)">● Latest</span>
             <span>{formatDate(featured.data.pubDate)}</span>

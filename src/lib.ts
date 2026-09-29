@@ -18,6 +18,12 @@ export function readingMinutes(body: string | undefined): number {
   return Math.max(1, Math.round(words / 230));
 }
 
+/** A site-internal path with the /blog base prefixed: href("x/") -> "/blog/x/". */
+export function href(path = ""): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  return `${base}/${path.replace(/^\//, "")}`;
+}
+
 export function formatDate(d: Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }

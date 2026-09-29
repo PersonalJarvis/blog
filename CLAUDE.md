@@ -2,7 +2,7 @@
 
 Rules for any coding agent working in this repo.
 
-- This is the blog for blog.personaljarvis.ai. It is its OWN git repo. Never commit it into the
+- This is the blog for personaljarvis.ai/blog. It is its OWN git repo. Never commit it into the
   Personal Jarvis app repo or the main website repo (`personaljarvis.github.io`), and never the
   other way round. The Jarvis app source is READ-ONLY reference for facts.
 - Everything committed is English. Conversation with the maintainer is German.
