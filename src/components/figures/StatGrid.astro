@@ -1,0 +1,68 @@
+---
+/** Key numbers as a hairline grid. The first stat can be the hero (gold). */
+interface Stat {
+  value: string;
+  label: string;
+  note?: string;
+}
+interface Props {
+  stats: Stat[];
+  heroFirst?: boolean;
+  columns?: number;
+}
+const { stats, heroFirst = true, columns = Math.min(stats.length, 3) } = Astro.props;
+---
+
+<div class="stats" style={`--cols:${columns}`}>
+  {
+    stats.map((s, i) => (
+      <div class:list={["stat", { hero: heroFirst && i === 0 }]}>
+        <div class="v tnum">{s.value}</div>
+        <div class="l mono">{s.label}</div>
+        {s.note && <div class="n">{s.note}</div>}
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  @media (max-width: 560px) {
+    .stats {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .stat {
+    background: var(--canvas);
+    padding: 20px 18px;
+  }
+  .v {
+    color: var(--ink);
+    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+  .hero .v {
+    color: var(--gold);
+  }
+  .l {
+    margin-top: 12px;
+    color: var(--ink-3);
+    font-size: 0.6875rem;
+  }
+  .n {
+    margin-top: 6px;
+    color: var(--ink-4);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+</style>

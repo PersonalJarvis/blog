@@ -1,0 +1,101 @@
+---
+/**
+ * The "try it now" callout: what to say, press or click, verbatim.
+ * `say` renders as a spoken line; `keys` as keycaps; `path` as a menu trail.
+ */
+interface Props {
+  title?: string;
+  say?: string;
+  keys?: string[];
+  path?: string[];
+}
+const { title = "Try it", say, keys, path } = Astro.props;
+---
+
+<aside class="try" data-reveal>
+  <div class="mono hd"><span class="live"></span>{title}</div>
+  {say && <p class="say">“{say}”</p>}
+  {
+    keys && (
+      <p class="keys">
+        {keys.map((k, i) => (
+          <>
+            {i > 0 && <span class="plus">+</span>}
+            <kbd>{k}</kbd>
+          </>
+        ))}
+      </p>
+    )
+  }
+  {
+    path && (
+      <p class="path mono">
+        {path.map((p, i) => (
+          <>
+            {i > 0 && <span class="sep"> › </span>}
+            <span>{p}</span>
+          </>
+        ))}
+      </p>
+    )
+  }
+  <div class="body"><slot /></div>
+</aside>
+
+<style>
+  .try {
+    margin: 2.2em 0;
+    padding: 20px 22px;
+    border: 1px dashed var(--line-strong);
+    border-radius: 12px;
+  }
+  .hd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink-3);
+  }
+  .live {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 4px var(--gold-wash);
+  }
+  .say {
+    margin: 12px 0 0;
+    color: var(--ink);
+    font-size: 1.25rem;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+  .keys {
+    margin: 12px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  kbd {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 4px 9px;
+    border: 1px solid var(--line-strong);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    color: var(--ink);
+    background: var(--surface);
+  }
+  .plus,
+  .sep {
+    color: var(--ink-4);
+  }
+  .path {
+    margin: 12px 0 0;
+    color: var(--ink-2);
+  }
+  .body :global(p) {
+    margin: 10px 0 0;
+    color: var(--ink-3);
+    font-size: 0.9375rem;
+  }
+</style>

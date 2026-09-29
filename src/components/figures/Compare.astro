@@ -1,0 +1,76 @@
+---
+/** Two columns, "before" on the left in grey, "after" on the right in gold. */
+interface Props {
+  before: { title: string; items: string[] };
+  after: { title: string; items: string[] };
+}
+const { before, after } = Astro.props;
+---
+
+<div class="cmp">
+  <div class="col then">
+    <div class="mono hd">{before.title}</div>
+    <ul>{before.items.map((i) => <li set:html={i} />)}</ul>
+  </div>
+  <div class="col now">
+    <div class="mono hd">{after.title}</div>
+    <ul>{after.items.map((i) => <li set:html={i} />)}</ul>
+  </div>
+</div>
+
+<style>
+  .cmp {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 560px) {
+    .cmp {
+      grid-template-columns: 1fr;
+    }
+  }
+  .col {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    background: var(--canvas);
+  }
+  .now {
+    border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  }
+  .hd {
+    color: var(--ink-4);
+    margin-bottom: 8px;
+  }
+  .now .hd {
+    color: var(--gold);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  li {
+    padding: 7px 0 7px 18px;
+    position: relative;
+    border-top: 1px solid var(--line-soft);
+  }
+  li:first-child {
+    border-top: 0;
+  }
+  li::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    color: var(--ink-4);
+  }
+  .now li::before {
+    content: "→";
+    color: var(--gold);
+  }
+  .then li {
+    color: var(--ink-3);
+  }
+</style>

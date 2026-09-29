@@ -1,0 +1,75 @@
+---
+/**
+ * Small multiples: how a grid of N panes is laid out, for several N.
+ * `layouts` gives the column count for each N (from the product's own
+ * `balanced_columns`), so the figure is data, not a guess.
+ */
+interface Props {
+  layouts: { n: number; cols: number }[];
+  highlight?: number;
+}
+const { layouts, highlight } = Astro.props;
+const CELL = 64;
+const H = 48;
+---
+
+<div class="multiples">
+  {
+    layouts.map(({ n, cols }) => {
+      const rows = Math.ceil(n / cols);
+      const gap = 3;
+      const cw = (CELL - gap * (cols - 1)) / cols;
+      const ch = (H - gap * (rows - 1)) / rows;
+      const on = highlight === n;
+      return (
+        <div class:list={["m", { on }]}>
+          <svg viewBox={`0 0 ${CELL} ${H}`} aria-hidden="true">
+            {Array.from({ length: n }).map((_, i) => (
+              <rect
+                x={(i % cols) * (cw + gap)}
+                y={Math.floor(i / cols) * (ch + gap)}
+                width={cw}
+                height={ch}
+                rx="1.5"
+                fill={on ? "var(--gold)" : "var(--surface-strong)"}
+                stroke={on ? "var(--gold-deep)" : "var(--line-strong)"}
+                stroke-width="0.6"
+              />
+            ))}
+          </svg>
+          <span class="mono n">{n} {n === 1 ? "pane" : "panes"}</span>
+          <span class="mono g">
+            {cols} × {rows}
+          </span>
+        </div>
+      );
+    })
+  }
+</div>
+
+<style>
+  .multiples {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px 14px;
+  }
+  .m {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .m svg {
+    width: 100%;
+    height: auto;
+  }
+  .n {
+    color: var(--ink-2);
+  }
+  .g {
+    color: var(--ink-4);
+    font-size: 0.625rem;
+  }
+  .on .n {
+    color: var(--gold);
+  }
+</style>

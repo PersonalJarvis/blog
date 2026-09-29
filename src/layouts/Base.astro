@@ -1,0 +1,145 @@
+---
+/**
+ * The page shell every route extends: head metadata, nav, footer.
+ * The brand ground and mascot match personaljarvis.ai so the blog reads as the
+ * same product, one subdomain over.
+ */
+import "@/styles/global.css";
+import { SITE } from "@/lib";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Absolute path of the OG image, e.g. "/og/slug.png". */
+  image?: string;
+  article?: { published: Date; modified?: Date; section: string; author: string };
+  jsonLd?: Record<string, unknown>;
+}
+
+const { title, description, image = "/og/default.png", article, jsonLd } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
+const fullTitle = title === SITE.title ? title : `${title} / ${SITE.title}`;
+const year = new Date().getFullYear();
+const stamp = String.raw`
+   ▄▄▄▄▄▄▄
+  █ ●   ● █   PERSONAL JARVIS
+  █       █   written by humans, drawn in SVG,
+  █▄▀▄▀▄▀▄█   shipped from a terminal.`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script is:inline>document.documentElement.classList.add("js");</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#060605" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/gigi.svg" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content={article ? "article" : "website"} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    {article && <meta property="article:published_time" content={article.published.toISOString()} />}
+    {article?.modified && <meta property="article:modified_time" content={article.modified.toISOString()} />}
+    {article && <meta property="article:section" content={article.section} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@PersonalJarvis" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <header class="nav">
+      <div class="frame">
+        <a class="nav-brand" href="/">
+          <img src="/gigi.svg" alt="" width="28" height="30" />
+          <span>Personal Jarvis <span class="slash">/</span> Blog</span>
+        </a>
+        <nav class="nav-links mono" aria-label="Main">
+          <a href="/"><span class="k">[B]</span> Blog</a>
+          <a class="hide-sm" href="/rss.xml"><span class="k">[R]</span> RSS</a>
+          <a class="hide-sm" href={SITE.github}><span class="k">[G]</span> GitHub</a>
+        </nav>
+        <a class="btn btn-solid" href={SITE.main}>Get Jarvis</a>
+      </div>
+    </header>
+
+    <slot />
+
+    <footer class="footer">
+      <div class="frame">
+        <div class="footer-cols">
+          <div>
+            <a class="nav-brand" href="/">
+              <img src="/gigi.svg" alt="" width="28" height="30" />
+              <span>Personal Jarvis</span>
+            </a>
+            <p style="margin:14px 0 0;max-width:340px;font-size:var(--text-small)">{SITE.tagline}</p>
+          </div>
+          <div>
+            <h4 class="mono">Product</h4>
+            <ul>
+              <li><a href={SITE.main}>Website</a></li>
+              <li><a href={`${SITE.github}/releases`}>Releases</a></li>
+              <li><a href={`${SITE.main}/#install`}>Install</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="mono">Blog</h4>
+            <ul>
+              <li><a href="/">All posts</a></li>
+              <li><a href="/category/agents/">Agents</a></li>
+              <li><a href="/rss.xml">RSS feed</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="mono">Community</h4>
+            <ul>
+              <li><a href={SITE.github}>GitHub</a></li>
+              <li><a href="https://x.com/PersonalJarvis">X</a></li>
+              <li><a href={`${SITE.main}/imprint/`}>Imprint</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="stamp" aria-hidden="true">{stamp}</div>
+        <p class="mono" style="margin-top:20px;color:var(--ink-4)">© {year} Personal Jarvis · Open source</p>
+      </div>
+    </footer>
+
+    <script>
+      // Reveal-on-scroll for anything marked data-reveal. Cheap and optional:
+      // without JS the CSS never hides anything because .is-in is added here.
+      const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
+      if (!("IntersectionObserver" in window)) els.forEach((e) => e.classList.add("is-in"));
+      else {
+        const io = new IntersectionObserver(
+          (entries) => entries.forEach((en) => en.isIntersecting && (en.target.classList.add("is-in"), io.unobserve(en.target))),
+          { rootMargin: "0px 0px -8% 0px" },
+        );
+        els.forEach((e) => io.observe(e));
+      }
+      // Keyboard shortcuts shown in the nav.
+      document.addEventListener("keydown", (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target as HTMLElement;
+        if (t.closest("input, textarea, [contenteditable]")) return;
+        const map: Record<string, string> = { b: "/", r: "/rss.xml", g: "https://github.com/PersonalJarvis/PersonalJarvis" };
+        const to = map[e.key.toLowerCase()];
+        if (to) location.href = to;
+      });
+    </script>
+  </body>
+</html>

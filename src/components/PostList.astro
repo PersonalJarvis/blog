@@ -1,0 +1,61 @@
+---
+/**
+ * The feed: a plain text list (date / title + dek / category / minutes), with
+ * category tabs that filter in place. No cards and no thumbnails on purpose —
+ * the visuals live inside the posts.
+ */
+import { CATEGORIES } from "@/content.config";
+import { formatDate, readingMinutes, type Post } from "@/lib";
+
+interface Props {
+  posts: Post[];
+  tabs?: boolean;
+}
+const { posts, tabs = true } = Astro.props;
+const used = CATEGORIES.filter((c) => posts.some((p) => p.data.category === c));
+---
+
+{
+  tabs && used.length > 1 && (
+    <div class="tabs" role="toolbar" aria-label="Filter by category">
+      <button type="button" aria-pressed="true" data-cat="all">
+        All
+      </button>
+      {used.map((c) => (
+        <button type="button" aria-pressed="false" data-cat={c}>
+          {c}
+        </button>
+      ))}
+    </div>
+  )
+}
+<ul class="feed" id="feed">
+  {
+    posts.map((p) => (
+      <li class="feed-row" data-cat={p.data.category}>
+        <a href={`/${p.id}/`}>
+          <span class="feed-date mono tnum">{formatDate(p.data.pubDate)}</span>
+          <span class="feed-title">
+            {p.data.series && <span class="k">{p.data.series}: </span>}
+            {p.data.title}
+            <small>{p.data.description}</small>
+          </span>
+          <span class="feed-cat mono">{p.data.category}</span>
+          <span class="feed-min mono tnum">{readingMinutes(p.body)} min</span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".tabs button");
+  const rows = document.querySelectorAll<HTMLElement>("#feed .feed-row");
+  buttons.forEach((b) =>
+    b.addEventListener("click", () => {
+      const cat = b.dataset.cat;
+      buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      rows.forEach((r) => (r.hidden = cat !== "all" && r.dataset.cat !== cat));
+    }),
+  );
+</script>

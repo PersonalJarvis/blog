@@ -1,0 +1,164 @@
+---
+import { render } from "astro:content";
+import Base from "@/layouts/Base.astro";
+import PostList from "@/components/PostList.astro";
+import { getPosts, formatDate, readingMinutes, SITE } from "@/lib";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const minutes = readingMinutes(post.body);
+const url = new URL(`/${post.id}/`, Astro.site).toString();
+const related = (await getPosts()).filter((p) => p.id !== post.id).slice(0, 5);
+const d = post.data;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: d.title,
+  description: d.description,
+  datePublished: d.pubDate.toISOString(),
+  dateModified: (d.updatedDate ?? d.pubDate).toISOString(),
+  author: { "@type": "Organization", name: d.author },
+  articleSection: d.category,
+  timeRequired: `PT${minutes}M`,
+  image: new URL(`/og/${post.id}.png`, Astro.site).toString(),
+  mainEntityOfPage: url,
+  publisher: { "@type": "Organization", name: "Personal Jarvis", url: SITE.main },
+};
+const share = [
+  { label: "X", href: `https://x.com/intent/post?text=${encodeURIComponent(d.title)}&url=${encodeURIComponent(url)}` },
+  { label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}` },
+  { label: "Hacker News", href: `https://news.ycombinator.com/submitlink?u=${encodeURIComponent(url)}&t=${encodeURIComponent(d.title)}` },
+];
+---
+
+<Base
+  title={d.title}
+  description={d.description}
+  image={`/og/${post.id}.png`}
+  article={{ published: d.pubDate, modified: d.updatedDate, section: d.category, author: d.author }}
+  jsonLd={jsonLd}
+>
+  <div class="top-progress" id="topProg"></div>
+  <main>
+    <header class="article-head frame">
+      <div class="grid12">
+        <div class="chip-col">
+          <a class="chip mono" href={`/category/${d.category}/`}><span class="dot"></span>{d.category}</a>
+        </div>
+        <div class="title-col">
+          {d.series && <div class="mono" style="color:var(--ink-4);margin-bottom:14px">{d.series}</div>}
+          <h1 class="article-title">{d.title}</h1>
+          <p class="article-dek">{d.description}</p>
+          <dl class="meta-row">
+            <div><dt class="mono">Author</dt><dd>{d.author}</dd></div>
+            <div><dt class="mono">Published</dt><dd class="tnum">{formatDate(d.pubDate)}</dd></div>
+            <div><dt class="mono">Reading time</dt><dd class="tnum">{minutes} minutes</dd></div>
+          </dl>
+        </div>
+      </div>
+    </header>
+    <div class="rule-full"></div>
+
+    <div class="article-body frame">
+      <div class="grid12">
+        <aside class="rail">
+          <div class="rail-inner">
+            {
+              toc.length > 0 && (
+                <nav class="toc" aria-label="Contents">
+                  <div class="mono k">Tree</div>
+                  <ol>
+                    {toc.map((h) => (
+                      <li class={`depth-${h.depth}`}>
+                        <a href={`#${h.slug}`} data-toc={h.slug}>
+                          {h.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </nav>
+              )
+            }
+            <div>
+              <div class="mono k">Progress</div>
+              <div class="mono progress-ascii" id="asciiProg" aria-hidden="true">
+                <span class="fill"></span><span class="rest">░░░░░░░░░░░░░░░░░░░░</span> <span class="pct">00%</span>
+              </div>
+            </div>
+            <div class="share">
+              <div class="mono k">Share</div>
+              {share.map((s) => <a class="mono" href={s.href} rel="noopener" target="_blank">└ {s.label}</a>)}
+              <a class="mono" href="#" id="copyUrl" data-url={url}>└ Copy URL</a>
+            </div>
+            {d.version && (
+              <div>
+                <div class="mono k">Written for</div>
+                <div class="mono" style="color:var(--ink-3);margin-top:6px">Jarvis {d.version}</div>
+              </div>
+            )}
+          </div>
+        </aside>
+        <article class="prose-col">
+          <div class="prose">
+            <Content />
+          </div>
+        </article>
+      </div>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="frame" style="padding-bottom:96px">
+          <div class="mono" style="color:var(--ink-4);margin-bottom:6px">Related posts</div>
+          <PostList posts={related} tabs={false} />
+        </section>
+      )
+    }
+  </main>
+</Base>
+
+<script>
+  const bar = document.getElementById("topProg");
+  const prog = document.getElementById("asciiProg");
+  const cells = 20;
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-toc]"));
+  const targets = links
+    .map((a) => document.getElementById(a.dataset.toc ?? ""))
+    .filter((el): el is HTMLElement => el !== null);
+
+  function onScroll() {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    const p = max > 0 ? Math.min(1, h.scrollTop / max) : 0;
+    if (bar) bar.style.width = `${p * 100}%`;
+    if (prog) {
+      const n = Math.round(p * cells);
+      prog.querySelector(".fill")!.textContent = "█".repeat(n);
+      prog.querySelector(".rest")!.textContent = "░".repeat(cells - n);
+      prog.querySelector(".pct")!.textContent = `${String(Math.round(p * 100)).padStart(2, "0")}%`;
+    }
+    let current = targets[0]?.id;
+    for (const t of targets) if (t.getBoundingClientRect().top < 140) current = t.id;
+    links.forEach((a) => a.setAttribute("aria-current", String(a.dataset.toc === current)));
+  }
+  document.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  document.getElementById("copyUrl")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const el = e.currentTarget as HTMLAnchorElement;
+    try {
+      await navigator.clipboard.writeText(el.dataset.url ?? location.href);
+      el.textContent = "└ Copied";
+    } catch {
+      el.textContent = "└ Copy failed";
+    }
+    setTimeout(() => (el.textContent = "└ Copy URL"), 1600);
+  });
+</script>
