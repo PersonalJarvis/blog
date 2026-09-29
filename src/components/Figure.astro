@@ -1,0 +1,66 @@
+---
+/**
+ * Frame for one chart: a title that states the finding, a subtitle that says
+ * what is measured, the plot, then the caption, source and the data as a
+ * table (so nothing depends on colour or hover alone).
+ */
+interface Props {
+  n: number;
+  title: string;
+  subtitle?: string;
+  source: string;
+  /** Column headers and rows for the "Show the data" table. */
+  table?: { head: string[]; rows: (string | number)[][] };
+  legend?: { label: string; color: string; ring?: boolean }[];
+}
+const { n, title, subtitle, source, table, legend } = Astro.props;
+---
+
+<figure class="figure">
+  <div class="figure-head">
+    <p class="figure-title">{title}</p>
+    {subtitle && <p class="figure-sub">{subtitle}</p>}
+  </div>
+  {
+    legend && (
+      <div class="legend" aria-hidden="true">
+        {legend.map((l) => (
+          <span>
+            <i style={l.ring ? `border:2px solid ${l.color};border-radius:50%;background:var(--paper)` : `background:${l.color}`} />
+            {l.label}
+          </span>
+        ))}
+      </div>
+    )
+  }
+  <p class="scroll-hint small">Swipe sideways to see the whole chart.</p>
+  <div class="figure-scroll"><div class="figure-plot"><slot /></div></div>
+  <figcaption class="figure-foot small">
+    <span><strong style="color:var(--ink-2)">Figure {n}.</strong> <slot name="caption" /> Source: {source}.</span>
+    {
+      table && (
+        <details>
+          <summary>Show the data</summary>
+          <table class="data-table">
+            <thead>
+              <tr>
+                {table.head.map((h) => (
+                  <th>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {table.rows.map((r) => (
+                <tr>
+                  {r.map((c) => (
+                    <td>{c}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )
+    }
+  </figcaption>
+</figure>

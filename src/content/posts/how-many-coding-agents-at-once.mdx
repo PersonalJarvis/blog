@@ -1,0 +1,127 @@
+---
+title: "How many coding agents do you actually run at once?"
+description: "We counted five months of coding-agent sessions on the machine Personal Jarvis is built on. Two or more agents were working 69% of the time, and the count never went past sixteen."
+pubDate: 2026-09-29
+category: agents
+version: "2.3"
+featured: true
+---
+
+import Figure from "@/components/Figure.astro";
+import PeakByMonth from "@/components/charts/PeakByMonth.astro";
+import BusiestDay from "@/components/charts/BusiestDay.astro";
+import Concurrency from "@/components/charts/Concurrency.astro";
+import CliMix from "@/components/charts/CliMix.astro";
+import { CLI_COLOR, CLI_ORDER } from "@/components/charts/util";
+import data from "@/data/agent-usage.json";
+
+export const share = (n) => `${((n / data.activeWindows) * 100).toFixed(1)}%`;
+
+"Run several coding agents in parallel" is easy to say and hard to picture. Is that two terminals side by side, or twenty? For an hour, or all day? And does anyone keep that many busy, or do most of them sit idle while you read one diff at a time?
+
+We could answer that for ourselves. Personal Jarvis reads the session logs that coding CLIs such as Codex and Claude Code write to disk, so its Spend view can show what your agents did and what they cost. The machine Jarvis is built on has five months of those logs. We pointed the same index at it and counted.
+
+The short version: **most of the time, more than one agent was working**, and the number crept up month after month until it reached the limit of what one Jarvis workspace holds.
+
+## Where the numbers come from
+
+The index keeps one row per model call: which CLI made it, when, and in which session. From May 1 to September 29, 2026, it recorded 208,147 model calls in 3,332 sessions.
+
+About half of those sessions made fewer than five calls. They are one-off lookups and background requests, not an agent working through a task, so we left them out. That leaves **1,584 agent sessions**, which still account for 99% of all model calls.
+
+To count agents "at once", we cut the day into five-minute windows. An agent counts as working in a window if it made at least one model call there. An agent that is thinking between calls still shows up; one that has finished and is waiting for you does not. Over the five months, there were 4,201 windows in which at least one agent was working, about 350 hours.
+
+## From one agent to ten
+
+In May, the busiest moment of a typical day had one agent working. By August it had ten.
+
+<Figure
+  n={1}
+  title="The typical day went from one agent at a time to about ten"
+  subtitle="Most agents working in the same five minutes, per day. Bar: the median day of the month. Ring: the busiest day."
+  source="Personal Jarvis CLI usage index, agent sessions with five or more model calls"
+  legend={[
+    { label: "Typical day (median of daily peaks)", color: "var(--accent)" },
+    { label: "Busiest day of the month", color: "var(--ink)", ring: true },
+  ]}
+  table={{
+    head: ["Month", "Typical day's peak", "Busiest day", "Active days"],
+    rows: data.monthly.map((m) => [m.month, m.medianPeak, m.maxPeak, m.days]),
+  }}
+>
+  <PeakByMonth />
+  <Fragment slot="caption">The dashed line marks sixteen, the most one workspace holds. September runs to the 29th.</Fragment>
+</Figure>
+
+The climb was not smooth. May had one outlier day with ten agents; on every other day the peak was five or lower, usually one. June stayed at three or fewer. In July, eight days reached five or more agents at once, and in August thirteen days reached ten or more. September's busiest days touched sixteen.
+
+## What a full day looks like
+
+Three days reached sixteen agents at once, all in September. The chart below shows the first of them, September 10, window by window. Between 9:25 in the morning and 9 in the evening, 38 agent sessions worked on that machine.
+
+<Figure
+  n={2}
+  title="September 10: two blocks of work, each climbing to sixteen agents"
+  subtitle="Agents that made a model call in each five-minute window, stacked by coding CLI. Hover for exact counts."
+  source="Personal Jarvis CLI usage index, local time"
+  legend={CLI_ORDER.filter((c) => data.busiestDay.clis.includes(c)).map((c) => ({ label: c, color: CLI_COLOR[c] }))}
+>
+  <BusiestDay />
+  <Fragment slot="caption">A gap means no agent made a call in that window.</Fragment>
+</Figure>
+
+The day ran in two blocks with a gap at lunch. In both, the count climbed into the teens and stayed there for most of an hour: between 11:00 and 11:40 it held between 12 and 16, and after the break it rose from 7 at 3:00 to 16 at 3:30 pm, then tapered off by six. At both peaks, every working agent was a Codex session. Many agents starting on related work at the same time is the situation Jarvis's voice briefing is designed for: one spoken instruction becomes one composed prompt per agent.
+
+## Two or more agents, 69% of the time
+
+Peaks are the dramatic part. The more useful question is what an ordinary hour looks like, and here the answer is clear. In only 31% of the working windows was a single agent working alone.
+
+<Figure
+  n={3}
+  title="Working with a single agent was the exception"
+  subtitle="Share of all working five-minute windows, by how many agents were working in them."
+  source="Personal Jarvis CLI usage index, May–September 2026"
+  table={{
+    head: ["Agents at once", "Share of working time", "Five-minute windows"],
+    rows: data.distribution.map((d) => [d.n, share(d.buckets), d.buckets]),
+  }}
+>
+  <Concurrency />
+  <Fragment slot="caption">The grey bar is one agent working alone.</Fragment>
+</Figure>
+
+The curve falls off gently. Two agents were the most common kind of parallel work, followed by three, then four. Eight or more agents were working in 12% of the windows. The top of the scale is sixteen, and it was reached in six windows, half an hour in total. Nothing went past it. That ceiling is the same number as the Jarvis workspace limit, which exists because each pane is a full CLI process with its own terminal.
+
+## No single CLI won
+
+The last question is which tools those agents were. For three months the answer was nearly always the same CLI. After that, it never was again.
+
+<Figure
+  n={4}
+  title="From one coding CLI to five in the same month"
+  subtitle="Agent sessions started each month, by the CLI they ran in."
+  source="Personal Jarvis CLI usage index, agent sessions with five or more model calls"
+  legend={CLI_ORDER.map((c) => ({ label: c, color: CLI_COLOR[c] }))}
+  table={{
+    head: ["Month", ...CLI_ORDER],
+    rows: data.mix.map((m) => [m.month, ...CLI_ORDER.map((c) => m[c] ?? 0)]),
+  }}
+>
+  <CliMix />
+  <Fragment slot="caption">Labels appear on segments of 10% or more.</Fragment>
+</Figure>
+
+May through July was Codex. August swung to Claude Code, which ran 83% of that month's sessions. September split five ways, and no CLI ran more than 37% of them. That is why a pane in Jarvis is not tied to one tool: any pane can run Claude Code, Codex, Cursor CLI, OpenCode, Kimi Code, the GLM Coding Plan, Grok Build, Antigravity, DeepSeek Harness or a plain shell, and one workspace can mix them.
+
+## What to take from this
+
+If you run coding agents in parallel, these numbers suggest a few habits.
+
+- **Expect your count to grow.** Our typical peak went from one to ten between May and August. A setup that is comfortable with four agents will feel tight sooner than you think.
+- **Group by task, not by tool.** Put the agents for one piece of work in one workspace, whatever CLIs suit it. If you need more than sixteen, open a second workspace.
+- **Keep agents out of each other's files.** Workspaces on the same folder share it. When agents must not collide, choose **New workspace in a worktree** from the project's menu; each one gets its own folder and branch.
+- **Look at your own numbers.** The Spend view reads the same session logs we used here.
+
+<div class="note">
+  <strong>How we measured.</strong> One workstation, the one Personal Jarvis is developed on, May 1 to September 29, 2026, local time. The index covers every Codex, Claude Code, Grok Build, OpenCode and Antigravity session on that machine. Sessions with fewer than five model calls were excluded, and Claude Code subagent transcripts were folded into the session that started them. Five-minute windows are coarse: two agents that each made one call in the same window count as working together, even if their calls were minutes apart. Your numbers will depend on how you work.
+</div>

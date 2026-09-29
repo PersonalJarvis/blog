@@ -5,7 +5,7 @@ import { renderOg } from "@/og";
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getPosts();
   return [
-    { params: { slug: "default" }, props: { title: "Field notes from the desk of your own AI.", label: "Blog" } },
+    { params: { slug: "default" }, props: { title: "Notes from building Personal Jarvis", label: "Blog" } },
     ...posts.map((p) => ({
       params: { slug: p.id },
       props: { title: p.data.title, label: p.data.series ?? p.data.category },

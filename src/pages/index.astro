@@ -1,75 +1,41 @@
 ---
 import Base from "@/layouts/Base.astro";
-import PostList from "@/components/PostList.astro";
 import { getPosts, formatDate, href, readingMinutes, SITE } from "@/lib";
 
 const posts = await getPosts();
-const featured = posts.find((p) => p.data.featured) ?? posts[0];
-const rest = posts.filter((p) => p !== featured);
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Blog",
   name: SITE.title,
-  url: Astro.site?.toString(),
+  url: new URL(href(), Astro.site).toString(),
   description: SITE.tagline,
   publisher: { "@type": "Organization", name: "Personal Jarvis", url: SITE.main },
 };
 ---
 
 <Base title={SITE.title} description={SITE.tagline} jsonLd={jsonLd}>
-  <main class="frame">
-    <section class="hero grid12">
-      <h1 class="hero-title">Field notes from the <em>desk</em> of your own AI.</h1>
-      <p class="hero-sub">
-        New features, the numbers behind them, and tips you can try in the next five minutes. Written by the people
-        building Personal Jarvis.
-      </p>
-      <img class="hero-mascot" src={href("gigi.svg")} alt="" width="180" height="195" />
+  <main class="wrap">
+    <section class="masthead">
+      <h1>Notes from building Personal Jarvis</h1>
+      <p>What we ship, what we measure while shipping it, and how to get more out of an AI assistant that runs on your own machine.</p>
     </section>
-
-    {
-      featured && (
-        <a class="featured" href={href(`${featured.id}/`)}>
-          <div class="featured-meta mono">
-            <span style="color:var(--gold)">● Latest</span>
-            <span>{formatDate(featured.data.pubDate)}</span>
-            <span>
-              {featured.data.category} · {readingMinutes(featured.body)} min
-            </span>
-          </div>
-          <div class="featured-body">
-            <h2 class="featured-title">{featured.data.title}</h2>
-            <p class="featured-dek">{featured.data.description}</p>
-          </div>
-          <div class="featured-art" aria-hidden="true">
-            <svg viewBox="0 0 160 110" width="100%">
-              {Array.from({ length: 16 }).map((_, i) => (
-                <rect
-                  x={(i % 4) * 40 + 2}
-                  y={Math.floor(i / 4) * 27 + 2}
-                  width="36"
-                  height="23"
-                  rx="3"
-                  fill={i === 5 ? "var(--gold)" : "var(--surface-card)"}
-                  stroke="var(--line-strong)"
-                  stroke-width="0.8"
-                />
-              ))}
-            </svg>
-          </div>
-        </a>
-      )
-    }
-
-    {
-      rest.length > 0 ? (
-        <PostList posts={rest} />
-      ) : (
-        <p class="mono" style="color:var(--ink-4);padding:24px 0;border-top:1px solid var(--line)">
-          More posts are on the way. Subscribe via RSS to get them first.
-        </p>
-      )
-    }
-    <div style="height:96px"></div>
+    <ol class="entries">
+      {
+        posts.map((p) => (
+          <li class="entry">
+            <a href={href(`${p.id}/`)}>
+              <div class="meta small">
+                <div class="num">{formatDate(p.data.pubDate)}</div>
+                <div>{readingMinutes(p.body)} min read</div>
+              </div>
+              <div>
+                <h2>{p.data.title}</h2>
+                <p>{p.data.description}</p>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
   </main>
 </Base>

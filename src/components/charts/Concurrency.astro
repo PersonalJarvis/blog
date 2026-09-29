@@ -1,0 +1,71 @@
+---
+/**
+ * Share of all active five-minute windows by how many agents were working in
+ * them. Counts above 16 are folded into one "17+" bar.
+ */
+import data from "@/data/agent-usage.json";
+import { barUp, pct } from "./util";
+
+const total = data.distribution.reduce((s, d) => s + d.buckets, 0);
+const bins = Array.from({ length: 16 }, (_, i) => {
+  const n = i + 1;
+  const b = data.distribution.find((d) => d.n === n)?.buckets ?? 0;
+  return { label: String(n), share: b / total, windows: b };
+});
+const over = data.distribution.filter((d) => d.n > 16).reduce((s, d) => s + d.buckets, 0);
+if (over > 0) bins.push({ label: "17+", share: over / total, windows: over });
+
+const W = 860;
+const H = 320;
+const L = 44;
+const R = 16;
+const T = 58;
+const B = 44;
+const base = H - B;
+const yMax = 0.35;
+const y = (v: number) => base - ((base - T) * v) / yMax;
+const band = (W - L - R) / bins.length;
+const bw = band - 8;
+const two = bins.slice(1).reduce((s, b) => s + b.share, 0);
+const last = bins.length - 1;
+const bx = (i: number) => L + band * i + (band - bw) / 2;
+const labelled = new Set([0, 1, 3, 7, 15]);
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Bar chart of working time by number of agents running at once. One agent ${pct(bins[0].share)}, two ${pct(bins[1].share)}, three ${pct(bins[2].share)}, falling to ${pct(bins[15].share, 1)} at sixteen; two or more agents ${pct(two)} of the time.`}>
+  {
+    [0, 0.1, 0.2, 0.3].map((v) => (
+      <g>
+        <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
+        <text class="t-axis" x={L - 10} y={y(v) + 4} text-anchor="end">
+          {pct(v)}
+        </text>
+      </g>
+    ))
+  }
+  <path d={`M${bx(1)},${T - 14}V${T - 20}H${bx(last) + bw}V${T - 14}`} fill="none" stroke="var(--ink-2)" />
+  <text class="t-strong" x={(bx(1) + bx(last) + bw) / 2} y={T - 28} text-anchor="middle">
+    Two or more agents: {pct(two)} of the time
+  </text>
+  {
+    bins.map((b, i) => {
+      const tip = `<b>${b.label} ${b.label === "1" ? "agent" : "agents"} at once</b><br>${pct(b.share, 1)} of working time<br>${b.windows.toLocaleString("en-US")} five-minute windows`;
+      return (
+        <g>
+          <path d={barUp(bx(i), y(b.share), bw, base, 3)} fill={i === 0 ? "var(--mark-muted)" : "var(--accent)"} />
+          {labelled.has(i) && (
+            <text class="t-label" x={bx(i) + bw / 2} y={y(b.share) - 7} text-anchor="middle">
+              {pct(b.share, b.share < 0.01 ? 1 : 0)}
+            </text>
+          )}
+          <text class="t-axis" x={bx(i) + bw / 2} y={base + 20} text-anchor="middle">
+            {b.label}
+          </text>
+          <rect class="hit" x={L + band * i} y={T} width={band} height={base - T} data-tip={tip} />
+          <rect class="hl" x={L + band * i + 1} y={T} width={band - 2} height={base - T} rx="4" fill="var(--ink)" fill-opacity="0.05" pointer-events="none" />
+        </g>
+      );
+    })
+  }
+  <text class="t-axis" x={(W + L - R) / 2} y={H - 4} text-anchor="middle">Agents working in the same five minutes</text>
+</svg>

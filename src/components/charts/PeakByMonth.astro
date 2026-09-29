@@ -1,0 +1,62 @@
+---
+/**
+ * Per month: the typical day's peak (median of each day's highest number of
+ * agents working at once) as a bar, and the busiest day as a ring above it.
+ */
+import data from "@/data/agent-usage.json";
+import { MONTH_NAME, barUp } from "./util";
+
+const W = 860;
+const H = 330;
+const L = 40;
+const R = 20;
+const T = 30;
+const B = 44;
+const base = H - B;
+const yMax = 20;
+const y = (v: number) => base - ((base - T) * v) / yMax;
+const months = data.monthly;
+const band = (W - L - R) / months.length;
+const bw = 46;
+const ref = 16;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={"Bar chart of the most coding agents working at once per day. " + months.map((m) => `${MONTH_NAME[m.month]}: typical day ${m.medianPeak}, busiest day ${m.maxPeak}`).join("; ")}>
+  {
+    [0, 5, 10, 15, 20].map((v) => (
+      <g>
+        <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
+        <text class="t-axis" x={L - 10} y={y(v) + 4} text-anchor="end">
+          {v}
+        </text>
+      </g>
+    ))
+  }
+  <line x1={L} x2={W - R} y1={y(ref)} y2={y(ref)} stroke="var(--ink-3)" stroke-dasharray="4 4" />
+  <text class="t-note" x={L + 4} y={y(ref) - 7}>16 — the most one workspace holds</text>
+  {
+    months.map((m, i) => {
+      const cx = L + band * i + band / 2;
+      const name = MONTH_NAME[m.month];
+      const tip = `<b>${name} 2026</b><br>Typical day's peak: ${m.medianPeak}<br>Busiest day: ${m.maxPeak}<br>${m.days} active days`;
+      return (
+        <g>
+          <line x1={cx} x2={cx} y1={y(m.medianPeak)} y2={y(m.maxPeak) + 6} stroke="var(--ink-4)" />
+          <path d={barUp(cx - bw / 2, y(m.medianPeak), bw, base)} fill="var(--accent)" />
+          <circle cx={cx} cy={y(m.maxPeak)} r="5.5" fill="var(--paper)" stroke="var(--ink)" stroke-width="2" />
+          <text class="t-strong" x={cx - bw / 2 - 7} y={y(m.medianPeak) + 4} text-anchor="end">
+            {m.medianPeak}
+          </text>
+          <text class="t-label" x={cx} y={y(m.maxPeak) - 11} text-anchor="middle">
+            {m.maxPeak}
+          </text>
+          <text class="t-axis" x={cx} y={base + 22} text-anchor="middle">
+            {name}
+          </text>
+          <rect class="hit" x={cx - band / 2} y={T} width={band} height={base - T} data-tip={tip} />
+          <rect class="hl" x={cx - band / 2 + 6} y={T} width={band - 12} height={base - T} rx="6" fill="var(--ink)" fill-opacity="0.05" pointer-events="none" />
+        </g>
+      );
+    })
+  }
+</svg>

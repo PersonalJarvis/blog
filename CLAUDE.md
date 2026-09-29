@@ -11,6 +11,8 @@ Rules for any coding agent working in this repo.
   `blog-post-writer`.
 - Stage explicit paths only. Conventional Commits. Push only when the maintainer says so —
   a push publishes to the public internet.
-- Dark-only design; colours only via tokens in `src/styles/tokens.css`. Logo = the Gigi ghost
-  (`public/gigi.svg`), never the gold four-point star.
+- The blog has its own quiet reading design (light paper + automatic dark mode, serif body,
+  sans small print). It never imitates another website. Colours only via roles in
+  `src/styles/global.css`. Logo = the Gigi ghost (`public/gigi.svg`).
+- Charts use REAL data only (aggregates in `src/data/`, nothing personal). No fake UI mockups.
 - Done means `npm run verify` passes AND the page was looked at in Chrome (`blog-visual-qa`).

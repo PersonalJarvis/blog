@@ -1,0 +1,62 @@
+---
+/**
+ * Which coding CLI new sessions ran in, month by month, as 100% stacked bars.
+ */
+import data from "@/data/agent-usage.json";
+import { CLI_COLOR, CLI_ORDER, MONTH_NAME, pct } from "./util";
+
+type Row = { month: string } & Record<string, number>;
+const months = (data.mix as unknown as Row[]).map((r) => {
+  const total = CLI_ORDER.reduce((s, c) => s + (r[c] ?? 0), 0);
+  return { month: r.month, total, parts: CLI_ORDER.map((c) => ({ cli: c, n: r[c] ?? 0, share: (r[c] ?? 0) / total })) };
+});
+
+const W = 860;
+const rowH = 34;
+const gapY = 18;
+const L = 130;
+const R = 8;
+const T = 4;
+const H = T + months.length * (rowH + gapY);
+const x0 = L;
+const span = W - L - R;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={"100% stacked bars of new coding-agent sessions per month by CLI. " + months.map((m) => `${MONTH_NAME[m.month]}: ` + m.parts.filter((p) => p.n).map((p) => `${p.cli} ${pct(p.share)}`).join(", ")).join(". ")}>
+  {
+    months.map((m, i) => {
+      const yy = T + i * (rowH + gapY);
+      let acc = 0;
+      return (
+        <g>
+          <text class="t-label" x={0} y={yy + rowH / 2 - 2}>
+            {MONTH_NAME[m.month]}
+          </text>
+          <text class="t-axis" x={0} y={yy + rowH / 2 + 13}>
+            {m.total.toLocaleString("en-US")} sessions
+          </text>
+          {m.parts
+            .filter((p) => p.n > 0)
+            .map((p) => {
+              const w = Math.max(span * p.share - 2, 1.5);
+              const xx = x0 + span * acc;
+              acc += p.share;
+              const tip = `<b>${MONTH_NAME[m.month]} — ${p.cli}</b><br>${p.n.toLocaleString("en-US")} sessions<br>${pct(p.share, 1)} of the month`;
+              const showLabel = p.share >= 0.1;
+              return (
+                <g>
+                  <rect x={xx} y={yy} width={w} height={rowH} rx="3" fill={CLI_COLOR[p.cli]} data-tip={tip} />
+                  <rect class="hl" x={xx} y={yy} width={w} height={rowH} rx="3" fill="none" stroke="var(--ink)" stroke-width="1.5" pointer-events="none" />
+                  {showLabel && (
+                    <text x={xx + 10} y={yy + rowH / 2 + 4.5} font-size="12.5" font-weight="600" fill={p.cli === "OpenCode" ? "#171613" : "#fff"} pointer-events="none" style="font-variant-numeric:tabular-nums">
+                      {p.share >= 0.28 ? `${p.cli} ${pct(p.share)}` : pct(p.share)}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+        </g>
+      );
+    })
+  }
+</svg>

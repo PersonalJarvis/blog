@@ -1,0 +1,89 @@
+---
+/**
+ * The busiest day, minute by minute: how many agent sessions made a model
+ * call in each five-minute window, stacked by coding CLI.
+ */
+import data from "@/data/agent-usage.json";
+import { CLI_COLOR, CLI_ORDER, clock } from "./util";
+
+const day = data.busiestDay;
+const clis = CLI_ORDER.filter((c) => day.clis.includes(c));
+type Row = { m: number } & Record<string, number>;
+const series = day.series as unknown as Row[];
+const active = series.filter((r) => clis.some((c) => r[c] > 0));
+const startMin = Math.floor(active[0].m / 60) * 60;
+const endMin = Math.ceil((active[active.length - 1].m + 5) / 60) * 60;
+const rows = series.filter((r) => r.m >= startMin && r.m < endMin);
+
+const W = 860;
+const H = 340;
+const L = 40;
+const R = 24;
+const T = 26;
+const B = 40;
+const base = H - B;
+const yMax = 20;
+const x = (min: number) => L + ((W - L - R) * (min - startMin)) / (endMin - startMin);
+const y = (v: number) => base - ((base - T) * v) / yMax;
+
+// One stacked step polygon per CLI.
+const layers = clis.map((cli, li) => {
+  const below = (r: Row) => clis.slice(0, li).reduce((s, c) => s + r[c], 0);
+  const top: string[] = [];
+  const bottom: string[] = [];
+  for (const r of rows) {
+    const b = below(r);
+    const t = b + r[cli];
+    top.push(`${x(r.m)},${y(t)}`, `${x(r.m + 5)},${y(t)}`);
+    bottom.unshift(`${x(r.m + 5)},${y(b)}`, `${x(r.m)},${y(b)}`);
+  }
+  return { cli, points: [...top, ...bottom].join(" ") };
+});
+
+const total = (r: Row) => clis.reduce((s, c) => s + r[c], 0);
+const peakRow = rows.reduce((a, r) => (total(r) > total(a) ? r : a), rows[0]);
+const peak = total(peakRow);
+const hours: number[] = [];
+for (let m = startMin; m <= endMin; m += 120) hours.push(m);
+const date = new Date(`${day.date}T00:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" });
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Stacked step chart of coding agents working at once on ${date}, 5-minute windows, from ${clock(startMin)} to ${clock(endMin)}. Peak ${peak} at ${clock(peakRow.m)}.`}>
+  {
+    [0, 5, 10, 15, 20].map((v) => (
+      <g>
+        <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
+        <text class="t-axis" x={L - 10} y={y(v) + 4} text-anchor="end">
+          {v}
+        </text>
+      </g>
+    ))
+  }
+  {
+    hours.map((m) => (
+      <text class="t-axis" x={x(m)} y={base + 22} text-anchor="middle">
+        {clock(m).replace(":00", "")}
+      </text>
+    ))
+  }
+  {layers.map((l) => <polygon points={l.points} fill={CLI_COLOR[l.cli]} stroke="var(--paper)" stroke-width="0.6" />)}
+  <line x1={L} x2={W - R} y1={y(16)} y2={y(16)} stroke="var(--ink)" stroke-opacity="0.55" stroke-dasharray="4 4" />
+  <text class="t-note" x={W - R} y={y(16) - 6} text-anchor="end">16, one full workspace</text>
+  <text class="t-strong" x={x(peakRow.m + 2.5)} y={y(peak) - 12} text-anchor="middle">
+    {peak} at once, {clock(peakRow.m)}
+  </text>
+  {
+    rows.map((r) => {
+      const lines = clis
+        .map((c) => `<div class="row"><i style="background:${CLI_COLOR[c]}"></i><span>${c}</span><span>${r[c]}</span></div>`)
+        .join("");
+      const tip = `<b>${clock(r.m)}–${clock(r.m + 5)}</b>${lines}<div class="row"><span>Total</span><span><b>${total(r)}</b></span></div>`;
+      return (
+        <g>
+          <rect class="hit" x={x(r.m)} y={T} width={x(r.m + 5) - x(r.m) + 0.5} height={base - T} data-tip={tip} />
+          <line class="hl" x1={x(r.m + 2.5)} x2={x(r.m + 2.5)} y1={T} y2={base} stroke="var(--ink)" pointer-events="none" />
+        </g>
+      );
+    })
+  }
+</svg>

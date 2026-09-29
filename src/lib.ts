@@ -30,7 +30,7 @@ export function formatDate(d: Date): string {
 
 export const SITE = {
   title: "Personal Jarvis Blog",
-  tagline: "New features, field notes and tips for running your own desktop AI.",
+  tagline: "What we ship, what we measure while shipping it, and how to get more out of an AI assistant on your own machine.",
   main: "https://personaljarvis.ai",
   github: "https://github.com/PersonalJarvis/PersonalJarvis",
 };
