@@ -4,22 +4,17 @@
  * tree -> SVG) and resvg (SVG -> PNG), so no browser is needed and CI can
  * build them.
  *
- * The card wears the blog's DARK roles (global.css, prefers-color-scheme:
- * dark). A dark card reads as one deliberate object in every feed, light or
- * dark; the paper colour read as an empty page on X's dark theme.
- *
- * Left: brand, category, title, date. Right: the post's cover screenshot when
- * its frontmatter names one, otherwise the Gigi portrait.
+ * The card is the post's thumbnail at share size: the category's flat tone
+ * (CATEGORY_TONE) with the post's line drawing (src/illustrations/) on the
+ * right, and brand, category, title and date in ink on the left. A solid
+ * colour reads as one deliberate object in every feed, light or dark.
  *
  * X lays the post title over the image's bottom-left corner, so nothing lives
  * in that strip (SAFE_BOTTOM) — a rule or a line of text there collides with it.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import satori from "satori";
-// Not a direct dependency: astro's default image service already requires
-// sharp to build the posts' WebP screenshots, so it is present in every build.
-import sharp from "sharp";
 import { Resvg } from "@resvg/resvg-js";
 
 // Resolved from the project root: the build bundles this module into a
@@ -33,16 +28,12 @@ const inter500 = font("@fontsource/inter", "inter-latin-500-normal.woff");
 const mono500 = font("@fontsource/jetbrains-mono", "jetbrains-mono-latin-500-normal.woff");
 const gigi = `data:image/svg+xml;base64,${readFileSync(join(root, "public", "gigi.svg")).toString("base64")}`;
 
-// The dark roles of src/styles/global.css — satori cannot read CSS variables.
+// Ink on the tone, as in the drawings themselves.
 const C = {
-  paper: "#131311",
-  ink: "#f2f0e9",
-  ink3: "#9c988d",
-  ruleStrong: "#3c3a34",
-  accent: "#e3ad4f",
+  ink: "#141413",
+  ink3: "rgba(20, 20, 19, 0.66)",
+  rule: "rgba(20, 20, 19, 0.3)",
 };
-/** --accent (dark) as an rgb triple, for the glow and the cover's halo. */
-const ACCENT_RGB = "227, 173, 79";
 
 const W = 1200;
 const H = 630;
@@ -64,16 +55,10 @@ export interface OgCard {
   label: string;
   /** Small print under the title, e.g. "Sep 30, 2026 · 9 min read". */
   meta: string;
-  /** Project-relative path of a real screenshot shown on the right. */
-  cover?: string;
-}
-
-/** Loads a cover as a PNG data URI; satori cannot decode the WebP the posts ship. */
-async function loadCover(path: string): Promise<{ src: string; width: number; height: number }> {
-  const file = join(root, path);
-  if (!existsSync(file)) throw new Error(`Social card cover not found: ${path}`);
-  const { data, info } = await sharp(file).png().toBuffer({ resolveWithObject: true });
-  return { src: `data:image/png;base64,${data.toString("base64")}`, width: info.width, height: info.height };
+  /** The flat background colour, from CATEGORY_TONE. */
+  tone: string;
+  /** The post's line drawing as SVG markup, from illustration(). */
+  drawing: string;
 }
 
 /** The largest title size whose estimated wrap stays within three lines. */
@@ -87,43 +72,22 @@ function titleSize(title: string, width: number): number {
 }
 
 export async function renderOg(card: OgCard): Promise<Uint8Array> {
-  const cover = card.cover ? await loadCover(card.cover) : undefined;
-  const column = cover ? 500 : 620;
+  const column = 540;
   const size = titleSize(card.title, column);
+  const drawing = `data:image/svg+xml;base64,${Buffer.from(card.drawing).toString("base64")}`;
+  const visual = img(drawing, 600, 400, { position: "absolute", left: 588, top: 96 });
 
-  // The screenshot runs off the right edge on purpose: it reads as a view into
-  // the app rather than a thumbnail pasted onto a slide.
-  const coverWidth = 700;
-  const coverHeight = cover ? Math.round((coverWidth * cover.height) / cover.width) : 0;
-  const visual = cover
-    ? h(
-        "div",
-        {
-          position: "absolute",
-          left: 628,
-          top: Math.round((H - coverHeight) / 2),
-          display: "flex",
-          borderRadius: 14,
-          overflow: "hidden",
-          border: "1px solid rgba(242, 240, 233, 0.14)",
-          boxShadow: `0 32px 90px rgba(0, 0, 0, 0.6), 0 0 120px rgba(${ACCENT_RGB}, 0.10)`,
-        },
-        [img(cover.src, coverWidth, coverHeight)],
-      )
-    : img(gigi, 300, 325, { position: "absolute", left: 810, top: 146 });
-
-  // Gigi appears once: small beside the name next to a cover, large without one.
   const brand = h("div", { display: "flex", alignItems: "center", gap: 14 }, [
-    ...(cover ? [img(gigi, 36, 39)] : []),
+    img(gigi, 36, 39),
     h("div", { fontSize: 24, fontWeight: 500, color: C.ink }, "Personal Jarvis"),
-    h("div", { width: 1, height: 22, background: C.ruleStrong }),
+    h("div", { width: 1.5, height: 22, background: C.rule }),
     h("div", { fontSize: 24, color: C.ink3 }, "Blog"),
   ]);
 
   const text = h("div", { display: "flex", flexDirection: "column" }, [
     h(
       "div",
-      { fontFamily: "JetBrains Mono", fontSize: 18, fontWeight: 500, letterSpacing: 3, textTransform: "uppercase", color: C.accent },
+      { fontFamily: "JetBrains Mono", fontSize: 18, fontWeight: 500, letterSpacing: 3, textTransform: "uppercase", color: C.ink3 },
       card.label,
     ),
     h(
@@ -150,9 +114,7 @@ export async function renderOg(card: OgCard): Promise<Uint8Array> {
       height: H,
       display: "flex",
       position: "relative",
-      backgroundColor: C.paper,
-      // Eased stops: a single linear fall-off draws a visible ring where it ends.
-      backgroundImage: `radial-gradient(circle at ${cover ? "84% 50%" : "80% 50%"}, rgba(${ACCENT_RGB}, 0.15) 0%, rgba(${ACCENT_RGB}, 0.085) 22%, rgba(${ACCENT_RGB}, 0.04) 38%, rgba(${ACCENT_RGB}, 0.015) 52%, rgba(${ACCENT_RGB}, 0) 68%)`,
+      backgroundColor: card.tone,
       fontFamily: "Inter",
       color: C.ink,
     },

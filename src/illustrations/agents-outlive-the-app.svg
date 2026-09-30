@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- The app window closes under the cursor; the agents float on, still working. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">
+<rect vector-effect="non-scaling-stroke" x="48" y="104" width="184" height="136" rx="12" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M48 132 H232"/>
+<path vector-effect="non-scaling-stroke" d="M64 118 H64.01 M78 118 H78.01"/>
+<path vector-effect="non-scaling-stroke" d="M206 112 L218 124 M218 112 L206 124"/>
+<path vector-effect="non-scaling-stroke" d="M68 160 H172 M68 182 H196 M68 204 H144"/>
+<path vector-effect="non-scaling-stroke" d="M214 120 L214 158 L223.5 149 L231 165 L238 162 L230.5 146 L243 146 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M252 188 C276 176 290 150 300 128" stroke-dasharray="1 11"/>
+<path vector-effect="non-scaling-stroke" d="M256 214 C300 214 330 200 350 186" stroke-dasharray="1 11"/>
+<g transform="translate(292 40) scale(0.78)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M25 56 L32 62 L25 68 M37 69 H46" fill="none"/></g>
+<g transform="translate(372 120) scale(0.9)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M25 56 L32 62 L25 68 M37 69 H46" fill="none"/></g>
+<g transform="translate(330 222) scale(0.62)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M30 52 Q35 56 40 52" fill="none"/></g>
+  </g>
+</svg>

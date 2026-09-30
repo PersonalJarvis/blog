@@ -575,42 +575,25 @@ a {
   box-shadow: 0 10px 30px -18px color-mix(in srgb, var(--ink) 45%, transparent);
 }
 
-/* The picture: the post's own screenshot, or Gigi on the category's tone. */
+/* The picture: the post's own line drawing on its category's flat tone,
+ * the same pair its social card shows when the link is shared. */
 .thumb {
   aspect-ratio: 3 / 2;
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: color-mix(in srgb, var(--tone) 16%, var(--panel));
+  background: var(--tone);
 }
 
-/* A screenshot sits framed on the tone, bleeding off the lower right edge. */
-.thumb.has-cover {
-  place-items: stretch;
-  padding: 1.4rem 0 0 1.4rem;
-}
-
-.thumb img:not(.mark) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top left;
-  border-radius: 7px 0 0 0;
-  box-shadow: 0 12px 32px -12px color-mix(in srgb, #000 55%, transparent);
-  outline: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
-}
-
-.thumb .mark {
-  width: 4.5rem;
+.thumb svg {
+  width: 88%;
   height: auto;
-  filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--ink) 25%, transparent));
+  transition: transform 0.35s;
 }
 
-.tone-agents { --tone: var(--s1); }
-.tone-engineering { --tone: var(--s4); }
-.tone-features { --tone: var(--s3); }
-.tone-tips { --tone: var(--s5); }
-.tone-voice { --tone: var(--s2); }
+.card a:hover .thumb svg {
+  transform: scale(1.035);
+}
 
 .card-body {
   padding: 1.1rem 1.25rem 1.4rem;
@@ -708,7 +691,8 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .hero-topics a,
   .hero-topics .arrow,
-  .card a {
+  .card a,
+  .thumb svg {
     transition: none;
   }
 }

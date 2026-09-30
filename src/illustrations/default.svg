@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- Gigi, the Personal Jarvis ghost, drawn in line. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">
+<g transform="translate(176 70) scale(1.8)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M30 52 Q35 56 40 52" fill="none"/></g>
+<path vector-effect="non-scaling-stroke" d="M318 96 L332 80 M326 118 L346 112 M312 76 L314 58"/>
+  </g>
+</svg>

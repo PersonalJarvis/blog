@@ -17,11 +17,6 @@ const posts = defineCollection({
     category: z.enum(CATEGORIES),
     /** Optional series prefix, e.g. "Using Jarvis". */
     series: z.string().optional(),
-    /**
-     * File name of a real screenshot in src/assets/posts/<slug>/ shown on the
-     * social card, e.g. "after.webp". Without one the card shows Gigi.
-     */
-    cover: z.string().optional(),
     /** Jarvis version the post was written against, e.g. "1.4". */
     version: z.string().optional(),
     featured: z.boolean().default(false),

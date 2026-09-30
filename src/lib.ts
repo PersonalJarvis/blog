@@ -33,7 +33,7 @@ export function formatDate(d: Date): string {
  * cache a card image by its URL for days; bump this when src/og.ts changes
  * how cards look, or shares keep showing the old design.
  */
-export const OG_VERSION = 2;
+export const OG_VERSION = 3;
 
 export const SITE = {
   title: "Personal Jarvis Blog",
@@ -54,4 +54,23 @@ export const CATEGORY_LABEL: Record<Post["data"]["category"], string> = {
 /** The index filtered to one category: a plain link that works without JS. */
 export function categoryHref(category: Post["data"]["category"]): string {
   return href(`?category=${category}#posts`);
+}
+
+/**
+ * The flat colour a category's pictures sit on: card thumbnails and social
+ * cards alike. Fixed in both themes, like paper the drawing is printed on.
+ */
+export const CATEGORY_TONE: Record<Post["data"]["category"], string> = {
+  agents: "#dcaa4e",
+  engineering: "#c5cbd8",
+  features: "#bccaa9",
+  tips: "#e3b9a8",
+  voice: "#d98a5f",
+};
+
+const drawings = import.meta.glob<string>("/src/illustrations/*.svg", { query: "?raw", import: "default", eager: true });
+
+/** A post's line drawing (src/illustrations/<slug>.svg), or Gigi when it has none. */
+export function illustration(slug: string): string {
+  return drawings[`/src/illustrations/${slug}.svg`] ?? drawings["/src/illustrations/default.svg"];
 }
