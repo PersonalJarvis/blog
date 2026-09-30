@@ -13,4 +13,7 @@ npm run verify   # type-check + production build
 ```
 
 Posts live in `src/content/posts/*.mdx`; charts in `src/components/charts/`.
-Social cards are rendered at build time to `/og/<slug>.png`.
+Social cards are rendered at build time to `/og/<slug>.png` (`src/og.ts`). A post's
+`cover` frontmatter names a real screenshot from `src/assets/posts/<slug>/` for the card;
+without one the card shows Gigi. Bump `OG_VERSION` in `src/lib.ts` when the card design
+changes, so X and LinkedIn fetch the new image instead of their cached copy.

@@ -1,6 +1,6 @@
 ---
 import "@/styles/global.css";
-import { SITE, href } from "@/lib";
+import { OG_VERSION, SITE, href } from "@/lib";
 
 interface Props {
   title: string;
@@ -14,6 +14,7 @@ interface Props {
 const { title, description, image = href("og/default.png"), article, jsonLd } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
+ogImage.searchParams.set("v", String(OG_VERSION));
 const fullTitle = title === SITE.title ? title : `${title} — ${SITE.title}`;
 ---
 

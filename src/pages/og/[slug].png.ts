@@ -1,19 +1,32 @@
 import type { APIRoute, GetStaticPaths } from "astro";
-import { getPosts, SITE } from "@/lib";
-import { renderOg } from "@/og";
+import { formatDate, getPosts, readingMinutes } from "@/lib";
+import { renderOg, type OgCard } from "@/og";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getPosts();
-  return [
-    { params: { slug: "default" }, props: { title: "Notes from building Personal Jarvis", label: "Blog" } },
+  const cards: { slug: string; card: OgCard }[] = [
+    {
+      slug: "default",
+      card: {
+        title: "Notes from building Personal Jarvis",
+        label: "New features, field notes and tips",
+        meta: "personaljarvis.ai/blog",
+      },
+    },
     ...posts.map((p) => ({
-      params: { slug: p.id },
-      props: { title: p.data.title, label: p.data.series ?? p.data.category },
+      slug: p.id,
+      card: {
+        title: p.data.title,
+        label: p.data.series ?? p.data.category,
+        meta: `${formatDate(p.data.pubDate)} · ${readingMinutes(p.body)} min read`,
+        cover: p.data.cover && `src/assets/posts/${p.id}/${p.data.cover}`,
+      },
     })),
   ];
+  return cards.map(({ slug, card }) => ({ params: { slug }, props: { card } }));
 };
 
 export const GET: APIRoute = async ({ props }) => {
-  const png = await renderOg({ title: props.title as string, label: (props.label as string) ?? SITE.title });
+  const png = await renderOg(props.card as OgCard);
   return new Response(png as BodyInit, { headers: { "Content-Type": "image/png" } });
 };

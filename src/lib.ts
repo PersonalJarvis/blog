@@ -28,6 +28,13 @@ export function formatDate(d: Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
+/**
+ * Version of the social card design, sent as ?v= on og:image. X and LinkedIn
+ * cache a card image by its URL for days; bump this when src/og.ts changes
+ * how cards look, or shares keep showing the old design.
+ */
+export const OG_VERSION = 2;
+
 export const SITE = {
   title: "Personal Jarvis Blog",
   tagline: "What we ship, what we measure while shipping it, and how to get more out of an AI assistant on your own machine.",
