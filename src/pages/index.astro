@@ -1,8 +1,26 @@
 ---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
 import Base from "@/layouts/Base.astro";
-import { getPosts, formatDate, href, readingMinutes, SITE } from "@/lib";
+import { CATEGORIES } from "@/content.config";
+import { getPosts, formatDate, href, readingMinutes, categoryHref, CATEGORY_LABEL, SITE } from "@/lib";
 
 const posts = await getPosts();
+
+// Only categories that hold a post get a line in the hero: an empty one
+// would promise reading that is not there yet.
+const categories = CATEGORIES.map((c) => ({
+  key: c,
+  label: CATEGORY_LABEL[c],
+  count: posts.filter((p) => p.data.category === c).length,
+})).filter((c) => c.count > 0);
+
+// Covers are real screenshots from each post's own asset folder.
+const images = import.meta.glob<{ default: ImageMetadata }>("/src/assets/posts/*/*.{webp,png,jpg,jpeg}", {
+  eager: true,
+});
+const coverOf = (id: string, file?: string) => (file ? images[`/src/assets/posts/${id}/${file}`]?.default : undefined);
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Blog",
@@ -14,28 +32,229 @@ const jsonLd = {
 ---
 
 <Base title={SITE.title} description={SITE.tagline} jsonLd={jsonLd}>
-  <main class="wrap">
-    <section class="masthead">
-      <h1>Notes from building Personal Jarvis</h1>
-      <p>What we ship, what we measure while shipping it, and how to get more out of an AI assistant that runs on your own machine.</p>
-    </section>
-    <ol class="entries">
-      {
-        posts.map((p) => (
-          <li class="entry">
-            <a href={href(`${p.id}/`)}>
-              <div class="meta small">
-                <div class="num">{formatDate(p.data.pubDate)}</div>
-                <div>{readingMinutes(p.body)} min read</div>
-              </div>
-              <div>
-                <h2>{p.data.title}</h2>
-                <p>{p.data.description}</p>
-              </div>
+  <main>
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-intro">
+        <h1 id="hero-title" class="hero-label">Blog</h1>
+        <div class="hero-pitch">
+          <p>Notes from building Personal Jarvis: what we ship, what we measure while shipping it, and how to get more out of an AI assistant on your own machine.</p>
+          <a class="button" href={SITE.main}>Get Personal Jarvis</a>
+        </div>
+      </div>
+      <nav class="hero-topics" aria-label="Browse by category">
+        <a href={href("#posts")} data-category="all">
+          <span class="topic">All posts</span><sup class="num">{posts.length}</sup><span class="arrow" aria-hidden="true">→</span>
+        </a>
+        {
+          categories.map((c) => (
+            <a href={categoryHref(c.key)} data-category={c.key}>
+              <span class="topic">{c.label}</span>
+              <sup class="num">{c.count}</sup>
+              <span class="arrow" aria-hidden="true">→</span>
             </a>
-          </li>
-        ))
-      }
-    </ol>
+          ))
+        }
+      </nav>
+    </section>
+
+    <section class="rail" aria-label="Latest posts">
+      <ol class="rail-track">
+        {
+          posts.map((p) => (
+            <li>
+              <a href={href(`${p.id}/`)}>
+                <span class="rail-title">{p.data.title}</span>
+                <span class="small num">{formatDate(p.data.pubDate)}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section id="posts" class="library wrap" aria-label="All posts">
+      <aside class="filters small">
+        <h2>Filter and sort</h2>
+        <label class="field">
+          <span>Sort by</span>
+          <select id="sort">
+            <option value="new">Newest first</option>
+            <option value="old">Oldest first</option>
+          </select>
+        </label>
+        <fieldset class="field">
+          <legend>Category</legend>
+          <label><input type="radio" name="category" value="all" checked /> All <span class="num">{posts.length}</span></label>
+          {
+            categories.map((c) => (
+              <label>
+                <input type="radio" name="category" value={c.key} /> {c.label} <span class="num">{c.count}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+      </aside>
+
+      <div class="library-main">
+        <div class="toolbar">
+          <label class="search">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg>
+            <input id="search" type="search" placeholder="Search posts" aria-label="Search posts" autocomplete="off" />
+          </label>
+          <div class="views small" role="group" aria-label="Layout">
+            <button type="button" data-view="grid" aria-pressed="true">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="5.5" height="5.5" rx="1" /><rect x="11.5" y="3" width="5.5" height="5.5" rx="1" /><rect x="3" y="11.5" width="5.5" height="5.5" rx="1" /><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1" /></svg>
+              Grid
+            </button>
+            <button type="button" data-view="list" aria-pressed="false">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5h10M7 10h10M7 15h10" /><circle cx="3.5" cy="5" r=".6" /><circle cx="3.5" cy="10" r=".6" /><circle cx="3.5" cy="15" r=".6" /></svg>
+              List
+            </button>
+          </div>
+        </div>
+
+        <ol class="cards" data-view="grid">
+          {
+            posts.map((p) => {
+              const cover = coverOf(p.id, p.data.cover);
+              return (
+                <li
+                  class="card"
+                  data-category={p.data.category}
+                  data-date={p.data.pubDate.valueOf()}
+                  data-text={`${p.data.title} ${p.data.description} ${CATEGORY_LABEL[p.data.category]}`.toLowerCase()}
+                >
+                  <a href={href(`${p.id}/`)}>
+                    <div class:list={["thumb", `tone-${p.data.category}`, { "has-cover": cover }]}>
+                      {cover ? (
+                        <Image src={cover} alt="" widths={[420, 840]} sizes="(max-width: 720px) 100vw, 420px" />
+                      ) : (
+                        <img class="mark" src={href("gigi.svg")} alt="" width="72" height="78" />
+                      )}
+                    </div>
+                    <div class="card-body">
+                      <div class="small card-meta">
+                        <span class="cat">{CATEGORY_LABEL[p.data.category]}</span>
+                        <span class="num">{formatDate(p.data.pubDate)}</span>
+                        <span>{readingMinutes(p.body)} min read</span>
+                      </div>
+                      <h3>{p.data.title}</h3>
+                      <p>{p.data.description}</p>
+                    </div>
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ol>
+        <p class="empty small" hidden>No post matches. Try another word or category.</p>
+      </div>
+    </section>
   </main>
 </Base>
+
+<script>
+  const cards = document.querySelector<HTMLOListElement>(".cards");
+  const items = [...document.querySelectorAll<HTMLLIElement>(".card")];
+  const search = document.querySelector<HTMLInputElement>("#search");
+  const sort = document.querySelector<HTMLSelectElement>("#sort");
+  const empty = document.querySelector<HTMLElement>(".empty");
+  const radios = [...document.querySelectorAll<HTMLInputElement>('input[name="category"]')];
+  const viewButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-view]:is(button)")];
+
+  const state = {
+    category: new URLSearchParams(location.search).get("category") ?? "all",
+    query: "",
+    order: "new",
+  };
+  if (!radios.some((r) => r.value === state.category)) state.category = "all";
+
+  function apply() {
+    if (!cards) return;
+    const words = state.query.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const li of items) {
+      const inCategory = state.category === "all" || li.dataset.category === state.category;
+      const matches = words.every((w) => li.dataset.text?.includes(w));
+      li.hidden = !(inCategory && matches);
+      if (!li.hidden) shown++;
+    }
+    const sorted = [...items].sort((a, b) => {
+      const d = Number(b.dataset.date) - Number(a.dataset.date);
+      return state.order === "new" ? d : -d;
+    });
+    cards.append(...sorted);
+    if (empty) empty.hidden = shown > 0;
+    for (const r of radios) r.checked = r.value === state.category;
+    document.querySelectorAll<HTMLAnchorElement>(".hero-topics a").forEach((a) => {
+      a.classList.toggle("is-current", a.dataset.category === state.category);
+    });
+  }
+
+  function setCategory(category: string) {
+    state.category = category;
+    const url = new URL(location.href);
+    if (category === "all") url.searchParams.delete("category");
+    else url.searchParams.set("category", category);
+    history.replaceState(null, "", url);
+    apply();
+  }
+
+  radios.forEach((r) => r.addEventListener("change", () => setCategory(r.value)));
+  search?.addEventListener("input", () => {
+    state.query = search.value;
+    apply();
+  });
+  sort?.addEventListener("change", () => {
+    state.order = sort.value;
+    apply();
+  });
+
+  // Hero lines filter in place instead of reloading the page.
+  document.querySelectorAll<HTMLAnchorElement>(".hero-topics a").forEach((a) =>
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      setCategory(a.dataset.category ?? "all");
+      document.querySelector("#posts")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }),
+  );
+
+  // Grid or list is a per-reader convenience; storage can be blocked, so it is optional.
+  function setView(view: string) {
+    if (!cards) return;
+    cards.dataset.view = view;
+    viewButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
+  }
+  viewButtons.forEach((b) =>
+    b.addEventListener("click", () => {
+      const view = b.dataset.view ?? "grid";
+      setView(view);
+      try {
+        localStorage.setItem("blog-view", view);
+      } catch {
+        // Storage blocked (private window, site data off): the choice lasts for this visit only.
+      }
+    }),
+  );
+  try {
+    const saved = localStorage.getItem("blog-view");
+    if (saved === "grid" || saved === "list") setView(saved);
+  } catch {
+    // Storage blocked: keep the default grid.
+  }
+
+  // The rail drifts sideways only when it holds more posts than fit on screen.
+  const rail = document.querySelector<HTMLElement>(".rail");
+  const track = rail?.querySelector<HTMLOListElement>(".rail-track");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (rail && track && !still && track.scrollWidth > rail.clientWidth + 40) {
+    const clone = track.cloneNode(true) as HTMLOListElement;
+    clone.setAttribute("aria-hidden", "true");
+    clone.querySelectorAll("a").forEach((a) => a.setAttribute("tabindex", "-1"));
+    track.append(...clone.children);
+    track.style.setProperty("--rail-seconds", `${Math.round(track.scrollWidth / 60)}s`);
+    rail.classList.add("is-moving");
+  }
+
+  apply();
+</script>

@@ -41,3 +41,17 @@ export const SITE = {
   main: "https://personaljarvis.ai",
   github: "https://github.com/PersonalJarvis/PersonalJarvis",
 };
+
+/** How a category reads on the page; the schema enum stays the URL key. */
+export const CATEGORY_LABEL: Record<Post["data"]["category"], string> = {
+  features: "Features",
+  tips: "Tips",
+  agents: "Coding agents",
+  voice: "Voice",
+  engineering: "Engineering",
+};
+
+/** The index filtered to one category: a plain link that works without JS. */
+export function categoryHref(category: Post["data"]["category"]): string {
+  return href(`?category=${category}#posts`);
+}

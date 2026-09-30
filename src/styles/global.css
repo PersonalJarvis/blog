@@ -218,75 +218,498 @@ a {
 
 /* ----------------------------------------------------------------- Index */
 
-.masthead {
-  padding: 5rem 0 3rem;
-  max-width: 44rem;
+/* Hero: a quiet label and pitch on the left, the categories as large serif
+ * lines on the right. Lines rest dimmed; the one under the pointer, or the
+ * one currently filtering the list, comes up to full ink. */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+  gap: 3rem clamp(2rem, 6vw, 5.5rem);
+  padding-top: clamp(3.5rem, 8vw, 6.5rem);
+  padding-bottom: clamp(3.5rem, 8vw, 6rem);
 }
 
-.masthead h1 {
+.hero-intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2.5rem;
+}
+
+.hero-label {
   margin: 0;
+  font-family: var(--sans);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.hero-pitch p {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--ink-3);
+  text-wrap: pretty;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 1.4rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 7px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  font-weight: 550;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.button:hover {
+  background: var(--ink-2);
+}
+
+.hero-topics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hero-topics a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  color: var(--ink-4);
+  text-decoration: none;
+  font-size: clamp(2.25rem, 1.4rem + 3.2vw, 4rem);
+  font-weight: 450;
+  line-height: 1.12;
+  letter-spacing: -0.028em;
+  transition: color 0.2s;
+}
+
+.hero-topics sup {
+  font-family: var(--sans);
+  font-size: 0.8125rem;
   font-weight: 500;
-  font-size: clamp(2.5rem, 1.6rem + 3.2vw, 4rem);
-  line-height: 1.02;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
+  vertical-align: 1.6em;
+  color: inherit;
 }
 
-.masthead p {
-  margin: 1.25rem 0 0;
-  color: var(--ink-2);
-  font-size: 1.25rem;
-  line-height: 1.5;
+.hero-topics .arrow {
+  font-family: var(--sans);
+  font-size: 0.55em;
+  font-weight: 300;
+  opacity: 0.7;
+  transform: translateX(-0.2em);
+  transition: transform 0.2s, opacity 0.2s;
 }
 
-.entries {
+.hero-topics a:hover,
+.hero-topics a:focus-visible,
+.hero-topics a.is-current {
+  color: var(--ink);
+}
+
+.hero-topics a:hover .arrow,
+.hero-topics a:focus-visible .arrow {
+  opacity: 1;
+  transform: translateX(0.15em);
+}
+
+/* While the pointer is on one line, the current one steps back again. */
+.hero-topics:hover a.is-current:not(:hover) {
+  color: var(--ink-4);
+}
+
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+  .hero-intro {
+    gap: 1.25rem;
+  }
+}
+
+/* Rail: every post as one column of a ruled strip, edge to edge. It drifts
+ * sideways only when it holds more posts than fit (index.astro script). */
+.rail {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+.rail-track {
+  display: flex;
+  width: max-content;
   list-style: none;
   margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--ink);
+  /* The first title lines up with the page's content edge. */
+  padding: 0 0 0 max(0px, calc(max(var(--gutter), (100% - 72rem) / 2 + var(--gutter)) - 1.5rem));
 }
 
-.entry a {
-  display: grid;
-  grid-template-columns: 11rem minmax(0, 1fr);
-  gap: 0.5rem 2.5rem;
-  padding: 2rem 0;
-  border-bottom: 1px solid var(--rule);
+.rail-track li {
+  width: 17.5rem;
+  border-left: 1px solid var(--rule);
+}
+
+.rail-track li:last-child {
+  border-right: 1px solid var(--rule);
+}
+
+.rail-track a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 1.6rem 1.5rem 1.75rem;
   text-decoration: none;
+  transition: background 0.15s;
 }
 
-.entry .meta {
-  padding-top: 0.45rem;
+.rail-track a:hover {
+  background: var(--panel);
 }
 
-.entry h2 {
-  margin: 0;
-  font-weight: 500;
-  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
-  line-height: 1.15;
-  letter-spacing: -0.015em;
+.rail-title {
+  font-size: 1.125rem;
+  font-weight: 550;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
-.entry a:hover h2 {
+.rail.is-moving {
+  overflow: hidden;
+}
+
+.rail.is-moving .rail-track {
+  animation: rail-drift var(--rail-seconds, 60s) linear infinite;
+}
+
+.rail.is-moving:hover .rail-track,
+.rail.is-moving:focus-within .rail-track {
+  animation-play-state: paused;
+}
+
+@keyframes rail-drift {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Library: filters on the left, search, layout switch and the cards. */
+.library {
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  gap: 2.5rem clamp(2rem, 6vw, 5.5rem);
+  padding-top: clamp(3.5rem, 7vw, 5.5rem);
+  scroll-margin-top: 1.5rem;
+}
+
+.filters h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.9rem 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.field > span,
+.field legend {
+  padding: 0;
+  margin-bottom: 0.15rem;
+  color: var(--ink-3);
+  float: left;
+  width: 100%;
+}
+
+.field select {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+}
+
+.field select option {
+  background: var(--paper);
+}
+
+.field label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.field label .num {
+  margin-left: auto;
+  color: var(--ink-4);
+}
+
+.field input[type="radio"] {
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(100%, 20rem);
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  color: var(--ink-3);
+}
+
+.search:focus-within {
+  border-color: var(--accent);
+}
+
+.search svg,
+.views svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+}
+
+.search input::placeholder {
+  color: var(--ink-4);
+}
+
+.views {
+  display: flex;
+  padding: 0.2rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+
+.views button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-3);
+  font: inherit;
+  cursor: pointer;
+}
+
+.views button[aria-pressed="true"] {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cards[data-view="grid"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 1.5rem;
+}
+
+.card a {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--panel);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cards[data-view="grid"] .card a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -18px color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+/* The picture: the post's own screenshot, or Gigi on the category's tone. */
+.thumb {
+  aspect-ratio: 3 / 2;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--tone) 16%, var(--panel));
+}
+
+/* A screenshot sits framed on the tone, bleeding off the lower right edge. */
+.thumb.has-cover {
+  place-items: stretch;
+  padding: 1.4rem 0 0 1.4rem;
+}
+
+.thumb img:not(.mark) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  border-radius: 7px 0 0 0;
+  box-shadow: 0 12px 32px -12px color-mix(in srgb, #000 55%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.thumb .mark {
+  width: 4.5rem;
+  height: auto;
+  filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--ink) 25%, transparent));
+}
+
+.tone-agents { --tone: var(--s1); }
+.tone-engineering { --tone: var(--s4); }
+.tone-features { --tone: var(--s3); }
+.tone-tips { --tone: var(--s5); }
+.tone-voice { --tone: var(--s2); }
+
+.card-body {
+  padding: 1.1rem 1.25rem 1.4rem;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.9rem;
+}
+
+.card-meta .cat {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.card h3 {
+  margin: 0.55rem 0 0;
+  font-size: 1.3125rem;
+  font-weight: 500;
+  line-height: 1.22;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+.card a:hover h3 {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
 }
 
-.entry p {
-  margin: 0.6rem 0 0;
+.card p {
+  display: none;
+  margin: 0.5rem 0 0;
   color: var(--ink-2);
-  max-width: 38rem;
-  font-size: 1.0625rem;
+  font-size: 1rem;
   line-height: 1.55;
 }
 
-@media (max-width: 720px) {
-  .entry a {
+/* List view: the calm reading index, one ruled row per post. */
+.cards[data-view="list"] {
+  border-top: 1px solid var(--ink);
+}
+
+.cards[data-view="list"] .card a {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 1.75rem;
+  padding: 1.5rem 0;
+  border-radius: 0;
+  background: none;
+  border-bottom: 1px solid var(--rule);
+}
+
+.cards[data-view="list"] .thumb {
+  border-radius: 6px;
+}
+
+.cards[data-view="list"] .card-body {
+  padding: 0;
+}
+
+.cards[data-view="list"] .card p {
+  display: block;
+}
+
+.empty {
+  padding: 2rem 0;
+}
+
+@media (max-width: 860px) {
+  .library {
     grid-template-columns: 1fr;
   }
-  .entry .meta {
-    padding-top: 0;
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+  }
+  .filters h2 {
+    width: 100%;
+  }
+  .field {
+    flex: 1 1 12rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .cards[data-view="list"] .card a {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-topics a,
+  .hero-topics .arrow,
+  .card a {
+    transition: none;
   }
 }
 
