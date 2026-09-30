@@ -14,5 +14,8 @@ Rules for any coding agent working in this repo.
 - The blog has its own quiet reading design (light paper + automatic dark mode, serif body,
   sans small print). It never imitates another website. Colours only via roles in
   `src/styles/global.css`. Logo = the Gigi ghost (`public/gigi.svg`).
+- Every post has a cover drawing `src/illustrations/<slug>.svg`: ink line art with Gigi ghosts
+  on the category's flat tone (`CATEGORY_TONE`). It is both the index thumbnail and the link
+  preview; the build fails without it. Never a screenshot or mockup as a cover.
 - Charts use REAL data only (aggregates in `src/data/`, nothing personal). No fake UI mockups.
 - Done means `npm run verify` passes AND the page was looked at in Chrome (`blog-visual-qa`).

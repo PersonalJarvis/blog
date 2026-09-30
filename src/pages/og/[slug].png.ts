@@ -1,9 +1,15 @@
 import type { APIRoute, GetStaticPaths } from "astro";
-import { CATEGORY_LABEL, CATEGORY_TONE, formatDate, getPosts, illustration, readingMinutes } from "@/lib";
+import { CATEGORY_LABEL, CATEGORY_TONE, formatDate, getPosts, hasIllustration, illustration, readingMinutes } from "@/lib";
 import { renderOg, type OgCard } from "@/og";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getPosts();
+  // Every published post wears its own cover drawing: it is the index
+  // thumbnail and the link preview. Drafts may borrow Gigi until then.
+  const bare = posts.filter((p) => !p.data.draft && !hasIllustration(p.id)).map((p) => p.id);
+  if (bare.length) {
+    throw new Error(`Missing cover drawing for ${bare.join(", ")}: add src/illustrations/<slug>.svg`);
+  }
   const cards: { slug: string; card: OgCard }[] = [
     {
       slug: "default",
