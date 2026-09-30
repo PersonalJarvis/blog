@@ -165,6 +165,31 @@ a {
   color: var(--ink);
 }
 
+/* On a phone the wordmark keeps one line; the Product link steps aside. */
+.brand {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .site-nav .wide-only {
+    display: none;
+  }
+}
+
+/* The GitHub mark: the repository, one click from every page. */
+.site-nav {
+  align-items: center;
+}
+
+.site-nav .gh {
+  display: inline-flex;
+}
+
+.site-nav .gh svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
 .site-foot {
   margin-top: 6rem;
   border-top: 1px solid var(--rule);
