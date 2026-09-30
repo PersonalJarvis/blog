@@ -1,6 +1,6 @@
 ---
 title: "How many coding agents do you actually run at once?"
-description: "We counted five months of coding-agent sessions on the machine Personal Jarvis is built on. Two or more agents were working 69% of the time, and the count never went past sixteen."
+description: "We build Personal Jarvis with coding agents running side by side. We counted how many work at once, what broke as the number grew, and the rules we ended up with."
 pubDate: 2026-09-29
 category: agents
 version: "2.3"
@@ -17,19 +17,19 @@ import data from "@/data/agent-usage.json";
 
 export const share = (n) => `${((n / data.activeWindows) * 100).toFixed(1)}%`;
 
-"Run several coding agents in parallel" is easy to say and hard to picture. Is that two terminals side by side, or twenty? For an hour, or all day? And does anyone keep that many busy, or do most of them sit idle while you read one diff at a time?
+More than 800 commits landed on the main branch of Personal Jarvis in September. Much of that code came out of coding agents, Codex, Claude Code and a few others, running side by side on one workstation. For months we had been saying that we "run agents in parallel". We had never counted.
 
-We could answer that for ourselves. Personal Jarvis reads the session logs that coding CLIs such as Codex and Claude Code write to disk, so its Spend view can show what your agents did and what they cost. The machine Jarvis is built on has five months of those logs. We pointed the same index at it and counted.
+So we pointed Jarvis at itself. Jarvis already reads the session logs that coding CLIs write to disk; that is how its Spend view shows what your agents did and what they cost. We ran the same index over five months of logs from the machine Jarvis is built on. In this post, "we" means the people building Personal Jarvis and the agents that do much of the typing.
 
-The short version: **most of the time, more than one agent was working**, and the number crept up month after month until it reached the limit of what one Jarvis workspace holds.
+This post covers what we found, three things that broke as the number of agents grew, and the rules we ended up with. If you run more than one agent yourself, most of it will apply to you.
 
-## Where the numbers come from
+## How we counted
 
 The index keeps one row per model call: which CLI made it, when, and in which session. From May 1 to September 29, 2026, it recorded 208,147 model calls in 3,332 sessions.
 
-About half of those sessions made fewer than five calls. They are one-off lookups and background requests, not an agent working through a task, so we left them out. That leaves **1,584 agent sessions**, which still account for 99% of all model calls.
+The first thing we noticed was noise. About half of those sessions made fewer than five calls. They were one-off lookups and background requests, not an agent working through a task, so we left them out. That leaves **1,584 agent sessions**, which still account for 99% of all model calls.
 
-To count agents "at once", we cut the day into five-minute windows. An agent counts as working in a window if it made at least one model call there. An agent that is thinking between calls still shows up; one that has finished and is waiting for you does not. Over the five months, there were 4,201 windows in which at least one agent was working, about 350 hours.
+To count agents "at once", we cut each day into five-minute windows. An agent counts as working in a window if it made at least one model call there. One that is thinking between calls still shows up; one that has finished and is waiting for us does not.
 
 ## From one agent to ten
 
@@ -53,11 +53,13 @@ In May, the busiest moment of a typical day had one agent working. By August it 
   <Fragment slot="caption">The dashed line marks sixteen, the most one workspace holds. September runs to the 29th.</Fragment>
 </Figure>
 
-The climb was not smooth. May had one outlier day with ten agents; on every other day the peak was five or lower, usually one. June stayed at three or fewer. In July, eight days reached five or more agents at once, and in August thirteen days reached ten or more. September's busiest days touched sixteen.
+We did not plan this curve. May had one outlier day with ten agents, and on every other day the peak was five or lower, usually one. June never went above three. In July, eight days reached five or more agents at once, and in August, thirteen days reached ten or more. By September, the busiest days touched sixteen.
 
-## What a full day looks like
+If you are at two or three agents today, plan for ten. For us, the step from "I watch my agent" to "my agents need a system" came within a single month.
 
-Three days reached sixteen agents at once, all in September. The chart below shows the first of them, September 10, window by window. Between 9:25 in the morning and 9 in the evening, 38 agent sessions worked on that machine.
+## A day at sixteen
+
+Three days reached sixteen agents at once, all in September. This is the first of them, September 10: 38 agent sessions between 9:25 in the morning and 9 in the evening.
 
 <Figure
   n={2}
@@ -70,11 +72,13 @@ Three days reached sixteen agents at once, all in September. The chart below sho
   <Fragment slot="caption">A gap means no agent made a call in that window.</Fragment>
 </Figure>
 
-The day ran in two blocks with a gap at lunch. In both, the count climbed into the teens and stayed there for most of an hour: between 11:00 and 11:40 it held between 12 and 16, and after the break it rose from 7 at 3:00 to 16 at 3:30 pm, then tapered off by six. At both peaks, every working agent was a Codex session. Many agents starting on related work at the same time is the situation Jarvis's voice briefing is designed for: one spoken instruction becomes one composed prompt per agent.
+The day ran in two blocks with a gap at lunch. Between 11:00 and 11:40 the count held between 12 and 16. After the break it rose from 7 at 3:00 to 16 at 3:30 pm, then tapered off by six. At both peaks, every working agent was a Codex session.
+
+Many agents picking up related work within minutes is exactly the case our voice briefing was built for: you say one instruction, and Jarvis writes a separate prompt for each agent. It is also where our first version of that briefing failed, as the next sections show.
 
 ## Two or more agents, 69% of the time
 
-Peaks are the dramatic part. The more useful question is what an ordinary hour looks like, and here the answer is clear. In only 31% of the working windows was a single agent working alone.
+Peaks are the dramatic part. The useful question is what an ordinary hour looks like. In only 31% of the working windows was a single agent working alone.
 
 <Figure
   n={3}
@@ -90,11 +94,35 @@ Peaks are the dramatic part. The more useful question is what an ordinary hour l
   <Fragment slot="caption">The grey bar is one agent working alone.</Fragment>
 </Figure>
 
-The curve falls off gently. Two agents were the most common kind of parallel work, followed by three, then four. Eight or more agents were working in 12% of the windows. The top of the scale is sixteen, and it was reached in six windows, half an hour in total. Nothing went past it. That ceiling is the same number as the Jarvis workspace limit, which exists because each pane is a full CLI process with its own terminal.
+Two agents were the most common kind of parallel work, then three, then four. Eight or more agents were working in 12% of the windows.
+
+The top of the scale is sixteen, and that number is ours. A Jarvis workspace holds at most sixteen agents, because every pane is a full CLI process with its own terminal. We treat sixteen as a resource limit, not a layout choice; past it, the answer in our own code is a second workspace. In five months, we sat at that limit for half an hour in total and never went past it. If you hit a limit like that every day, you have outgrown one workspace, not one screen.
+
+## What broke when we went parallel
+
+One agent is a tool. Ten agents are a team, and a team needs rules. Three of ours came from things that broke.
+
+### Agents committed each other's work
+
+The obvious setup is one checkout of the repository with every agent working in it. It fails in a way that is easy to miss: an agent that runs `git add -A` sweeps another agent's half-finished work into its own commit. The rule in our `AGENTS.md`, the rulebook our coding agents load at the start of every session, now says it plainly: "The working tree is SHARED with other agent sessions. Stage only YOUR paths."
+
+For larger work, an agent gets its own worktree, a separate folder on its own branch. When it is done, it runs one command, `scripts/agent_land.py`, which refuses to run in a checkout with uncommitted changes, rebases, runs the checks and pushes. **Give every agent its own checkout.** In Jarvis, that is **New workspace in a worktree** in the project's menu.
+
+### Nothing landed
+
+The obvious way to merge agent work is one pull request per agent, re-tested whenever main moves. With several agents pushing at once, main moved constantly, every pull request fell behind again, and nothing landed.
+
+Since September 28, a merge train, a queue that lands pull requests one at a time, does the merging instead. Every fifteen minutes and on every push, it merges main into a pull request only when it conflicts or failed its tests while behind, regenerates generated files instead of fighting over them, and squash-merges the first green one. The trade-off is real: a change that passes alone and breaks together is caught by the full test run after the merge, not before. **Don't make every agent wait for every other agent.** The workflow is public in our repository as `.github/workflows/merge-train.yml`, if you want to copy it.
+
+### Jarvis said two agents were working. Only one was.
+
+The obvious way to brief several agents by voice is a loop: write a prompt, send it, move on to the next agent. On July 26, that loop reported success after only one of two agents had received its brief. Jarvis said both were working. The other one never got the task.
+
+Now a briefing never reports a single "done". Every terminal comes back with its own result, and Jarvis says out loud which ones it could not reach. The loop was also too slow: writing one good prompt takes Jarvis 10 to 21 seconds, and a spoken turn gives up after 20. So the prompts are written in parallel, five at a time, which keeps a large team from running into the model provider's rate limit. **A team of agents reports per agent, never "done".**
 
 ## No single CLI won
 
-The last question is which tools those agents were. For three months the answer was nearly always the same CLI. After that, it never was again.
+The last question was which tools those agents were. For three months the answer was nearly always the same CLI. After that, it never was again.
 
 <Figure
   n={4}
@@ -111,17 +139,21 @@ The last question is which tools those agents were. For three months the answer 
   <Fragment slot="caption">Labels appear on segments of 10% or more.</Fragment>
 </Figure>
 
-May through July was Codex. August swung to Claude Code, which ran 83% of that month's sessions. September split five ways, and no CLI ran more than 37% of them. That is why a pane in Jarvis is not tied to one tool: any pane can run Claude Code, Codex, Cursor CLI, OpenCode, Kimi Code, the GLM Coding Plan, Grok Build, Antigravity, DeepSeek Harness or a plain shell, and one workspace can mix them.
+May through July was Codex. August swung to Claude Code, which ran 83% of that month's sessions. September split five ways, and no CLI ran more than 37% of them.
 
-## What to take from this
+We did not expect to switch tools this often, and we doubt we are done. That is why a pane in Jarvis is not tied to one tool. Any pane can run Claude Code, Codex, Cursor CLI, OpenCode, Kimi Code, the GLM Coding Plan, Grok Build, Antigravity, DeepSeek Harness or a plain shell, and one workspace can mix them.
 
-If you run coding agents in parallel, these numbers suggest a few habits.
+## If you're doing the same
 
-- **Expect your count to grow.** Our typical peak went from one to ten between May and August. A setup that is comfortable with four agents will feel tight sooner than you think.
-- **Group by task, not by tool.** Put the agents for one piece of work in one workspace, whatever CLIs suit it. If you need more than sixteen, open a second workspace.
-- **Keep agents out of each other's files.** Workspaces on the same folder share it. When agents must not collide, choose **New workspace in a worktree** from the project's menu; each one gets its own folder and branch.
-- **Look at your own numbers.** The Spend view reads the same session logs we used here.
+- **Count first.** Open the Spend view in Jarvis. It reads the same session logs we used, so you can see your own numbers before you change anything.
+- **Plan for ten.** Our typical peak went from one to ten between May and August.
+- **One checkout per agent.** Use **New workspace in a worktree** whenever agents might touch the same files.
+- **Let a queue land the work.** Don't re-test every pull request on every push; merge what conflicts, land what is green.
+- **Ask for results per agent.** When you brief a team, check which agents actually received the task.
+- **Mix tools by task.** Group agents by the work they share, not by the CLI they run in.
+
+We will keep measuring as this grows. If your numbers look very different from ours, tell us on [GitHub](https://github.com/PersonalJarvis/PersonalJarvis/issues).
 
 <div class="note">
-  <strong>How we measured.</strong> One workstation, the one Personal Jarvis is developed on, May 1 to September 29, 2026, local time. The index covers every Codex, Claude Code, Grok Build, OpenCode and Antigravity session on that machine. Sessions with fewer than five model calls were excluded, and Claude Code subagent transcripts were folded into the session that started them. Five-minute windows are coarse: two agents that each made one call in the same window count as working together, even if their calls were minutes apart. Your numbers will depend on how you work.
+  <strong>How we measured.</strong> One workstation, the one Personal Jarvis is developed on, May 1 to September 29, 2026, local time. The index covers every Codex, Claude Code, Grok Build, OpenCode and Antigravity session on that machine, inside a Jarvis workspace or not. Sessions with fewer than five model calls were excluded, and Claude Code subagent transcripts were folded into the session that started them. Five-minute windows are coarse: two agents that each made one call in the same window count as working together, even if their calls were minutes apart. The commit count is for the public main branch in September 2026. Your numbers will depend on how you work.
 </div>
