@@ -1,6 +1,7 @@
 ---
 import { render } from "astro:content";
 import Base from "@/layouts/Base.astro";
+import Toc from "@/components/Toc.astro";
 import { getPosts, formatDate, href, readingMinutes, SITE, CATEGORY_LABEL, categoryHref } from "@/lib";
 
 export async function getStaticPaths() {
@@ -9,7 +10,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 const d = post.data;
 const minutes = readingMinutes(post.body);
 const url = new URL(href(`${post.id}/`), Astro.site).toString();
@@ -50,8 +51,11 @@ const jsonLd = {
         {d.version && <span>Written against Jarvis {d.version}</span>}
       </div>
     </header>
-    <article class="prose">
-      <Content />
-    </article>
+    <div class="article-body">
+      <Toc headings={headings} />
+      <article class="prose">
+        <Content />
+      </article>
+    </div>
   </main>
 </Base>

@@ -768,6 +768,132 @@ a {
   margin: 3rem auto 0;
 }
 
+/* "On this page": a collapsible box above the text on narrow screens, a
+   sticky list in the left margin once there is room beside the column. */
+.toc {
+  max-width: var(--measure);
+  margin: 2.5rem auto 0;
+}
+
+.toc-box {
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+}
+
+.toc-title {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.toc ol {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+}
+
+.toc li + li {
+  margin-top: 0.35rem;
+}
+
+.toc .toc-d3 {
+  padding-left: 0.85rem;
+}
+
+.toc a {
+  display: block;
+  text-decoration: none;
+  color: var(--ink-3);
+  text-wrap: pretty;
+}
+
+.toc a:hover {
+  color: var(--ink);
+}
+
+.toc a[aria-current] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.prose h2,
+.prose h3 {
+  scroll-margin-top: 1.5rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (min-width: 74rem) {
+  .article.wrap {
+    max-width: 80rem;
+  }
+
+  .article-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr);
+    column-gap: 3rem;
+    align-items: start;
+  }
+
+  .article-body > .prose {
+    grid-column: 2;
+    width: 100%;
+  }
+
+  .toc {
+    grid-column: 1;
+    grid-row: 1;
+    position: sticky;
+    top: 2rem;
+    max-width: 15rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    margin: 3rem 0 0;
+  }
+
+  .toc-box {
+    border: 0;
+    padding: 0;
+  }
+
+  .toc-title {
+    cursor: default;
+    list-style: none;
+    pointer-events: none;
+  }
+
+  .toc-title::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc ol {
+    border-left: 1px solid var(--rule);
+  }
+
+  .toc a {
+    margin-left: -1px;
+    padding-left: 0.85rem;
+    border-left: 2px solid transparent;
+  }
+
+  .toc .toc-d3 {
+    padding-left: 0;
+  }
+
+  .toc .toc-d3 a {
+    padding-left: 1.6rem;
+  }
+
+  .toc a[aria-current] {
+    border-left-color: var(--accent);
+  }
+}
+
 .prose > * {
   margin: 0;
 }
