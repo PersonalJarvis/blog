@@ -6,10 +6,10 @@
 import data from "@/data/agent-usage.json";
 import { MONTH_NAME, barUp } from "./util";
 
-const W = 860;
-const H = 330;
-const L = 40;
-const R = 20;
+const W = 640;
+const H = 300;
+const L = 30;
+const R = 0;
 const T = 30;
 const B = 44;
 const base = H - B;
@@ -17,7 +17,7 @@ const yMax = 20;
 const y = (v: number) => base - ((base - T) * v) / yMax;
 const months = data.monthly;
 const band = (W - L - R) / months.length;
-const bw = 46;
+const bw = 40;
 const ref = 16;
 ---
 
@@ -26,7 +26,7 @@ const ref = 16;
     [0, 5, 10, 15, 20].map((v) => (
       <g>
         <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
-        <text class="t-axis" x={L - 10} y={y(v) + 4} text-anchor="end">
+        <text class="t-axis" x={0} y={y(v) + 4}>
           {v}
         </text>
       </g>

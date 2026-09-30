@@ -35,7 +35,6 @@
   --sans: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --measure: 40rem;
-  --wide: 56rem;
   --gutter: clamp(1.25rem, 4vw, 2.5rem);
 }
 
@@ -414,17 +413,15 @@ a {
 
 /* --------------------------------------------------------------- Figures */
 
+/* A figure sits in the text column: its title, legend, plot and caption
+ * share the same left and right edges as the paragraphs around it. Charts
+ * are drawn at the column's own width (viewBox 640), so they render 1:1. */
 .figure {
-  max-width: var(--wide);
-  margin: 3rem auto;
-  margin-left: 50%;
-  transform: translateX(-50%);
-  width: min(var(--wide), calc(100vw - 2 * var(--gutter)));
+  margin: 3rem 0;
 }
 
 .figure-head {
-  max-width: var(--measure);
-  margin: 0 auto 1.25rem;
+  margin: 0 0 1.25rem;
 }
 
 .figure-title {
@@ -457,7 +454,7 @@ a {
 }
 
 .figure-scroll .figure-plot {
-  min-width: 620px;
+  min-width: 600px;
 }
 
 .scroll-hint {
@@ -467,8 +464,7 @@ a {
 @media (max-width: 640px) {
   .scroll-hint {
     display: block;
-    max-width: var(--measure);
-    margin: 0 auto 0.5rem;
+    margin: 0 0 0.5rem;
   }
 }
 
@@ -481,8 +477,7 @@ a {
 }
 
 .figure-foot {
-  max-width: var(--measure);
-  margin: 1rem auto 0;
+  margin: 1rem 0 0;
   padding-top: 0.75rem;
   border-top: 1px solid var(--rule);
 }
@@ -531,8 +526,7 @@ a {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem 1.25rem;
-  max-width: var(--measure);
-  margin: 0 auto 0.9rem;
+  margin: 0 0 0.9rem;
   font-family: var(--sans);
   font-size: 0.8125rem;
   color: var(--ink-2);

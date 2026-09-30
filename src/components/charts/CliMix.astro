@@ -11,11 +11,11 @@ const months = (data.mix as unknown as Row[]).map((r) => {
   return { month: r.month, total, parts: CLI_ORDER.map((c) => ({ cli: c, n: r[c] ?? 0, share: (r[c] ?? 0) / total })) };
 });
 
-const W = 860;
+const W = 640;
 const rowH = 34;
 const gapY = 18;
-const L = 130;
-const R = 8;
+const L = 112;
+const R = 0;
 const T = 4;
 const H = T + months.length * (rowH + gapY);
 const x0 = L;
