@@ -1,0 +1,74 @@
+---
+/**
+ * One PTY host across one working day: every time the desktop app started
+ * and re-attached to it, with how many agents were still running. Read from
+ * the app's own log lines ("PTY host attached (pid …) — N terminal(s) still
+ * running").
+ */
+import data from "@/data/host-day.json";
+
+const W = 640;
+const H = 300;
+const L = 30;
+const R = 8;
+const T = 40;
+const B = 70;
+const base = H - B;
+const yMax = 16;
+const toMin = (hhmm: string) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+};
+const x0 = 7 * 60;
+const x1 = 22 * 60 + 30;
+const x = (min: number) => L + ((W - L - R) * (min - x0)) / (x1 - x0);
+const y = (v: number) => base - ((base - T) * v) / yMax;
+const hostStart = toMin(data.hostStart);
+const hostLost = toMin(data.hostLost);
+const laneY = base + 34;
+const hours = [8, 10, 12, 14, 16, 18, 20, 22];
+const label = (h: number) => (h === 12 ? "12 pm" : h < 12 ? `${h} am` : `${h - 12} pm`);
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Dot chart of September 29. The desktop app re-attached to the same terminal host ${data.attaches.length} times between ${data.attaches[0].t} and ${data.attaches[data.attaches.length - 1].t}; each time between 9 and 13 agents were still running. The host started at ${data.hostStart}, when ${data.resumedBefore.agents} agents were resumed after the night, and ended at ${data.hostLost} when the PC shut down.`}>
+  {
+    [0, 4, 8, 12, 16].map((v) => (
+      <g>
+        <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
+        <text class="t-axis" x={0} y={y(v) + 4}>
+          {v}
+        </text>
+      </g>
+    ))
+  }
+  {
+    hours.map((h) => (
+      <text class="t-axis" x={x(h * 60)} y={base + 16} text-anchor="middle">
+        {label(h)}
+      </text>
+    ))
+  }
+  <text class="t-note" x={L} y={T - 22}>Agents still running when the app re-attached</text>
+
+  <!-- the host's lifetime -->
+  <rect x={x(hostStart)} y={laneY - 7} width={x(hostLost) - x(hostStart)} height={14} rx="3" fill="var(--mark-muted)" />
+  <text class="t-label" x={x(hostStart) + 8} y={laneY + 4} style="fill: var(--ink)">One terminal host, {data.hostStart} to {data.hostLost}</text>
+  <line x1={x(hostStart)} x2={x(hostStart)} y1={laneY - 7} y2={T} stroke="var(--ink-4)" stroke-dasharray="3 3" />
+  <line x1={x(hostLost)} x2={x(hostLost)} y1={laneY - 7} y2={T} stroke="var(--ink-4)" stroke-dasharray="3 3" />
+  <text class="t-note" x={x(hostStart) + 5} y={T + 12}>PC on: {data.resumedBefore.agents} agents resumed</text>
+  <text class="t-note" x={x(hostLost) - 5} y={T + 12} text-anchor="end">PC off</text>
+
+  {
+    data.attaches.map((a) => {
+      const cx = x(toMin(a.t));
+      const tip = `<b>${a.t}</b><br>App re-attached<br>${a.agents} agents still running`;
+      return (
+        <g>
+          <circle class="hit" cx={cx} cy={y(a.agents)} r="9" data-tip={tip} />
+          <circle class="hl" cx={cx} cy={y(a.agents)} r="8" fill="none" stroke="var(--ink)" stroke-width="1.5" pointer-events="none" />
+          <circle cx={cx} cy={y(a.agents)} r="4.5" fill="var(--accent)" stroke="var(--paper)" stroke-width="1.5" pointer-events="none" />
+        </g>
+      );
+    })
+  }
+</svg>

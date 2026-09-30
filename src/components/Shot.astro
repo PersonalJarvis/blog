@@ -1,0 +1,57 @@
+---
+/**
+ * A real screenshot of the Personal Jarvis app, framed like a chart figure:
+ * a title that states what to look at, the image at the column's width, and
+ * a caption that says where and when it was taken.
+ */
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  n: number;
+  src: ImageMetadata;
+  alt: string;
+  title: string;
+  subtitle?: string;
+  source: string;
+  /** Narrow screenshots (a single pane) are shown at half the column width. */
+  narrow?: boolean;
+}
+const { n, src, alt, title, subtitle, source, narrow = false } = Astro.props;
+---
+
+<figure class="figure">
+  <div class="figure-head">
+    <p class="figure-title">{title}</p>
+    {subtitle && <p class="figure-sub">{subtitle}</p>}
+  </div>
+  <div class:list={["shot", { narrow }]}>
+    <a href={src.src} target="_blank" rel="noopener" title="Open the full-size screenshot">
+      <Image src={src} alt={alt} widths={[640, 1280]} sizes="(max-width: 700px) 100vw, 640px" />
+    </a>
+  </div>
+  <figcaption class="figure-foot small">
+    <span><strong style="color:var(--ink-2)">Figure {n}.</strong> <slot name="caption" /> Source: {source}. Click the image for full size.</span>
+  </figcaption>
+</figure>
+
+<style>
+  .shot {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--rule-strong);
+    background: #0f0f0e;
+  }
+  .shot.narrow {
+    max-width: 320px;
+  }
+  .shot a {
+    display: block;
+    cursor: zoom-in;
+  }
+  .shot :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

@@ -12,7 +12,8 @@ export default defineConfig({
   trailingSlash: "always",
   integrations: [mdx(), sitemap()],
   markdown: {
-    shikiConfig: { theme: "github-dark-dimmed", wrap: false },
+    // Two code themes, switched with the page (see global.css, "Code").
+    shikiConfig: { themes: { light: "github-light", dark: "github-dark-dimmed" }, wrap: false },
   },
   server: { port: 4410, host: "127.0.0.1" },
   vite: { plugins: [tailwindcss()], server: { strictPort: true } },
