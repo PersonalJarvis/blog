@@ -16,5 +16,7 @@ export async function GET(context: APIContext) {
       categories: [p.data.category],
     })),
     customData: "<language>en-us</language>",
+    // Browsers render the feed as a readable subscribe page instead of raw XML.
+    stylesheet: href("rss.xsl"),
   });
 }
