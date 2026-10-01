@@ -1149,6 +1149,11 @@ a {
   opacity: 1;
 }
 
+/* Near the top of a chart there is no room above the pointer. */
+.tip.below {
+  transform: translate(-50%, 16px);
+}
+
 .tip b {
   font-weight: 600;
 }

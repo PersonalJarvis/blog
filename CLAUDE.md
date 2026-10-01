@@ -18,4 +18,9 @@ Rules for any coding agent working in this repo.
   on the category's flat tone (`CATEGORY_TONE`). It is both the index thumbnail and the link
   preview; the build fails without it. Never a screenshot or mockup as a cover.
 - Charts use REAL data only (aggregates in `src/data/`, nothing personal). No fake UI mockups.
+- Chart tooltips: put the text on a mark as `data-tip` and nothing else. The one script in
+  `src/layouts/Base.astro` measures each tooltip and keeps it inside the visible chart
+  (`.figure-scroll` clips the rest, and on a phone the plot is wider than the screen). Never
+  position a tooltip per chart, and hover the left edge, right edge and top of every new chart
+  in the Chrome check.
 - Done means `npm run verify` passes AND the page was looked at in Chrome (`blog-visual-qa`).

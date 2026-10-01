@@ -94,11 +94,26 @@ const fullTitle = title === SITE.title ? title : `${title} — ${SITE.title}`;
         plot.addEventListener("pointermove", (e) => {
           const target = (e.target as Element).closest("[data-tip]");
           if (!target) return hide();
-          const box = plot.getBoundingClientRect();
           tip.innerHTML = target.getAttribute("data-tip") ?? "";
-          const x = Math.min(Math.max(e.clientX - box.left, 80), box.width - 80);
+          // Keep the whole tooltip inside the part of the chart that is on
+          // screen: .figure-scroll clips everything outside it, and on a phone
+          // the plot is wider than that window. Measure the tooltip itself,
+          // never assume a width, and flip it below the pointer near the top.
+          const box = plot.getBoundingClientRect();
+          const view = (plot.closest(".figure-scroll") ?? plot).getBoundingClientRect();
+          const left = Math.max(box.left, view.left) - box.left;
+          const right = Math.min(box.right, view.right) - box.left;
+          const top = Math.max(box.top, view.top) - box.top;
+          const pad = 4;
+          const half = tip.offsetWidth / 2;
+          const x =
+            right - left < tip.offsetWidth + 2 * pad
+              ? (left + right) / 2
+              : Math.min(Math.max(e.clientX - box.left, left + half + pad), right - half - pad);
+          const y = e.clientY - box.top;
+          tip.classList.toggle("below", y - tip.offsetHeight - 10 < top + pad);
           tip.style.left = `${x}px`;
-          tip.style.top = `${e.clientY - box.top}px`;
+          tip.style.top = `${y}px`;
           tip.classList.add("on");
           const hl = target.nextElementSibling;
           if (lit !== hl) {
