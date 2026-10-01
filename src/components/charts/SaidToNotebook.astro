@@ -1,0 +1,77 @@
+---
+/**
+ * Every thing said to Jarvis in September 2026 as one square, in the order it
+ * was said, with the few the shipped filter marked; below, what happens to
+ * those. Read from src/data/learning-september.json.
+ */
+import data from "@/data/learning-september.json";
+
+const W = 640;
+const H = 296;
+const cols = 25;
+const cell = 20;
+const gap = 4;
+const left = (W - (cols * (cell + gap) - gap)) / 2;
+const top = 40;
+const flags = data.calls.flatMap((c) => c.marked);
+const marked = flags.filter(Boolean).length;
+const reviews = data.calls.filter((c) => c.marked.some(Boolean)).length;
+const rows = Math.ceil(flags.length / cols);
+const sq = flags.map((f, i) => ({
+  f,
+  i,
+  x: left + (i % cols) * (cell + gap),
+  y: top + Math.floor(i / cols) * (cell + gap),
+}));
+
+const gridBottom = top + rows * (cell + gap) - gap;
+const boxY = gridBottom + 68;
+const boxW = 176;
+const boxH = 58;
+const boxGap = (W - 3 * boxW) / 2;
+const boxes = [
+  { head: `${marked} marked`, sub: "by the free filter" },
+  { head: `${reviews} reviews`, sub: `about ${data.tokensPerReview.shipped.toLocaleString("en-US")} tokens each` },
+  { head: "Python checks", sub: "every change quotes you" },
+].map((b, k) => ({ ...b, x: k * (boxW + boxGap) }));
+const a = boxes[0];
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${flags.length} squares, one for each thing said to Jarvis in September 2026, in order. ${marked} of them are highlighted: the sentences the free filter marked. They lead to ${reviews} reviews of about ${data.tokensPerReview.shipped} input tokens each, and Python keeps a change only when it quotes the user.`}>
+  <text class="t-note" x={left} y={top - 16}>Everything said to Jarvis in September, one square each, in order</text>
+  {
+    sq
+      .filter((s) => s.f)
+      .map((s) => (
+        <path d={`M${s.x + cell / 2},${gridBottom + 8} C${s.x + cell / 2},${boxY - 20} ${a.x + boxW / 2},${boxY - 36} ${a.x + boxW / 2},${boxY}`} fill="none" stroke="var(--accent)" stroke-width="1.5" />
+      ))
+  }
+  {
+    sq.map((s) =>
+      s.f ? (
+        <g>
+          <rect x={s.x} y={s.y} width={cell} height={cell} rx="3" fill="var(--accent)" stroke="var(--ink)" stroke-width="1.5" />
+          <path d={`M${s.x + cell / 2},${s.y + cell + 3} V${gridBottom + 8}`} stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="1 3" />
+        </g>
+      ) : (
+        <rect x={s.x} y={s.y} width={cell} height={cell} rx="3" fill="var(--mark-muted)" />
+      ),
+    )
+  }
+  {
+    boxes.map((b, k) => (
+      <g>
+        <rect x={b.x + 0.75} y={boxY} width={boxW - 1.5} height={boxH} rx="8" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5" />
+        <text class="t-strong" x={b.x + boxW / 2} y={boxY + 24} text-anchor="middle">
+          {b.head}
+        </text>
+        <text class="t-label" x={b.x + boxW / 2} y={boxY + 43} text-anchor="middle">
+          {b.sub}
+        </text>
+        {k < boxes.length - 1 && (
+          <path d={`M${b.x + boxW + 8},${boxY + boxH / 2} H${b.x + boxW + boxGap - 8} M${b.x + boxW + boxGap - 15},${boxY + boxH / 2 - 6} L${b.x + boxW + boxGap - 8},${boxY + boxH / 2} L${b.x + boxW + boxGap - 15},${boxY + boxH / 2 + 6}`} fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        )}
+      </g>
+    ))
+  }
+</svg>

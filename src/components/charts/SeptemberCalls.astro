@@ -1,0 +1,76 @@
+---
+/**
+ * Every voice call of September 2026 as one dot in its day's column. A call
+ * in which the shipped filter marked nothing never reaches a model; the
+ * others would get one small review. Read from src/data/learning-september.json.
+ */
+import data from "@/data/learning-september.json";
+
+const W = 640;
+const H = 250;
+const L = 8;
+const R = 8;
+const T = 46;
+const B = 34;
+const base = H - B;
+const days = 30;
+const band = (W - L - R) / days;
+const step = 19;
+const r = 7;
+const cx = (day: number) => L + band * (day - 1) + band / 2;
+const cy = (slot: number) => base - r - 4 - slot * step;
+const fmt = (iso: string) => `Sep ${Number(iso.slice(8, 10))}`;
+
+const slots = new Map<string, number>();
+const dots = data.calls.map((c) => {
+  const slot = slots.get(c.date) ?? 0;
+  slots.set(c.date, slot + 1);
+  const said = c.marked.length;
+  const marked = c.marked.reduce((a, b) => a + b, 0);
+  return { day: Number(c.date.slice(8, 10)), date: c.date, slot, said, marked };
+});
+const free = dots.filter((d) => d.marked === 0).length;
+const reviewed = dots.filter((d) => d.marked > 0);
+const first = reviewed[0];
+const ticks = [1, 8, 15, 22, 29];
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Dot chart of ${dots.length} voice calls in September 2026, one dot per call in the column of its day. ${free} calls had nothing the filter marked and would cost nothing to learn from. ${reviewed.length} calls, on ${reviewed.map((d) => fmt(d.date)).join(" and ")}, held a marked sentence and would get one small review each.`}>
+  <line x1={L} x2={W - R} y1={base} y2={base} stroke="var(--axis)" />
+  {
+    ticks.map((d) => (
+      <text class="t-axis" x={cx(d)} y={base + 20} text-anchor="middle">
+        Sep {d}
+      </text>
+    ))
+  }
+  {
+    dots.map((d) => {
+      const x = cx(d.day);
+      const y = cy(d.slot);
+      const tip = `<b>${fmt(d.date)}</b><br>${d.said} thing${d.said === 1 ? "" : "s"} said<br>${d.marked === 0 ? "Nothing marked: no model call" : `${d.marked} marked: one small review`}`;
+      return (
+        <g>
+          <circle class="hit" cx={x} cy={y} r={r + 2} data-tip={tip} />
+          <circle class="hl" cx={x} cy={y} r={r + 3} fill="none" stroke="var(--ink)" stroke-width="1.5" pointer-events="none" />
+          {d.marked === 0 ? (
+            <circle cx={x} cy={y} r={r} fill="var(--mark-muted)" pointer-events="none" />
+          ) : (
+            <circle cx={x} cy={y} r={r} fill="var(--accent)" stroke="var(--ink)" stroke-width="1.5" pointer-events="none" />
+          )}
+        </g>
+      );
+    })
+  }
+  {
+    first && (
+      <g>
+        <path d={`M${cx(first.day) + r + 3},${cy(first.slot) - 3} Q${cx(first.day) + 40},${T - 4} ${cx(first.day) + 70},${T - 10}`} fill="none" stroke="var(--ink-3)" />
+        <text class="t-note" x={cx(first.day) + 76} y={T - 6}>
+          {reviewed.length} calls held something worth keeping
+        </text>
+      </g>
+    )
+  }
+  <text class="t-strong" x={W - R} y={T - 24} text-anchor="end">{free} of {dots.length} calls: no model call</text>
+</svg>

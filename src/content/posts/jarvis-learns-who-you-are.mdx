@@ -6,6 +6,13 @@ category: features
 featured: true
 ---
 
+import Figure from "@/components/Figure.astro";
+import SeptemberCalls from "@/components/charts/SeptemberCalls.astro";
+import SaidToNotebook from "@/components/charts/SaidToNotebook.astro";
+import NotebookBudget from "@/components/charts/NotebookBudget.astro";
+import VersionReplay from "@/components/charts/VersionReplay.astro";
+import september from "@/data/learning-september.json";
+
 In September we had 39 voice calls with Jarvis on the machine we build it on. If the learning loop we shipped on September 30 had been running all month, 37 of those calls would have cost nothing to learn from. The other two would have cost one small model call each.
 
 The learning loop is how Jarvis now remembers you. Tell it once that you are vegan, that your sister's birthday is in March, or that you like short answers, and it should not need telling again. This post covers what Jarvis keeps, the three steps that decide what gets written, and how the first version, built the same morning, would have cost about a hundred times more.
@@ -25,15 +32,25 @@ Most of what you say to an assistant is a request: play some music, what is the 
 
 Before any model sees a conversation, a plain rule-based filter reads what you said. It marks only the sentences in which you talk about yourself ("I work at…", "my sister…"), state a preference ("I prefer…", "from now on…"), correct Jarvis ("that's wrong", "no, I meant…") or name a plan, goal or deadline. It understands English, German and Spanish. **A conversation without a single marked sentence never reaches a model.**
 
-We ran the shipped filter over the user side of every voice call we had in September:
+We ran the shipped filter over the user side of every voice call we had in September: 39 calls and 125 things said to Jarvis. It marked 4 of them, in 2 calls.
 
-| September 2 to 29, 2026 | Count |
-|---|---|
-| Voice calls | 39 |
-| Things said to Jarvis | 125 |
-| Marked by the filter | 4 (3%) |
-| Calls that would have reached a model | 2 (5%) |
-| Calls that would have cost nothing | 37 (95%) |
+<Figure
+  n={1}
+  title="37 of 39 September calls would have cost nothing to learn from"
+  subtitle="Each dot is one voice call, in the column of its day. Highlighted: calls with at least one sentence the free filter marked."
+  source="Personal Jarvis desktop app, voice call log, September 2 to 29, 2026; the shipped filter, signals.py"
+  legend={[
+    { label: "Nothing marked: no model call", color: "var(--mark-muted)" },
+    { label: "Something marked: one small review", color: "var(--accent)" },
+  ]}
+  table={{
+    head: ["Call on", "Things said", "Marked"],
+    rows: september.calls.map((c) => [c.date, c.marked.length, c.marked.filter(Boolean).length]),
+  }}
+>
+  <SeptemberCalls />
+  <Fragment slot="caption">Most calls are one or two sentences long: a request, an answer, done.</Fragment>
+</Figure>
 
 Most of those 125 turns were in German, ten in English and two in Spanish. Our usage is not yours: we talk to Jarvis mostly to drive the app we are building, so we say little about ourselves. If you tell Jarvis more about your life, more of your calls will be marked, and that is the point.
 
@@ -44,6 +61,25 @@ Most of those 125 turns were in German, ten in English and two in Spanish. Our u
 When a conversation does hold something worth keeping, Jarvis reviews it once, afterwards: when a call ends, after five quiet minutes, or every 30 turns in a very long conversation. The review never runs while you are waiting for an answer.
 
 The review is small on purpose. The model sees at most eight of your marked sentences, each with the line Jarvis said just before it, plus the two notebooks. It may propose at most three changes: add an entry, update one, or remove one you took back. That is about 1,300 tokens in and at most 800 out, on the provider's cheap model.
+
+<Figure
+  n={2}
+  title="From 125 things said to two small reviews"
+  subtitle="Every thing said to Jarvis in September as one square, in the order it was said, and what happens to the four the filter marked."
+  source="Personal Jarvis desktop app, voice call log, September 2 to 29, 2026; review.py and guard.py"
+  table={{
+    head: ["Step", "September 2026"],
+    rows: [
+      ["Things said to Jarvis", 125],
+      ["Marked by the free filter", 4],
+      ["Calls reviewed (one review each)", 2],
+      ["Changes a review may propose", "at most 3"],
+    ],
+  }}
+>
+  <SaidToNotebook />
+  <Fragment slot="caption">The 121 grey squares never reach a model. The two reviews would have read only the four marked sentences, each with the line Jarvis said before it.</Fragment>
+</Figure>
 
 It also respects who pays. While a subscription login is connected, the review runs only on subscriptions and local models and never bills a pay-per-token API key. If all you have is one API key, it uses that key's cheap model, so the feature still works. The review goes to the same background provider your wiki memory already uses, so learning adds no new place your words are sent.
 
@@ -62,7 +98,26 @@ Every accepted change goes into a log next to the notebooks, with the old text, 
 
 ## Small on purpose
 
-The notebooks travel with every turn, so they have to stay short. Together they hold about 2,500 characters, which is at most around 650 tokens per turn. Each entry is one short sentence, and Jarvis keeps them tidy by itself:
+The notebooks travel with every turn, so they have to stay short. Together they hold about 2,500 characters, which is at most around 650 tokens per turn.
+
+<Figure
+  n={3}
+  title="Small enough to ride along on every turn"
+  subtitle="The size limit of each notebook in characters, against the first version, with the two lines that keep it there."
+  source="Personal Jarvis, JarvisLearningConfig defaults and compact.py"
+  table={{
+    head: ["Notebook", "Limit", "Merge starts", "Review ceiling", "First version"],
+    rows: [
+      ["USER.md", "1,500", "1,200", "1,875", "4,000"],
+      ["MEMORY.md", "1,000", "800", "1,250", "4,000"],
+    ],
+  }}
+>
+  <NotebookBudget />
+  <Fragment slot="caption">Only an explicit "remember that" may go past the review ceiling; the next merge brings the notebook back down.</Fragment>
+</Figure>
+
+Each entry is one short sentence, and Jarvis keeps the notebooks tidy by itself:
 
 - Duplicates, and entries already contained in another one, are removed for free.
 - Once a notebook is 80 percent full, one cheap call merges entries, at most every twelve hours. A merge is accepted only if it is shorter than what it replaces and invents nothing: every number, link and name has to come from the original entries.
@@ -76,14 +131,30 @@ Jarvis reads its notebooks as background knowledge, never as instructions. What 
 
 The loop went in three commits on the morning of September 30. The first one, at 09:45, worked, and it was too expensive. It reviewed every six turns and again at every hang-up, showed the reviewer everything said since the last review, about 6,000 input tokens, and accepted up to eight changes at once. Its notebooks could hold 4,000 characters each, which puts about 2,000 tokens on every single turn.
 
-Thirty-six minutes later the filter, the one-review-per-conversation rule and the smaller notebooks replaced that. Half an hour after that, the merging and the hard size ceiling followed. We replayed both versions on the same 39 September calls:
+Thirty-six minutes later the filter, the one-review-per-conversation rule and the smaller notebooks replaced that. Half an hour after that, the merging and the hard size ceiling followed. We replayed both versions on the same 39 September calls. The first version would have run 44 reviews; the shipped one runs 2.
 
-| | First version (09:45) | Shipped version (10:53) |
-|---|---|---|
-| Reviews | 44 | 2 |
-| Input tokens per review | about 6,000 | about 1,300 |
-| Input tokens for the month | about 264,000 | about 2,600 |
-| Notebooks on every turn | up to about 2,000 tokens | up to about 650 tokens |
+<Figure
+  n={4}
+  title="The same month, replayed: about 264,000 review tokens against about 2,600"
+  subtitle="Input tokens of all reviews, added up day by day, if each version had run on our September voice calls."
+  source="Personal Jarvis desktop app, voice call log, September 2 to 29, 2026; per-review token estimates from the app's commits"
+  legend={[
+    { label: "First version (09:45)", color: "var(--ink-3)" },
+    { label: "Shipped version (10:53)", color: "var(--accent)" },
+  ]}
+  table={{
+    head: ["", "First version", "Shipped version"],
+    rows: [
+      ["Reviews", 44, 2],
+      ["Input tokens per review", "about 6,000", "about 1,300"],
+      ["Input tokens for the month", "about 264,000", "about 2,600"],
+      ["Notebooks on every turn", "up to about 2,000 tokens", "up to about 650 tokens"],
+    ],
+  }}
+>
+  <VersionReplay />
+  <Fragment slot="caption">The shipped line is not missing: it sits just above the floor.</Fragment>
+</Figure>
 
 **Decide for free what is worth a model call.** The expensive part of a memory is rarely the writing. It is paying a model to read every conversation in which there was nothing to write.
 
@@ -101,5 +172,5 @@ The design follows Nous Research's [Hermes Agent](https://github.com/NousResearc
 Every rule and limit is written down in [docs/jarvis-learning.md](https://github.com/PersonalJarvis/PersonalJarvis/blob/main/docs/jarvis-learning.md). If Jarvis remembers something wrong, or misses something it should have kept, open an issue on [GitHub](https://github.com/PersonalJarvis/PersonalJarvis/issues).
 
 <div class="note">
-  <strong>How we measured.</strong> The September numbers come from the voice call log of the Personal Jarvis desktop app on the Windows machine it is built on, September 2 to 29, 2026: 39 calls and 125 user turns, all the maintainer's own. We ran the shipped filter (<code>jarvis/memory/learning/signals.py</code>) over the stored user turns; only the counts left the machine. Typed chats are not included. The first-version replay counts one review for every six turns of a call and one at hang-up for the rest, and skips any group with less than 12 characters of speech, as that version did. Token figures per review are the estimates recorded in our commits, not billed amounts. When we wrote this, the notebooks on that machine were still empty, so we have not yet measured the cost of a live review.
+  <strong>How we measured.</strong> The September numbers come from the voice call log of the Personal Jarvis desktop app on the Windows machine it is built on, September 2 to 29, 2026: 39 calls and 125 user turns, all the maintainer's own. We ran the shipped filter (<code>jarvis/memory/learning/signals.py</code>) over the stored user turns; only the counts left the machine, and figures 1, 2 and 4 are drawn from those counts. Figure 3 shows the defaults in the app's code. Typed chats are not included. The first-version replay counts one review for every six turns of a call and one at hang-up for the rest, and skips any group with less than 12 characters of speech, as that version did. Token figures per review are the estimates recorded in our commits, not billed amounts. When we wrote this, the notebooks on that machine were still empty, so we have not yet measured the cost of a live review.
 </div>

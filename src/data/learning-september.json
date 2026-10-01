@@ -1,0 +1,368 @@
+{
+ "_about": "One entry per voice call, September 2026, from the maintainer's own desktop log. 'marked' has one flag per thing said (1 = the shipped filter marked it); 'oldReviews' is how many reviews the first version would have run. Counts only, no text.",
+ "tokensPerReview": {
+  "first": 6000,
+  "shipped": 1300
+ },
+ "calls": [
+  {
+   "date": "2026-09-02",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-02",
+   "marked": [
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-03",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-03",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-03",
+   "marked": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-03",
+   "marked": [
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-04",
+   "marked": [
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-05",
+   "marked": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 2
+  },
+  {
+   "date": "2026-09-06",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-06",
+   "marked": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-06",
+   "marked": [
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-06",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-06",
+   "marked": [
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-06",
+   "marked": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 2
+  },
+  {
+   "date": "2026-09-06",
+   "marked": [
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-09",
+   "marked": [
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-09",
+   "marked": [
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-09",
+   "marked": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-09",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-09",
+   "marked": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-09",
+   "marked": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "oldReviews": 7
+  },
+  {
+   "date": "2026-09-10",
+   "marked": [
+    0,
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-10",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-10",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-10",
+   "marked": [
+    1
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-10",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-12",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-19",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-19",
+   "marked": [
+    0
+   ],
+   "oldReviews": 0
+  },
+  {
+   "date": "2026-09-20",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-20",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-21",
+   "marked": [
+    0
+   ],
+   "oldReviews": 0
+  },
+  {
+   "date": "2026-09-23",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-23",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-23",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-23",
+   "marked": [
+    0
+   ],
+   "oldReviews": 0
+  },
+  {
+   "date": "2026-09-29",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-29",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  },
+  {
+   "date": "2026-09-29",
+   "marked": [
+    0
+   ],
+   "oldReviews": 1
+  }
+ ]
+}

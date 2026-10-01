@@ -1,0 +1,67 @@
+---
+/**
+ * The size limit of each learning notebook in characters, shipped against the
+ * first version, with the two thresholds that keep it there: a merge starts
+ * at 80 percent, and a review may never grow a notebook past 125 percent.
+ * Values are the defaults in the app's JarvisLearningConfig and compact.py.
+ */
+const W = 640;
+const H = 236;
+const L = 96;
+const R = 20;
+const T = 64;
+const scale = 4000;
+const x = (v: number) => L + ((W - L - R) * v) / scale;
+const bh = 26;
+const rowGap = 70;
+const rows = [
+  { name: "USER.md", what: "about you", size: 1500, first: 4000 },
+  { name: "MEMORY.md", what: "its own notes", size: 1000, first: 4000 },
+].map((r, i) => ({ ...r, y: T + i * rowGap }));
+const n = (v: number) => v.toLocaleString("en-US");
+const axis = T + rows.length * rowGap - 18;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Bar chart of the notebook size limits in characters. USER.md holds 1,500 characters and MEMORY.md 1,000, against 4,000 each in the first version. A merge starts at 80 percent of the limit, and a review may never grow a notebook past 125 percent of it.">
+  {
+    [0, 1000, 2000, 3000, 4000].map((v) => (
+      <g>
+        <line x1={x(v)} x2={x(v)} y1={T - 8} y2={axis} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
+        <text class="t-axis" x={x(v)} y={axis + 16} text-anchor="middle">
+          {n(v)}
+        </text>
+      </g>
+    ))
+  }
+  <text class="t-axis" x={x(4000)} y={axis + 32} text-anchor="end">characters</text>
+  {
+    rows.map((r, i) => {
+      const merge = r.size * 0.8;
+      const ceiling = r.size * 1.25;
+      return (
+        <g>
+          <text class="t-strong" x={0} y={r.y + bh / 2 - 2}>
+            {r.name}
+          </text>
+          <text class="t-axis" x={0} y={r.y + bh / 2 + 14}>
+            {r.what}
+          </text>
+          <rect x={x(0)} y={r.y} width={x(r.first) - x(0)} height={bh} rx="4" fill="none" stroke="var(--ink-4)" stroke-width="1.5" stroke-dasharray="5 4" />
+          <rect x={x(0)} y={r.y} width={x(r.size) - x(0)} height={bh} rx="4" fill="var(--accent)" />
+          <text class="t-strong" x={x(0) + 10} y={r.y + bh / 2 + 4.5} style="fill: var(--paper)">
+            {n(r.size)}
+          </text>
+          <line x1={x(merge)} x2={x(merge)} y1={r.y - 6} y2={r.y + bh + 6} stroke="var(--ink)" stroke-width="1.5" />
+          <line x1={x(ceiling)} x2={x(ceiling)} y1={r.y - 6} y2={r.y + bh + 6} stroke="var(--ink)" stroke-width="2" stroke-dasharray="3 3" />
+          {i === 0 && (
+            <g>
+              <text class="t-note" x={x(merge)} y={r.y - 14} text-anchor="end">merge starts (80%)</text>
+              <text class="t-note" x={x(ceiling)} y={r.y - 14}>review ceiling (125%)</text>
+              <text class="t-label" x={x(r.first) - 8} y={r.y + bh / 2 + 4.5} text-anchor="end">first version: {n(r.first)}</text>
+            </g>
+          )}
+        </g>
+      );
+    })
+  }
+</svg>

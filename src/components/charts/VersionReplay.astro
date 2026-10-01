@@ -1,0 +1,96 @@
+---
+/**
+ * The first and the shipped version of the learning loop replayed on the same
+ * September 2026 voice calls: review input tokens added up day by day. Token
+ * counts per review are the estimates recorded in the app's commits.
+ * Read from src/data/learning-september.json.
+ */
+import data from "@/data/learning-september.json";
+
+const W = 640;
+const H = 290;
+const L = 44;
+const R = 150;
+const T = 24;
+const B = 34;
+const base = H - B;
+const yMax = 300_000;
+const x = (day: number) => L + ((W - L - R) * (day - 1)) / 29;
+const y = (v: number) => base - ((base - T) * v) / yMax;
+const k = (v: number) => (v === 0 ? "0" : `${v / 1000}k`);
+const n = (v: number) => v.toLocaleString("en-US");
+
+const per = new Map<number, { first: number; shipped: number; calls: number }>();
+for (const c of data.calls) {
+  const d = Number(c.date.slice(8, 10));
+  const e = per.get(d) ?? { first: 0, shipped: 0, calls: 0 };
+  e.first += c.oldReviews * data.tokensPerReview.first;
+  e.shipped += c.marked.some(Boolean) ? data.tokensPerReview.shipped : 0;
+  e.calls += 1;
+  per.set(d, e);
+}
+let first = 0;
+let shipped = 0;
+const days = Array.from({ length: 30 }, (_, i) => {
+  const d = i + 1;
+  const e = per.get(d);
+  first += e?.first ?? 0;
+  shipped += e?.shipped ?? 0;
+  return { d, first, shipped, calls: e?.calls ?? 0 };
+});
+const stepPath = (key: "first" | "shipped") => {
+  let p = `M${x(1)},${y(0)}`;
+  let prev = 0;
+  for (const s of days) {
+    if (s[key] !== prev) {
+      p += `H${x(s.d)}V${y(s[key])}`;
+      prev = s[key];
+    }
+  }
+  return p + `H${x(30)}`;
+};
+const end = days[days.length - 1];
+const band = (W - L - R) / 29;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Step chart of review input tokens added up over September 2026, replayed on the same ${data.calls.length} voice calls. The first version climbs to about ${n(end.first)} tokens; the shipped version stays near the floor at about ${n(end.shipped)}.`}>
+  {
+    [0, 100_000, 200_000, 300_000].map((v) => (
+      <g>
+        <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
+        <text class="t-axis" x={L - 8} y={y(v) + 4} text-anchor="end">
+          {k(v)}
+        </text>
+      </g>
+    ))
+  }
+  {
+    [1, 8, 15, 22, 29].map((d) => (
+      <text class="t-axis" x={x(d)} y={base + 20} text-anchor="middle">
+        Sep {d}
+      </text>
+    ))
+  }
+  <path d={stepPath("first") + `V${y(0)}H${x(1)}Z`} fill="var(--ink-3)" fill-opacity="0.08" />
+  <path d={stepPath("first")} fill="none" stroke="var(--ink-3)" stroke-width="2.5" stroke-linejoin="round" />
+  <path d={stepPath("shipped")} fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linejoin="round" />
+
+  <text class="t-strong" x={x(30) + 10} y={y(end.first) + 4}>First version</text>
+  <text class="t-label" x={x(30) + 10} y={y(end.first) + 21}>about {n(end.first)}</text>
+  <text class="t-strong" x={x(30) + 10} y={y(end.shipped) - 22} style="fill: var(--accent)">Shipped</text>
+  <text class="t-label" x={x(30) + 10} y={y(end.shipped) - 6}>about {n(end.shipped)}</text>
+
+  {
+    days
+      .filter((s) => s.calls > 0)
+      .map((s) => {
+        const tip = `<b>Sep ${s.d}</b><br>${s.calls} call${s.calls === 1 ? "" : "s"} that day<br>Total so far, first version: ${n(s.first)}<br>Total so far, shipped: ${n(s.shipped)}`;
+        return (
+          <g>
+            <rect class="hit" x={x(s.d) - band / 2} y={T} width={band} height={base - T} data-tip={tip} />
+            <rect class="hl" x={x(s.d) - band / 2 + 2} y={T} width={band - 4} height={base - T} rx="3" fill="var(--ink)" fill-opacity="0.06" pointer-events="none" />
+          </g>
+        );
+      })
+  }
+</svg>
