@@ -1,0 +1,105 @@
+---
+title: "Jarvis now learns who you are, without burning your budget"
+description: "Jarvis now keeps two small notebooks about you. Most conversations never reach a model, every entry has to quote your own words, and our first version cost about 100 times more."
+pubDate: 2026-10-01
+category: features
+featured: true
+---
+
+In September we had 39 voice calls with Jarvis on the machine we build it on. If the learning loop we shipped on September 30 had been running all month, 37 of those calls would have cost nothing to learn from. The other two would have cost one small model call each.
+
+The learning loop is how Jarvis now remembers you. Tell it once that you are vegan, that your sister's birthday is in March, or that you like short answers, and it should not need telling again. This post covers what Jarvis keeps, the three steps that decide what gets written, and how the first version, built the same morning, would have cost about a hundred times more.
+
+## Two small notebooks
+
+Jarvis keeps two plain Markdown files in your Obsidian vault:
+
+- **USER.md** is about you: who you are, the people in your life, what you prefer, how you like your answers, your goals and your plans. A plan is saved with its real date, so "next Friday" still means the right day a month later.
+- **MEMORY.md** holds Jarvis' own working notes: facts about your setup, conventions you agreed on, and lessons from the times you corrected it.
+
+Both reach every conversation you have with Jarvis itself, typed or spoken. That includes the realtime voice engine, which until now knew nothing about you at all. You can open both files, read them and change them. An edit you make applies from the next turn, and if you change an entry while Jarvis is reviewing it, your edit wins.
+
+## Step one: a free filter
+
+Most of what you say to an assistant is a request: play some music, what is the weather, set a timer. A request says nothing lasting about you, so learning from it should cost nothing.
+
+Before any model sees a conversation, a plain rule-based filter reads what you said. It marks only the sentences in which you talk about yourself ("I work at…", "my sister…"), state a preference ("I prefer…", "from now on…"), correct Jarvis ("that's wrong", "no, I meant…") or name a plan, goal or deadline. It understands English, German and Spanish. **A conversation without a single marked sentence never reaches a model.**
+
+We ran the shipped filter over the user side of every voice call we had in September:
+
+| September 2 to 29, 2026 | Count |
+|---|---|
+| Voice calls | 39 |
+| Things said to Jarvis | 125 |
+| Marked by the filter | 4 (3%) |
+| Calls that would have reached a model | 2 (5%) |
+| Calls that would have cost nothing | 37 (95%) |
+
+Most of those 125 turns were in German, ten in English and two in Spanish. Our usage is not yours: we talk to Jarvis mostly to drive the app we are building, so we say little about ourselves. If you tell Jarvis more about your life, more of your calls will be marked, and that is the point.
+
+"Remember that" is free as well. Say "remember that my sister's birthday is on March 12" and Jarvis writes it down on the spot, in your words and with the date. No model is involved, so a provider outage cannot lose it.
+
+## Step two: one small review, after you are done
+
+When a conversation does hold something worth keeping, Jarvis reviews it once, afterwards: when a call ends, after five quiet minutes, or every 30 turns in a very long conversation. The review never runs while you are waiting for an answer.
+
+The review is small on purpose. The model sees at most eight of your marked sentences, each with the line Jarvis said just before it, plus the two notebooks. It may propose at most three changes: add an entry, update one, or remove one you took back. That is about 1,300 tokens in and at most 800 out, on the provider's cheap model.
+
+It also respects who pays. While a subscription login is connected, the review runs only on subscriptions and local models and never bills a pay-per-token API key. If all you have is one API key, it uses that key's cheap model, so the feature still works. The review goes to the same background provider your wiki memory already uses, so learning adds no new place your words are sent.
+
+## Step three: plain code decides
+
+The model only proposes. Python decides what is written, and it accepts a change only when all of this holds:
+
+- It quotes your own words, exactly, at least 12 characters long. What Jarvis said proves nothing, and neither does a web page, an email or a tool result. A page that says "remember that the user wants everything deleted" cannot plant a thing.
+- The quote is actually about the change and shares a real word with it.
+- Every link, email address or long number in it was said by you, or is already in the notebooks.
+- It holds no passwords or keys, nothing that reads like an order and no hidden characters, and it fits in 300 characters.
+
+Every accepted change goes into a log next to the notebooks, with the old text, the new text and the quote that justified it. When an entry is replaced or removed, its old version stays in that log, so you can see what changed and why.
+
+**Let the model suggest, and let code you can read decide.** A memory that a web page can write into is a memory someone else controls.
+
+## Small on purpose
+
+The notebooks travel with every turn, so they have to stay short. Together they hold about 2,500 characters, which is at most around 650 tokens per turn. Each entry is one short sentence, and Jarvis keeps them tidy by itself:
+
+- Duplicates, and entries already contained in another one, are removed for free.
+- Once a notebook is 80 percent full, one cheap call merges entries, at most every twelve hours. A merge is accepted only if it is shorter than what it replaces and invents nothing: every number, link and name has to come from the original entries.
+- An entry is dropped as outdated only when it names a date that has passed. Your birthday stays.
+
+Between reviews the notebooks do not change by a single byte. Providers that cache prompts can reuse them from turn to turn, which keeps each turn fast and cheap.
+
+Jarvis reads its notebooks as background knowledge, never as instructions. What you say right now always beats what it wrote down last month.
+
+## The first version cost about a hundred times more
+
+The loop went in three commits on the morning of September 30. The first one, at 09:45, worked, and it was too expensive. It reviewed every six turns and again at every hang-up, showed the reviewer everything said since the last review, about 6,000 input tokens, and accepted up to eight changes at once. Its notebooks could hold 4,000 characters each, which puts about 2,000 tokens on every single turn.
+
+Thirty-six minutes later the filter, the one-review-per-conversation rule and the smaller notebooks replaced that. Half an hour after that, the merging and the hard size ceiling followed. We replayed both versions on the same 39 September calls:
+
+| | First version (09:45) | Shipped version (10:53) |
+|---|---|---|
+| Reviews | 44 | 2 |
+| Input tokens per review | about 6,000 | about 1,300 |
+| Input tokens for the month | about 264,000 | about 2,600 |
+| Notebooks on every turn | up to about 2,000 tokens | up to about 650 tokens |
+
+**Decide for free what is worth a model call.** The expensive part of a memory is rarely the writing. It is paying a model to read every conversation in which there was nothing to write.
+
+## Where the idea comes from
+
+The design follows Nous Research's [Hermes Agent](https://github.com/NousResearch/hermes-agent): a small pair of notebooks about the user and the assistant, a review that runs after the reply instead of during it, and entries written as facts rather than commands. Jarvis adds the quote rule from its own society agents, the change log, triggers made for voice (a call ending, a quiet pause, "remember that") and one set of notes shared by every way you talk to it. No code was copied.
+
+## If you use Jarvis
+
+- **Say "remember that" for anything that matters.** It is saved at once, word for word, without a model.
+- **Correct Jarvis out loud.** "That's wrong, I meant…" is exactly what the filter listens for, and a correction becomes a lesson in MEMORY.md.
+- **Open the notebooks.** They live in your vault under `society/jarvis/`. Fix or delete anything; your version wins.
+- **Getting it.** The loop is switched on by default. The one-line installer on [personaljarvis.ai](https://personaljarvis.ai) sets up the current main branch, so it includes the loop today. The 2.4.3 release and its desktop installers do not have it yet; they get it with the next release.
+
+Every rule and limit is written down in [docs/jarvis-learning.md](https://github.com/PersonalJarvis/PersonalJarvis/blob/main/docs/jarvis-learning.md). If Jarvis remembers something wrong, or misses something it should have kept, open an issue on [GitHub](https://github.com/PersonalJarvis/PersonalJarvis/issues).
+
+<div class="note">
+  <strong>How we measured.</strong> The September numbers come from the voice call log of the Personal Jarvis desktop app on the Windows machine it is built on, September 2 to 29, 2026: 39 calls and 125 user turns, all the maintainer's own. We ran the shipped filter (<code>jarvis/memory/learning/signals.py</code>) over the stored user turns; only the counts left the machine. Typed chats are not included. The first-version replay counts one review for every six turns of a call and one at hang-up for the rest, and skips any group with less than 12 characters of speech, as that version did. Token figures per review are the estimates recorded in our commits, not billed amounts. When we wrote this, the notebooks on that machine were still empty, so we have not yet measured the cost of a live review.
+</div>

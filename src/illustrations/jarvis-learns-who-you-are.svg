@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- Three things said; only one passes the filter and is written into the notebook Gigi keeps. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">
+<path vector-effect="non-scaling-stroke" d="M50 52 H140 Q152 52 152 64 V84 Q152 96 140 96 H72 L58 108 L60 96 H50 Q38 96 38 84 V64 Q38 52 50 52 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M58 74 H58.01 M76 74 H76.01 M94 74 H94.01"/>
+<path vector-effect="non-scaling-stroke" d="M64 132 H154 Q166 132 166 144 V164 Q166 176 154 176 H86 L72 188 L74 176 H64 Q52 176 52 164 V144 Q52 132 64 132 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M72 148 H146 M72 162 H124"/>
+<path vector-effect="non-scaling-stroke" d="M50 212 H140 Q152 212 152 224 V244 Q152 256 140 256 H72 L58 268 L60 256 H50 Q38 256 38 244 V224 Q38 212 50 212 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M58 234 H58.01 M76 234 H76.01 M94 234 H94.01"/>
+<path vector-effect="non-scaling-stroke" d="M176 154 C188 150 196 140 202 128" stroke-dasharray="1 11"/>
+<path vector-effect="non-scaling-stroke" d="M188 116 H264 L238 156 V192 H214 V156 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M226 204 C238 236 266 246 290 230" stroke-dasharray="1 11"/>
+<g transform="translate(336 76) scale(0.95)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M30 52 Q35 56 40 52" fill="none"/></g>
+<path vector-effect="non-scaling-stroke" d="M296 150 Q334 138 370 150 V266 Q334 254 296 266 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M370 150 Q406 138 444 150 V266 Q406 254 370 266 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M310 176 H356 M310 196 H356 M310 216 H342"/>
+<path vector-effect="non-scaling-stroke" d="M384 176 H430 M384 196 H418"/>
+<path vector-effect="non-scaling-stroke" d="M420 104 L432 92 M424 124 L442 120"/>
+  </g>
+</svg>
