@@ -29,7 +29,7 @@ const jsonLd = {
       <div class="hero-intro">
         <h1 id="hero-title" class="hero-label">Blog</h1>
         <div class="hero-pitch">
-          <p>Notes from building Personal Jarvis: what we ship, what we measure while shipping it, and how to get more out of an AI assistant on your own machine.</p>
+          <p>{SITE.tagline}</p>
           <a class="button" href={SITE.main}>Get Personal Jarvis</a>
         </div>
       </div>
@@ -121,7 +121,7 @@ const jsonLd = {
                       <div class="small card-meta">
                         <span class="cat">{CATEGORY_LABEL[p.data.category]}</span>
                         <span class="num">{formatDate(p.data.pubDate)}</span>
-                        <span>{readingMinutes(p.body)} min read</span>
+                        <span class="mins">{readingMinutes(p.body)} min read</span>
                       </div>
                       <h3>{p.data.title}</h3>
                       <p>{p.data.description}</p>
