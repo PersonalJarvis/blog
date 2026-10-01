@@ -1,0 +1,48 @@
+---
+/**
+ * Every skill that ships with Jarvis as one square, grouped by what it is
+ * for. Read from src/data/agent-hands.json (`skills.groups`).
+ */
+import data from "@/data/agent-hands.json";
+import { esc } from "./util";
+
+const W = 640;
+const cols = 13;
+const cell = 26;
+const gap = 5;
+const left = 0;
+const top = 8;
+const FILL = ["var(--accent)", "var(--s1)", "var(--mark-muted)"];
+const groups = data.skills.groups.map((g, i) => ({ ...g, fill: FILL[i] }));
+const sq: { x: number; y: number; g: (typeof groups)[number] }[] = [];
+let i = 0;
+for (const g of groups) {
+  for (let k = 0; k < g.n; k++, i++) {
+    sq.push({ x: left + (i % cols) * (cell + gap), y: top + Math.floor(i / cols) * (cell + gap), g });
+  }
+}
+const gridW = cols * (cell + gap) - gap;
+const gridH = Math.ceil(i / cols) * (cell + gap) - gap;
+const lx = gridW + 28;
+const H = Math.max(top + gridH + 8, 150);
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${data.skills.builtin} skills ship with Jarvis: ` + groups.map((g) => `${g.label} ${g.n}`).join("; ")}>
+  {
+    sq.map((s) => (
+      <rect x={s.x} y={s.y} width={cell} height={cell} rx="4" fill={s.g.fill} data-tip={`<b>${esc(s.g.label)}</b><br>${s.g.n} of ${data.skills.builtin} built-in skills`} />
+    ))
+  }
+  {
+    groups.map((g, k) => {
+      const y = top + 12 + k * 40;
+      return (
+        <g>
+          <rect x={lx} y={y - 11} width={14} height={14} rx="3" fill={g.fill} />
+          <text class="t-strong" x={lx + 22} y={y + 1}>{g.n}</text>
+          <text class="t-label" x={lx + 46} y={y + 1}>{g.label}</text>
+        </g>
+      );
+    })
+  }
+</svg>

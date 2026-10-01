@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- A skill page, a plug and a tool server feeding one toolbox that two agents share. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M48 276 H432"/>
+<path d="M58 58 H112 L126 72 V132 H58 Z" fill="#faf9f5"/>
+<path d="M112 58 V72 H126"/>
+<path d="M70 88 H112 M70 102 H112 M70 116 H98"/>
+<rect x="196" y="52" width="50" height="40" rx="8" fill="#faf9f5"/>
+<path d="M210 52 V36 M232 52 V36"/>
+<path d="M221 92 V110 Q221 126 238 126"/>
+<rect x="340" y="50" width="86" height="82" rx="8" fill="#faf9f5"/>
+<path d="M340 77 H426 M340 104 H426"/>
+<circle cx="356" cy="64" r="3.5" fill="#141413" stroke="none"/>
+<circle cx="356" cy="91" r="3.5" fill="#141413" stroke="none"/>
+<circle cx="356" cy="118" r="3.5" fill="#141413" stroke="none"/>
+<path d="M372 64 H408 M372 91 H400 M372 118 H404"/>
+<path d="M92 140 Q100 176 176 190" stroke-dasharray="2 10"/>
+<path d="M238 126 Q246 160 240 182" stroke-dasharray="2 10"/>
+<path d="M382 140 Q376 176 304 190" stroke-dasharray="2 10"/>
+<path d="M170 204 H310 V276 H170 Z" fill="#faf9f5"/>
+<path d="M210 204 V190 Q210 182 218 182 H262 Q270 182 270 190 V204"/>
+<path d="M170 232 H310"/>
+<rect x="228" y="224" width="24" height="16" rx="3" fill="#faf9f5"/>
+<g transform="translate(86 200) scale(0.86)"><path d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path d="M30 52 Q35 56 40 52"/></g>
+<g transform="translate(336 200) scale(0.86)"><path d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path d="M28 54 H42"/></g>
+<path d="M150 238 L168 232"/>
+<path d="M330 238 L312 232"/>
+  </g>
+</svg>

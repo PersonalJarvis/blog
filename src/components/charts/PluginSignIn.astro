@@ -1,0 +1,60 @@
+---
+/**
+ * The plugins in the store as one square each, twice: how you sign in, and
+ * what the plugin brings. Read from src/data/agent-hands.json (`plugins`).
+ */
+import data from "@/data/agent-hands.json";
+import { esc } from "./util";
+
+const W = 640;
+const n = data.plugins.total;
+const cols = 23;
+const cell = 22;
+const gap = 4;
+const blockW = cols * (cell + gap) - gap;
+const left = (W - blockW) / 2;
+
+type Group = { label: string; n: number; fill: string };
+const browser = data.plugins.auth.filter((a) => a.browser);
+const other = data.plugins.auth.filter((a) => !a.browser);
+const signIn: Group[] = [
+  ...browser.map((a) => ({ label: a.label, n: a.n, fill: "var(--accent)" })),
+  ...other.map((a) => ({ label: a.label, n: a.n, fill: "var(--mark-muted)" })),
+];
+const CARRY_FILL = ["var(--s1)", "var(--s3)", "var(--s5)"];
+const carries: Group[] = data.plugins.carries.map((c, i) => ({ label: c.label, n: c.n, fill: CARRY_FILL[i] }));
+
+function squares(groups: Group[], top: number) {
+  const out: { x: number; y: number; g: Group }[] = [];
+  let i = 0;
+  for (const g of groups) {
+    for (let k = 0; k < g.n; k++, i++) {
+      out.push({ x: left + (i % cols) * (cell + gap), y: top + Math.floor(i / cols) * (cell + gap), g });
+    }
+  }
+  return out;
+}
+const rowsPerBlock = Math.ceil(n / cols);
+const blockH = rowsPerBlock * (cell + gap) - gap;
+const top1 = 30;
+const top2 = top1 + blockH + 66;
+const H = top2 + blockH + 12;
+const browserN = browser.reduce((a, b) => a + b.n, 0);
+const blocks = [
+  { title: `How you sign in: ${browserN} of ${n} with one approval in the browser`, sq: squares(signIn, top1), top: top1 },
+  { title: `What it brings: ${carries[0].n} of ${n} carry an MCP server`, sq: squares(carries, top2), top: top2 },
+];
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${n} plugins. Sign-in: ` + signIn.map((g) => `${g.label} ${g.n}`).join("; ") + `. What they bring: ` + carries.map((g) => `${g.label} ${g.n}`).join("; ")}>
+  {
+    blocks.map((b) => (
+      <g>
+        <text class="t-note" x={left} y={b.top - 12}>{b.title}</text>
+        {b.sq.map((s) => (
+          <rect x={s.x} y={s.y} width={cell} height={cell} rx="3" fill={s.g.fill} data-tip={`<b>${esc(s.g.label)}</b><br>${s.g.n} plugin${s.g.n === 1 ? "" : "s"}`} />
+        ))}
+      </g>
+    ))
+  }
+</svg>

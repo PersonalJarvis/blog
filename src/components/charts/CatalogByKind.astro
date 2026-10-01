@@ -1,0 +1,47 @@
+---
+/**
+ * The capability catalog on the machine we build Jarvis on, by kind, with the
+ * MCP row split by the server the tools come from.
+ * Read from src/data/agent-hands.json (`catalog`).
+ */
+import data from "@/data/agent-hands.json";
+import { esc } from "./util";
+
+const W = 640;
+const T = 6;
+const rowH = 46;
+const rows = data.catalog.rows.map((r) => ({ ...r, n: r.parts.reduce((a, p) => a + p.n, 0) }));
+const H = T + rows.length * rowH + 4;
+const max = Math.max(...rows.map((r) => r.n));
+const barX = 170;
+const barW = W - barX - 44;
+const PART_FILL: Record<string, string[]> = {
+  mcp: ["var(--s1)", "var(--s2)"],
+  tool: ["var(--mark-muted)", "var(--rule-strong)"],
+};
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Bar chart of the ${data.catalog.total} capabilities in the catalog: ` + rows.map((r) => `${r.label} ${r.n}`).join("; ")}>
+  {
+    rows.map((r, i) => {
+      const y = T + i * rowH;
+      let x = barX;
+      const tip = `<b>${esc(r.label)}: ${r.n}</b>` + r.parts.map((p) => `<br>${esc(p.label)}: ${p.n}`).join("");
+      return (
+        <g>
+          <rect class="hit" x={0} y={y} width={W} height={rowH - 6} data-tip={tip} />
+          <rect class="hl" x={0} y={y} width={W} height={rowH - 6} rx="5" fill="var(--ink)" fill-opacity="0.05" pointer-events="none" />
+          <text class="t-label" x={0} y={y + 25} pointer-events="none">{r.label}</text>
+          {r.parts.map((p, k) => {
+            const w = (barW * p.n) / max;
+            const fill = PART_FILL[r.key]?.[k] ?? "var(--mark-muted)";
+            const el = <rect x={x} y={y + 9} width={Math.max(w - 2, 1)} height={22} rx="3" fill={fill} pointer-events="none" />;
+            x += w;
+            return el;
+          })}
+          <text class="t-strong" x={x + 6} y={y + 25} pointer-events="none">{r.n}</text>
+        </g>
+      );
+    })
+  }
+</svg>

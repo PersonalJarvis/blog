@@ -1,0 +1,189 @@
+{
+  "measured": "2026-10-01",
+  "catalog": {
+    "total": 200,
+    "rows": [
+      {
+        "key": "mcp",
+        "label": "MCP tools",
+        "parts": [
+          {
+            "label": "GitHub plugin (hosted MCP server)",
+            "n": 45
+          },
+          {
+            "label": "NotebookLM (MCP server we added)",
+            "n": 32
+          }
+        ]
+      },
+      {
+        "key": "tool",
+        "label": "Jarvis tools",
+        "parts": [
+          {
+            "label": "Connected",
+            "n": 67
+          },
+          {
+            "label": "Sign-in missing",
+            "n": 3
+          }
+        ]
+      },
+      {
+        "key": "skill",
+        "label": "Skills",
+        "parts": [
+          {
+            "label": "Skills",
+            "n": 33
+          }
+        ]
+      },
+      {
+        "key": "core",
+        "label": "Built-in basics",
+        "parts": [
+          {
+            "label": "Wiki, browser, contacts and more",
+            "n": 11
+          }
+        ]
+      },
+      {
+        "key": "cli",
+        "label": "Command-line tools",
+        "parts": [
+          {
+            "label": "gh, gcloud, aws and more",
+            "n": 9
+          }
+        ]
+      }
+    ]
+  },
+  "plugins": {
+    "total": 46,
+    "auth": [
+      {
+        "label": "Browser sign-in (OAuth)",
+        "n": 24,
+        "browser": true
+      },
+      {
+        "label": "Browser sign-in at the service's own MCP server",
+        "n": 16,
+        "browser": true
+      },
+      {
+        "label": "Code shown on a second device",
+        "n": 1,
+        "browser": true
+      },
+      {
+        "label": "Sign-in on your own server's page",
+        "n": 1,
+        "browser": true
+      },
+      {
+        "label": "Pasted access token",
+        "n": 3,
+        "browser": false
+      },
+      {
+        "label": "Nothing to sign in (local)",
+        "n": 1,
+        "browser": false
+      }
+    ],
+    "carries": [
+      {
+        "label": "An MCP server",
+        "n": 38
+      },
+      {
+        "label": "A tool built into Jarvis",
+        "n": 6
+      },
+      {
+        "label": "A chat channel",
+        "n": 2
+      }
+    ],
+    "status": {
+      "connected": 15,
+      "needs_reauth": 4,
+      "not_connected": 27
+    }
+  },
+  "skills": {
+    "builtin": 51,
+    "groups": [
+      {
+        "label": "Manual for one plugin",
+        "n": 45,
+        "cls": "tool_backed"
+      },
+      {
+        "label": "Guide for a CLI or an API",
+        "n": 2,
+        "cls": "tool_backed"
+      },
+      {
+        "label": "Plain instructions",
+        "n": 4,
+        "cls": "instruction"
+      }
+    ],
+    "installedHere": 34,
+    "learnedByAgents": 8
+  },
+  "turns": [
+    {
+      "sentence": "What's the weather in Berlin tomorrow?",
+      "mcp": 0,
+      "servers": []
+    },
+    {
+      "sentence": "Find me a flight to Lisbon on Friday",
+      "mcp": 0,
+      "servers": []
+    },
+    {
+      "sentence": "Put lunch with Anna on my calendar for Friday",
+      "mcp": 0,
+      "servers": []
+    },
+    {
+      "sentence": "Make flashcards from my biology notebook",
+      "mcp": 32,
+      "servers": [
+        "notebooklm-mcp"
+      ]
+    },
+    {
+      "sentence": "Build a mind map about the French Revolution",
+      "mcp": 32,
+      "servers": [
+        "notebooklm-mcp"
+      ]
+    },
+    {
+      "sentence": "Which issues are still open in the website repo?",
+      "mcp": 77,
+      "servers": [
+        "github",
+        "notebooklm-mcp"
+      ]
+    },
+    {
+      "sentence": "Open a pull request for the login fix",
+      "mcp": 45,
+      "servers": [
+        "github"
+      ]
+    }
+  ],
+  "mcpTotal": 77
+}

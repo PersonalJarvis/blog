@@ -1,0 +1,49 @@
+---
+/**
+ * The shipped per-turn relevance gate run over our catalog's MCP tools for a
+ * handful of example requests: how many of them would reach the model.
+ * Read from src/data/agent-hands.json (`turns`, `catalog`).
+ */
+import data from "@/data/agent-hands.json";
+import { esc } from "./util";
+
+const W = 640;
+const T = 6;
+const rowH = 50;
+const rows = data.turns;
+const H = T + rows.length * rowH + 2;
+const total = data.mcpTotal;
+const parts = data.catalog.rows.find((r) => r.key === "mcp")!.parts;
+const SERVER: Record<string, { n: number; fill: string; label: string }> = {
+  github: { n: parts[0].n, fill: "var(--s1)", label: "GitHub" },
+  "notebooklm-mcp": { n: parts[1].n, fill: "var(--s2)", label: "NotebookLM" },
+};
+const barX = 300;
+const barW = W - barX - 64;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`For each example request, how many of the ${total} MCP tools reach the model: ` + rows.map((r) => `${r.sentence} ${r.mcp}`).join("; ")}>
+  {
+    rows.map((r, i) => {
+      const y = T + i * rowH;
+      let x = barX;
+      const names = r.servers.map((s) => SERVER[s].label).join(" and ") || "none";
+      const tip = `<b>${esc(r.sentence)}</b><br>${r.mcp} of ${total} MCP tools offered<br>Servers: ${names}`;
+      return (
+        <g>
+          <rect class="hit" x={0} y={y} width={W} height={rowH - 6} data-tip={tip} />
+          <rect class="hl" x={0} y={y} width={W} height={rowH - 6} rx="5" fill="var(--ink)" fill-opacity="0.05" pointer-events="none" />
+          <text class="t-label" x={0} y={y + 27} pointer-events="none">{`“${r.sentence}”`}</text>
+          <rect x={barX} y={y + 11} width={barW} height={22} rx="3" fill="none" stroke="var(--rule-strong)" stroke-width="1" pointer-events="none" />
+          {r.servers.map((s) => {
+            const w = (barW * SERVER[s].n) / total;
+            const el = <rect x={x} y={y + 11} width={Math.max(w - 2, 1)} height={22} rx="3" fill={SERVER[s].fill} pointer-events="none" />;
+            x += w;
+            return el;
+          })}
+          <text class="t-strong" x={barX + barW + 8} y={y + 27} pointer-events="none">{r.mcp}</text>
+        </g>
+      );
+    })
+  }
+</svg>

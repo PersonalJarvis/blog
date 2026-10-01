@@ -1,0 +1,76 @@
+---
+/**
+ * How skills, plugins and MCP servers become an agent's tools: three kinds of
+ * source feed one catalog, each agent takes its share of it, and a per-turn
+ * gate decides what the model sees. Counts from src/data/agent-hands.json.
+ */
+import data from "@/data/agent-hands.json";
+
+const W = 640;
+const H = 280;
+const plugins = data.plugins.total;
+const mcpTools = data.mcpTotal;
+const skillRows = data.catalog.rows.find((r) => r.key === "skill")!.parts[0].n;
+
+const src = [
+  { head: "Skills", sub1: "Text: how to do a task", sub2: `${skillRows} in our catalog` },
+  { head: "Plugins", sub1: "A sign-in to a service", sub2: `${plugins} in the store` },
+  { head: "MCP servers", sub1: "Tools in an open format", sub2: `${mcpTools} tools from 2 servers` },
+];
+const bx = 0;
+const bw = 176;
+const bh = 66;
+const gapY = 22;
+const top = 30;
+const cx = 236;
+const cw = 150;
+const ch = 3 * bh + 2 * gapY;
+const ax = 446;
+const aw = W - ax;
+const mid = top + ch / 2;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Diagram: skills, plugins and MCP servers feed one catalog of ${data.catalog.total} capabilities. Each agent takes its share by grant, deny and focus, and a per-turn check decides which tools the model sees.`}>
+  <text class="t-note" x={bx} y={top - 12}>Where tools come from</text>
+  <text class="t-note" x={cx} y={top - 12}>One catalog</text>
+  <text class="t-note" x={ax} y={top - 12}>Each agent, each turn</text>
+  {
+    src.map((s, i) => {
+      const y = top + i * (bh + gapY);
+      return (
+        <g>
+          <rect x={bx + 1} y={y} width={bw} height={bh} rx="8" fill="var(--panel)" stroke="var(--rule-strong)" stroke-width="1.5" />
+          <text class="t-strong" x={bx + 16} y={y + 24}>{s.head}</text>
+          <text class="t-label" x={bx + 16} y={y + 42}>{s.sub1}</text>
+          <text class="t-label" x={bx + 16} y={y + 58} style="fill:var(--ink-3)">{s.sub2}</text>
+          <path d={`M${bx + bw + 2},${y + bh / 2} C${bx + bw + 30},${y + bh / 2} ${cx - 30},${mid} ${cx - 4},${mid}`} fill="none" stroke="var(--axis)" stroke-width="1.5" />
+        </g>
+      );
+    })
+  }
+  <path d={`M${cx - 10},${mid - 5} L${cx - 3},${mid} L${cx - 10},${mid + 5}`} fill="none" stroke="var(--axis)" stroke-width="1.5" />
+  <rect x={cx} y={top} width={cw} height={ch} rx="10" fill="var(--paper)" stroke="var(--accent)" stroke-width="2" />
+  <text x={cx + cw / 2} y={mid - 14} text-anchor="middle" style="font-size:34px;font-weight:600;fill:var(--ink);font-variant-numeric:tabular-nums">{data.catalog.total}</text>
+  <text class="t-label" x={cx + cw / 2} y={mid + 12} text-anchor="middle">capabilities, one</text>
+  <text class="t-label" x={cx + cw / 2} y={mid + 28} text-anchor="middle">id each, from all</text>
+  <text class="t-label" x={cx + cw / 2} y={mid + 44} text-anchor="middle">sources together</text>
+  <path d={`M${cx + cw + 4},${mid} H${ax - 6}`} stroke="var(--axis)" stroke-width="1.5" />
+  <path d={`M${ax - 13},${mid - 5} L${ax - 6},${mid} L${ax - 13},${mid + 5}`} fill="none" stroke="var(--axis)" stroke-width="1.5" />
+  {
+    [
+      ["1  Grant", "all, or a short list"],
+      ["2  Deny", "minus what you blocked"],
+      ["3  Focus", "its main tools go first"],
+      ["4  Per turn", "an MCP server only if asked"],
+    ].map(([h, s], i) => {
+      const y = top + i * 57;
+      return (
+        <g>
+          <rect x={ax} y={y} width={aw - 1} height={48} rx="8" fill={i === 3 ? "var(--paper)" : "var(--panel)"} stroke={i === 3 ? "var(--accent)" : "var(--rule-strong)"} stroke-width="1.5" />
+          <text class="t-strong" x={ax + 14} y={y + 20}>{h}</text>
+          <text class="t-label" x={ax + 14} y={y + 37}>{s}</text>
+        </g>
+      );
+    })
+  }
+</svg>
