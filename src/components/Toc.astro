@@ -12,7 +12,7 @@ const items = Astro.props.headings.filter((h) => h.depth === 2 || h.depth === 3)
 {
   items.length > 2 && (
     <nav class="toc small" aria-label="On this page">
-      <details class="toc-box" open>
+      <details class="toc-box">
         <summary class="toc-title">On this page</summary>
         <ol>
           {items.map((h) => (
@@ -44,7 +44,8 @@ const items = Astro.props.headings.filter((h) => h.depth === 2 || h.depth === 3)
     .map((a) => document.getElementById(a.dataset.toc ?? ""))
     .filter((el): el is HTMLElement => el !== null);
 
-  // The sidebar is always open; the narrow-screen box starts closed.
+  // The sidebar is always open; the narrow-screen box starts closed, as the
+  // markup serves it, so opening never shifts the text on a phone.
   const box = document.querySelector<HTMLDetailsElement>(".toc-box");
   const wide = window.matchMedia("(min-width: 74rem)");
   const syncOpen = () => {
@@ -80,6 +81,6 @@ const items = Astro.props.headings.filter((h) => h.depth === 2 || h.depth === 3)
   if (targets.length) {
     window.addEventListener("scroll", queue, { passive: true });
     window.addEventListener("resize", queue, { passive: true });
-    update();
+    queue();
   }
 </script>

@@ -27,7 +27,12 @@ const { n, src, alt, title, subtitle, source, narrow = false } = Astro.props;
   </div>
   <div class:list={["shot", { narrow }]}>
     <a href={src.src} target="_blank" rel="noopener" title="Open the full-size screenshot">
-      <Image src={src} alt={alt} widths={[640, 1280]} sizes="(max-width: 700px) 100vw, 640px" />
+      <Image
+        src={src}
+        alt={alt}
+        widths={narrow ? [320, 480, 640] : [480, 640, 800, 960, 1280]}
+        sizes={narrow ? "(max-width: 360px) calc(100vw - 2.5rem), 320px" : "(max-width: 700px) calc(100vw - 2.5rem), 640px"}
+      />
     </a>
   </div>
   <figcaption class="figure-foot small">

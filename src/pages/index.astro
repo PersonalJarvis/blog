@@ -168,7 +168,8 @@ const jsonLd = {
       const d = Number(b.dataset.date) - Number(a.dataset.date);
       return state.order === "new" ? d : -d;
     });
-    cards.append(...sorted);
+    // Moving nodes costs a layout; skip it when the order already holds.
+    if (sorted.some((li, i) => cards.children[i] !== li)) cards.append(...sorted);
     if (empty) empty.hidden = shown > 0;
     for (const r of radios) r.checked = r.value === state.category;
     document.querySelectorAll<HTMLAnchorElement>(".hero-topics a").forEach((a) => {
@@ -232,14 +233,18 @@ const jsonLd = {
   const rail = document.querySelector<HTMLElement>(".rail");
   const track = rail?.querySelector<HTMLOListElement>(".rail-track");
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (rail && track && !still && track.scrollWidth > rail.clientWidth + 40) {
+  // Measured after the first frame, when the browser has laid the page out
+  // anyway; measuring during start-up forced an extra layout.
+  requestAnimationFrame(() => {
+    if (!rail || !track || still || track.scrollWidth <= rail.clientWidth + 40) return;
+    const width = track.scrollWidth;
     const clone = track.cloneNode(true) as HTMLOListElement;
     clone.setAttribute("aria-hidden", "true");
     clone.querySelectorAll("a").forEach((a) => a.setAttribute("tabindex", "-1"));
     track.append(...clone.children);
-    track.style.setProperty("--rail-seconds", `${Math.round(track.scrollWidth / 60)}s`);
+    track.style.setProperty("--rail-seconds", `${Math.round((width * 2) / 60)}s`);
     rail.classList.add("is-moving");
-  }
+  });
 
   apply();
 </script>

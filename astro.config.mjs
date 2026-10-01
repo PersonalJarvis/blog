@@ -11,6 +11,10 @@ export default defineConfig({
   base: "/blog",
   trailingSlash: "always",
   integrations: [mdx(), sitemap()],
+  // The whole stylesheet is ~5 KB compressed. Inline, it costs no round trip
+  // before the first paint; fetched, it blocked rendering for ~150 ms on a
+  // phone (Lighthouse, render-blocking requests).
+  build: { inlineStylesheets: "always" },
   markdown: {
     // Two code themes, switched with the page (see global.css, "Code").
     shikiConfig: { themes: { light: "github-light", dark: "github-dark-dimmed" }, wrap: false },
