@@ -425,7 +425,7 @@ a {
   display: grid;
   grid-template-columns: minmax(0, var(--side)) minmax(0, 1fr);
   gap: 2.5rem var(--side-gap);
-  padding-top: clamp(2.5rem, 4vw, 3.5rem);
+  padding-top: clamp(2rem, 3vw, 3rem);
   scroll-margin-top: 1.5rem;
 }
 
@@ -567,11 +567,30 @@ a {
   padding: 0;
 }
 
-/* Three across on a desktop screen, two on a tablet, one on a phone. */
+/* Exactly three across wherever the column has room, so the first row
+ * fills the first screen on a wide window instead of shrinking into four
+ * small cards; two on a tablet, one on a phone. The column, not the window,
+ * decides: the filters beside it take a share of the width. */
+.library-main {
+  container-type: inline-size;
+}
+
 .cards[data-view="grid"] {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.25rem;
+}
+
+@container (max-width: 42rem) {
+  .cards[data-view="grid"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 26rem) {
+  .cards[data-view="grid"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .card a {
@@ -633,7 +652,7 @@ a {
 
 .card h3 {
   margin: 0.45rem 0 0;
-  font-size: 1.1875rem;
+  font-size: 1.25rem;
   font-weight: 500;
   line-height: 1.22;
   letter-spacing: -0.012em;
