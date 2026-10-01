@@ -241,8 +241,8 @@ a {
   gap: 2rem var(--side-gap);
   /* --hero-fill: the spare height of a tall window, set by the index page so
    * the first row of cards ends at the bottom of the first screen. */
-  padding-top: calc(clamp(2.5rem, 4vw, 4rem) + var(--hero-fill, 0px) / 2);
-  padding-bottom: calc(clamp(2.5rem, 4vw, 4rem) + var(--hero-fill, 0px) / 2);
+  padding-top: calc(clamp(2rem, 3vw, 3rem) + var(--hero-fill, 0px) / 2);
+  padding-bottom: calc(clamp(2rem, 3vw, 3rem) + var(--hero-fill, 0px) / 2);
 }
 
 .hero-intro {
@@ -347,6 +347,86 @@ a {
   }
   .hero-intro {
     gap: 1.25rem;
+  }
+}
+
+/* Spotlight: the newest post, large, in the space right of the category
+ * lines, on its category's tone with a matching glow. It stretches to the
+ * hero's height, and the index script grows it on a tall window, so the first
+ * screen is filled by a picture rather than by empty padding. Wide screens
+ * only: below that, the rail and the cards already lead with the newest post. */
+.hero-feature {
+  display: none;
+}
+
+@media (min-width: 75rem) {
+  .hero {
+    grid-template-columns: minmax(0, var(--side)) auto minmax(0, 1fr);
+  }
+
+  .hero-feature {
+    display: flex;
+    flex-direction: column;
+    justify-self: end;
+    width: min(100%, 34rem);
+    min-height: 15rem;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--panel);
+    text-decoration: none;
+    box-shadow: 0 40px 90px -55px var(--tone);
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .hero-feature:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 48px 100px -50px var(--tone);
+  }
+
+  .hero-feature .thumb {
+    position: relative;
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+    min-height: 8rem;
+  }
+
+  .hero-feature .thumb svg {
+    position: absolute;
+    inset: 9% 8%;
+    width: 84%;
+    height: 82%;
+  }
+
+  .hero-feature-body {
+    padding: 0.95rem 1.25rem 1.15rem;
+  }
+
+  .hero-feature h2 {
+    margin: 0.4rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .hero-feature:hover h2 {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+}
+
+/* The drawing drifts a few pixels, slowly, like paper on air. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-feature .thumb svg {
+    animation: drift 7s ease-in-out infinite;
+  }
+}
+
+@keyframes drift {
+  50% {
+    transform: translateY(-7px);
   }
 }
 
@@ -577,10 +657,12 @@ a {
   container-type: inline-size;
 }
 
+/* The rows sit 2.5rem apart, so the row after the first starts below the
+ * fold of the hero view instead of showing a sliver of its pictures. */
 .cards[data-view="grid"] {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem;
+  gap: 2.5rem 1.25rem;
 }
 
 @container (max-width: 42rem) {
@@ -731,6 +813,7 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero-feature,
   .hero-topics a,
   .hero-topics .arrow,
   .card a,

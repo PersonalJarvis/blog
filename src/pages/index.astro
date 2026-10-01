@@ -4,6 +4,7 @@ import { CATEGORIES } from "@/content.config";
 import { getPosts, formatDate, href, readingMinutes, categoryHref, illustration, CATEGORY_LABEL, CATEGORY_TONE, SITE } from "@/lib";
 
 const posts = await getPosts();
+const latest = posts[0];
 
 // Only categories that hold a post get a line in the hero: an empty one
 // would promise reading that is not there yet.
@@ -47,6 +48,21 @@ const jsonLd = {
           ))
         }
       </nav>
+      {
+        latest && (
+          <a class="hero-feature" href={href(`${latest.id}/`)} style={`--tone: ${CATEGORY_TONE[latest.data.category]}`}>
+            <div class="thumb" set:html={illustration(latest.id)} />
+            <div class="hero-feature-body">
+              <div class="small card-meta">
+                <span class="cat">Latest post</span>
+                <span>{CATEGORY_LABEL[latest.data.category]}</span>
+                <span class="num">{formatDate(latest.data.pubDate)}</span>
+              </div>
+              <h2>{latest.data.title}</h2>
+            </div>
+          </a>
+        )
+      }
     </section>
 
     <section class="rail" aria-label="Latest posts">
@@ -136,30 +152,33 @@ const jsonLd = {
         {/*
           The first screen is the hero view: hero, rail, filters and the first
           row of cards, ending at the bottom of the window. On a window taller
-          than that content, the spare height goes into the hero's padding.
-          Inline and placed right after the cards, it runs before the first
-          paint, so the page never moves after it shows. A phone, where the
-          first row lies below the fold anyway, gets nothing.
+          than that content, the spare height grows the spotlight (or, where
+          the spotlight is hidden, the hero's padding) instead of leaving a
+          gap. Inline and placed right after the cards, it runs before the
+          first paint, so the page never moves after it shows. A phone, where
+          the first row lies below the fold anyway, gets nothing.
         */}
         <script is:inline>
           (() => {
             const hero = document.querySelector(".hero");
+            const feature = document.querySelector(".hero-feature");
             const first = document.querySelector(".cards .card");
             if (!hero || !first) return;
-            let last = -1;
             const fit = () => {
               hero.style.removeProperty("--hero-fill");
+              if (feature) feature.style.removeProperty("min-height");
               const bottom = first.getBoundingClientRect().bottom + window.scrollY;
-              // 24 px of air under the row; never more than 15% of the screen,
-              // so a tall portrait monitor does not get a hollow hero.
-              const spare = Math.min(window.innerHeight - bottom - 24, window.innerHeight * 0.15);
-              const fill = spare > 0 ? Math.round(spare) : 0;
-              if (Math.abs(fill - last) < 2) {
-                if (last > 0) hero.style.setProperty("--hero-fill", last + "px");
-                return;
+              // 16 px of air under the row, whose successor starts 40 px lower,
+              // below the fold. Never more than 15% of the screen, so a tall
+              // portrait monitor does not get a hollow hero.
+              const spare = Math.round(Math.min(window.innerHeight - bottom - 16, window.innerHeight * 0.15));
+              if (spare <= 0) return;
+              if (feature && feature.offsetParent !== null) {
+                // The spotlight is as tall as the hero row, so growing it grows the row by exactly the spare.
+                feature.style.minHeight = feature.offsetHeight + spare + "px";
+              } else {
+                hero.style.setProperty("--hero-fill", spare + "px");
               }
-              last = fill;
-              if (fill > 0) hero.style.setProperty("--hero-fill", fill + "px");
             };
             fit();
             window.addEventListener("resize", fit);
