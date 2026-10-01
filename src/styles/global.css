@@ -239,8 +239,10 @@ a {
   display: grid;
   grid-template-columns: minmax(0, var(--side)) minmax(0, 1fr);
   gap: 2rem var(--side-gap);
-  padding-top: clamp(2.5rem, 4vw, 4rem);
-  padding-bottom: clamp(2.5rem, 4vw, 4rem);
+  /* --hero-fill: the spare height of a tall window, set by the index page so
+   * the first row of cards ends at the bottom of the first screen. */
+  padding-top: calc(clamp(2.5rem, 4vw, 4rem) + var(--hero-fill, 0px) / 2);
+  padding-bottom: calc(clamp(2.5rem, 4vw, 4rem) + var(--hero-fill, 0px) / 2);
 }
 
 .hero-intro {

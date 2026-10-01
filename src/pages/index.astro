@@ -133,6 +133,39 @@ const jsonLd = {
           }
         </ol>
         <p class="empty small" hidden>No post matches. Try another word or category.</p>
+        {/*
+          The first screen is the hero view: hero, rail, filters and the first
+          row of cards, ending at the bottom of the window. On a window taller
+          than that content, the spare height goes into the hero's padding.
+          Inline and placed right after the cards, it runs before the first
+          paint, so the page never moves after it shows. A phone, where the
+          first row lies below the fold anyway, gets nothing.
+        */}
+        <script is:inline>
+          (() => {
+            const hero = document.querySelector(".hero");
+            const first = document.querySelector(".cards .card");
+            if (!hero || !first) return;
+            let last = -1;
+            const fit = () => {
+              hero.style.removeProperty("--hero-fill");
+              const bottom = first.getBoundingClientRect().bottom + window.scrollY;
+              // 24 px of air under the row; never more than 15% of the screen,
+              // so a tall portrait monitor does not get a hollow hero.
+              const spare = Math.min(window.innerHeight - bottom - 24, window.innerHeight * 0.15);
+              const fill = spare > 0 ? Math.round(spare) : 0;
+              if (Math.abs(fill - last) < 2) {
+                if (last > 0) hero.style.setProperty("--hero-fill", last + "px");
+                return;
+              }
+              last = fill;
+              if (fill > 0) hero.style.setProperty("--hero-fill", fill + "px");
+            };
+            fit();
+            window.addEventListener("resize", fit);
+            document.fonts?.ready.then(fit);
+          })();
+        </script>
       </div>
     </section>
   </main>
