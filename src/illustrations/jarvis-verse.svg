@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- Two desks in the office: one agent works at its screen, one waits and waves, one strolls past on a break. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">
+<path vector-effect="non-scaling-stroke" d="M36 262 H444"/>
+<rect vector-effect="non-scaling-stroke" x="104" y="128" width="84" height="58" rx="6" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M146 186 V196"/>
+<path vector-effect="non-scaling-stroke" d="M118 146 H148 M118 158 H172 M118 170 H136"/>
+<rect vector-effect="non-scaling-stroke" x="142" y="164" width="8" height="10" fill="#141413" stroke="none"/>
+<rect vector-effect="non-scaling-stroke" x="60" y="196" width="160" height="12" rx="3" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M76 208 V262 M204 208 V262"/>
+<rect vector-effect="non-scaling-stroke" x="290" y="128" width="84" height="58" rx="6" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M332 186 V196"/>
+<circle cx="318" cy="157" r="4" fill="#141413" stroke="none"/>
+<circle cx="332" cy="157" r="4" fill="#141413" stroke="none"/>
+<circle cx="346" cy="157" r="4" fill="#141413" stroke="none"/>
+<rect vector-effect="non-scaling-stroke" x="268" y="196" width="160" height="12" rx="3" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M284 208 V262 M412 208 V262"/>
+<path vector-effect="non-scaling-stroke" d="M390 172 H410 V188 C410 193 406 196 401 196 H399 C394 196 390 193 390 188 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M410 177 C417 177 417 187 410 187"/>
+<path vector-effect="non-scaling-stroke" d="M396 164 C393 160 399 157 396 152 M404 164 C401 160 407 157 404 152"/>
+<path vector-effect="non-scaling-stroke" d="M190 112 C206 92 220 88 236 92" stroke-dasharray="1 11"/>
+<g transform="translate(30 130) scale(0.7)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="31" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="51" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M36 58 H48" fill="none"/></g>
+<g transform="translate(240 44) scale(0.56)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M30 52 Q35 56 40 52" fill="none"/></g>
+<g transform="translate(386 56) scale(0.62)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M28 54 Q35 62 42 54" fill="none"/></g>
+<path vector-effect="non-scaling-stroke" d="M440 66 C447 72 447 82 440 88 M450 58 C461 68 461 90 450 100"/>
+  </g>
+</svg>

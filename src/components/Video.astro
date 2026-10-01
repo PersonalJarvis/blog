@@ -1,0 +1,69 @@
+---
+/**
+ * A real recording of the Personal Jarvis app, framed like a Shot: a title
+ * that says what to watch for, the video at the column's width, and a caption
+ * that says where it comes from.
+ *
+ * Self-hosted, never an embedded player: a third-party player contacts its
+ * owner as soon as the page loads. `preload="metadata"` fetches only the
+ * header and duration (the file is encoded with its index up front), nothing
+ * plays by itself, and the sound stays the reader's choice.
+ */
+import { href } from "@/lib";
+
+interface Props {
+  n: number;
+  /** Path under public/, without the /blog base: "posts/x/film.mp4". */
+  src: string;
+  /** Still shown until play, same convention as `src`. */
+  poster: string;
+  /** What the video shows, for readers who cannot watch it. */
+  label: string;
+  title: string;
+  subtitle?: string;
+  source: string;
+  /** Pixel size of the file, so the box keeps its shape before it loads. */
+  width: number;
+  height: number;
+}
+const { n, src, poster, label, title, subtitle, source, width, height } = Astro.props;
+---
+
+<figure class="figure">
+  <div class="figure-head">
+    <p class="figure-title">{title}</p>
+    {subtitle && <p class="figure-sub">{subtitle}</p>}
+  </div>
+  <div class="film">
+    <video
+      controls
+      playsinline
+      preload="metadata"
+      poster={href(poster)}
+      width={width}
+      height={height}
+      aria-label={label}
+    >
+      <source src={href(src)} type="video/mp4" />
+      <a href={href(src)}>Download the video</a>
+    </video>
+  </div>
+  <figcaption class="figure-foot small">
+    <span><strong style="color:var(--ink-2)">Figure {n}.</strong> <slot name="caption" /> Source: {source}.</span>
+  </figcaption>
+</figure>
+
+<style>
+  .film {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--rule-strong);
+    background: #0f0f0e;
+  }
+  .film video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+</style>
