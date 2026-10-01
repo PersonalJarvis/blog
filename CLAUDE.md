@@ -23,4 +23,7 @@ Rules for any coding agent working in this repo.
   (`.figure-scroll` clips the rest, and on a phone the plot is wider than the screen). Never
   position a tooltip per chart, and hover the left edge, right edge and top of every new chart
   in the Chrome check.
+- Post titles follow `docs/titles.md`: a plain statement of what is now true or what we did,
+  sentence case, at most 70 characters, never a question, tease, slogan or hype word.
+  `scripts/check-titles.mjs` (part of `npm run verify`) blocks the mechanical cases.
 - Done means `npm run verify` passes AND the page was looked at in Chrome (`blog-visual-qa`).
