@@ -1,0 +1,79 @@
+---
+/**
+ * One real sprite sheet at 1:1, with the state each row plays and that row's
+ * frame count and speed from its pet.json. Read from src/data/pets.json; the
+ * image is the shipped sheet.png.
+ */
+import data from "@/data/pets.json";
+import { href } from "@/lib";
+import { esc } from "../charts/util";
+
+interface Props {
+  pet: string;
+}
+const { pet: petId } = Astro.props;
+const pet = data.pets.find((p) => p.id === petId)!;
+
+const LABEL: Record<string, string> = {
+  idle: "Idle",
+  listening: "Listening",
+  thinking: "Thinking",
+  talking: "Talking",
+  success: "Success",
+  error: "Error",
+  sleeping: "Sleeping",
+  working: "Working",
+  searching: "Searching",
+  held: "Being carried",
+};
+const NOTE: Record<string, string> = {
+  idle: "Breathes on seven cells, blinks on the eighth every third pass",
+  talking: "Ordered from mouth closed to widest; the live voice level picks the cell",
+  success: "Plays once",
+  error: "Plays once",
+};
+
+const size = pet.frame_size;
+const rows = Object.entries(pet.animations)
+  .map(([state, a]) => ({ state, ...a }))
+  .sort((a, b) => a.row - b.row);
+const cols = 8;
+const imgX = 246;
+const W = 640;
+const H = rows.length * size + 2;
+---
+
+<svg
+  viewBox={`0 0 ${W} ${H}`}
+  role="img"
+  aria-label={`${pet.name}'s sprite sheet: ${rows.length} rows of ${size}-pixel cells, one row per state: ` + rows.map((r) => `${LABEL[r.state]} ${r.frames} frames at ${r.fps} fps`).join("; ")}
+>
+  <image
+    href={href(`posts/desktop-pets/pets/${pet.id}/sheet.png`)}
+    x={imgX}
+    y={1}
+    width={cols * size}
+    height={rows.length * size}
+    style="image-rendering: pixelated"
+  />
+  <g stroke="var(--rule)" stroke-width="1" stroke-dasharray="2 3" pointer-events="none">
+    {Array.from({ length: cols + 1 }, (_, i) => <line x1={imgX + i * size} y1={1} x2={imgX + i * size} y2={rows.length * size + 1} />)}
+    {Array.from({ length: rows.length + 1 }, (_, i) => <line x1={imgX} y1={1 + i * size} x2={imgX + cols * size} y2={1 + i * size} />)}
+  </g>
+  {
+    rows.map((r) => {
+      const y = 1 + r.row * size;
+      const tip =
+        `<b>${esc(LABEL[r.state])}</b><br>row ${r.row} · ${r.frames} frames · ${r.fps} fps` +
+        (NOTE[r.state] ? `<br>${esc(NOTE[r.state])}` : "");
+      return (
+        <g>
+          <rect class="hit" x={0} y={y} width={W} height={size} data-tip={tip} />
+          <rect class="hl" x={0} y={y + 1} width={W} height={size - 2} rx="5" fill="var(--ink)" fill-opacity="0.05" pointer-events="none" />
+          <text class="t-strong" x={0} y={y + 21} pointer-events="none">{LABEL[r.state]}</text>
+          <text class="t-axis" x={0} y={y + 38} pointer-events="none">{`${r.frames} frames · ${r.fps} fps`}</text>
+        </g>
+      );
+    })
+  }
+</svg>

@@ -1,0 +1,261 @@
+---
+/**
+ * A player for one pet: pick a pet, then a state or an idle act, and watch
+ * the real sprite row play the way the desktop renderer plays it. The text
+ * under the stage says which Jarvis events drive that state (docs/pets.md).
+ */
+import data from "@/data/pets.json";
+import { href } from "@/lib";
+
+interface Props {
+  n: number;
+  title: string;
+  subtitle?: string;
+  source: string;
+}
+const { n, title, subtitle, source } = Astro.props;
+const pets = data.pets;
+
+/** The state names as the My Pets page shows them, in sprite-row order. */
+const STATES: { id: string; label: string; driver: string }[] = [
+  { id: "idle", label: "Idle", driver: "Nothing is happening. Left alone, the pet plays one of its idle acts after 6 to 18 seconds, then every 14 to 40." },
+  { id: "listening", label: "Listening", driver: "The wake word was heard, a voice session started, or you are dictating." },
+  { id: "thinking", label: "Thinking", driver: "Jarvis is working out its answer." },
+  { id: "talking", label: "Talking", driver: "Jarvis speaks. In the app the mouth follows the live voice level; here it swings open and shut, as it does when no level arrives." },
+  { id: "success", label: "Success", driver: "Plays once, for 1.5 seconds: a job Jarvis started is done, or a step outside a conversation worked." },
+  { id: "error", label: "Error", driver: "Plays once, for 2 seconds: something failed that you would notice, such as a provider that is unavailable." },
+  { id: "sleeping", label: "Sleeping", driver: "Five minutes without any Jarvis event. The next event wakes it." },
+  { id: "working", label: "Working", driver: "A tool step that changes, sends or runs something, or an agent task running in the background." },
+  { id: "searching", label: "Searching", driver: "A tool step that looks something up: its name contains a word like search, find, read, fetch, browse, query, list or wiki." },
+  { id: "held", label: "Being carried", driver: "You are dragging the pet across the desktop with the mouse." },
+];
+const start = pets.findIndex((p) => p.id === "ember");
+---
+
+<figure class="figure">
+  <div class="figure-head">
+    <p class="figure-title">{title}</p>
+    {subtitle && <p class="figure-sub">{subtitle}</p>}
+  </div>
+  <div class="player" data-pets={JSON.stringify(pets)} data-states={JSON.stringify(STATES)} data-base={href("posts/desktop-pets/pets/")} data-start={start}>
+    <div class="stage">
+      <canvas aria-hidden="true"></canvas>
+      <p class="stage-now small" aria-live="polite"></p>
+    </div>
+    <div class="controls">
+      <p class="ctl-label small">Pet</p>
+      <div class="chips" data-group="pet">
+        {pets.map((p, i) => <button type="button" data-v={i} aria-pressed={i === start ? "true" : "false"}>{p.name}</button>)}
+      </div>
+      <p class="ctl-label small">State</p>
+      <div class="chips" data-group="state">
+        {STATES.map((s) => <button type="button" data-v={s.id} aria-pressed={s.id === "idle" ? "true" : "false"}>{s.label}</button>)}
+      </div>
+      <p class="ctl-label small">Idle acts</p>
+      <div class="chips" data-group="act"></div>
+      <p class="driver small"></p>
+    </div>
+  </div>
+  <figcaption class="figure-foot small">
+    <span><strong style="color:var(--ink-2)">Figure {n}.</strong> <slot name="caption" /> Source: {source}.</span>
+  </figcaption>
+</figure>
+
+<style>
+  .player {
+    display: grid;
+    grid-template-columns: 13.5rem 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  @media (max-width: 560px) {
+    .player {
+      grid-template-columns: 1fr;
+    }
+  }
+  .stage {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--panel);
+    padding: 0.75rem 0.5rem 0.5rem;
+  }
+  .stage canvas {
+    display: block;
+    width: 100%;
+  }
+  .stage-now {
+    margin: 0.25rem 0 0;
+    text-align: center;
+    color: var(--ink-2);
+  }
+  .ctl-label {
+    margin: 0 0 0.35rem;
+    color: var(--ink-3);
+  }
+  .ctl-label:not(:first-child) {
+    margin-top: 0.9rem;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .chips button {
+    padding: 0.2rem 0.65rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    background: none;
+    color: var(--ink-2);
+    font-family: var(--sans);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+  .chips button:hover {
+    border-color: var(--ink-3);
+    color: var(--ink);
+  }
+  .chips button[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .driver {
+    margin: 1rem 0 0;
+    color: var(--ink-2);
+    min-height: 3em;
+  }
+</style>
+
+<script>
+  import { Actor, devicePixels, drawCell, fitCanvas, humanize, loadPet, reducedMotion, whileVisible, type Pet, type Sheets } from "./engine";
+
+  interface State {
+    id: string;
+    label: string;
+    driver: string;
+  }
+
+  const ACT_FIRST_S: [number, number] = [6, 18];
+  const ACT_GAP_S: [number, number] = [14, 40];
+  const between = ([lo, hi]: [number, number]) => lo + Math.random() * (hi - lo);
+
+  document.querySelectorAll<HTMLElement>(".player").forEach(async (root) => {
+    const pets: Pet[] = JSON.parse(root.dataset.pets!);
+    const states: State[] = JSON.parse(root.dataset.states!);
+    const base = root.dataset.base!;
+    const canvas = root.querySelector("canvas")!;
+    const label = root.querySelector<HTMLElement>(".stage-now")!;
+    const driver = root.querySelector<HTMLElement>(".driver")!;
+    const group = (g: string) => root.querySelector<HTMLElement>(`[data-group="${g}"]`)!;
+    const still = reducedMotion();
+
+    let index = Number(root.dataset.start) || 0;
+    let actor = new Actor(pets[index]);
+    let sheets: Sheets = await loadPet(base, pets[index]);
+    let wasBusy = false;
+    let nextAct = performance.now() / 1000 + between(ACT_FIRST_S);
+    const stateOf = (id: string) => states.find((s) => s.id === id)!;
+
+    const press = (g: string, v: string | null) =>
+      group(g)
+        .querySelectorAll<HTMLButtonElement>("button")
+        .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+
+    const describe = (id: string) => {
+      driver.textContent = stateOf(id).driver;
+    };
+
+    const buildActs = () => {
+      const box = group("act");
+      box.replaceChildren(
+        ...Object.keys(actor.pet.acts).map((name) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.dataset.v = name;
+          b.textContent = humanize(name);
+          b.setAttribute("aria-pressed", "false");
+          return b;
+        }),
+      );
+    };
+
+    const draw = (t: number) => {
+      const size = actor.pet.frame_size;
+      const dpr = devicePixels();
+      // Whole device pixels per sprite pixel, at most 4 CSS px (192 px for a 48 px pet).
+      const scale = Math.max(1, Math.min(Math.floor((canvas.clientWidth * dpr) / size), Math.floor(4 * dpr)));
+      fitCanvas(canvas, (size * scale) / dpr);
+      const ctx = canvas.getContext("2d")!;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!still && actor.state === "idle" && !actor.busy && t >= nextAct) {
+        actor.playAct(actor.randomAct(), t);
+      }
+      const f = still && !actor.busy ? { acts: false, row: actor.pet.animations[actor.state].row, col: 0, label: actor.state } : actor.frame(t);
+      drawCell(ctx, f.acts ? sheets.acts : sheets.sheet, size, f.row, f.col, (canvas.width - size * scale) / 2, 0, scale);
+      const busy = actor.busy;
+      if (wasBusy && !busy) {
+        // A one-shot or an act ended: the pet is back in its looping state.
+        press("act", null);
+        press("state", actor.state);
+        nextAct = t + between(ACT_GAP_S);
+      }
+      wasBusy = busy;
+      label.textContent = `${actor.pet.name} · ${f.acts ? humanize(f.label) : stateOf(f.label).label}`;
+    };
+
+    const kick = (seconds: number) => {
+      if (!still) return;
+      const stop = performance.now() / 1000 + seconds;
+      const run = () => {
+        draw(performance.now() / 1000);
+        if (performance.now() / 1000 < stop) requestAnimationFrame(run);
+      };
+      requestAnimationFrame(run);
+    };
+
+    group("pet").addEventListener("click", async (e) => {
+      const b = (e.target as Element).closest("button");
+      if (!b) return;
+      index = Number(b.dataset.v);
+      const state = actor.state;
+      sheets = await loadPet(base, pets[index]);
+      actor = new Actor(pets[index]);
+      actor.setState(state, performance.now() / 1000);
+      press("pet", String(index));
+      buildActs();
+      nextAct = performance.now() / 1000 + between(ACT_FIRST_S);
+      draw(performance.now() / 1000);
+    });
+
+    group("state").addEventListener("click", (e) => {
+      const b = (e.target as Element).closest("button");
+      if (!b) return;
+      const id = b.dataset.v!;
+      const t = performance.now() / 1000;
+      actor.setState(id, t);
+      press("state", id);
+      press("act", null);
+      describe(id);
+      nextAct = t + between(ACT_FIRST_S);
+      kick(2.2);
+    });
+
+    group("act").addEventListener("click", (e) => {
+      const b = (e.target as Element).closest("button");
+      if (!b) return;
+      actor.setState("idle", performance.now() / 1000);
+      actor.playAct(b.dataset.v!, performance.now() / 1000);
+      press("act", b.dataset.v!);
+      press("state", "idle");
+      describe("idle");
+      kick(1.6);
+    });
+
+    buildActs();
+    describe("idle");
+    draw(performance.now() / 1000);
+    if (!still) whileVisible(root, draw);
+    window.addEventListener("resize", () => draw(performance.now() / 1000));
+  });
+</script>

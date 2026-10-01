@@ -1,0 +1,726 @@
+{
+  "source": "jarvis/ui/pets/builtin/<id>/pet.json in the Personal Jarvis repo, read 2026-10-01",
+  "renderer": {
+    "act_first_delay_s": [
+      6.0,
+      18.0
+    ],
+    "act_gap_s": [
+      14.0,
+      40.0
+    ],
+    "success_hold_s": 1.5,
+    "error_hold_s": 2.0
+  },
+  "pets": [
+    {
+      "id": "gigi",
+      "name": "Gigi",
+      "description": "The Jarvis ghost, eight bits tall: it floats, glitches while it thinks.",
+      "frame_size": 48,
+      "animations": {
+        "idle": {
+          "row": 0,
+          "frames": 8,
+          "fps": 6,
+          "loop": true,
+          "accent_frames": 1,
+          "accent_every": 3
+        },
+        "listening": {
+          "row": 1,
+          "frames": 6,
+          "fps": 8,
+          "loop": true
+        },
+        "thinking": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "talking": {
+          "row": 3,
+          "frames": 4,
+          "fps": 10,
+          "loop": true
+        },
+        "success": {
+          "row": 4,
+          "frames": 8,
+          "fps": 10,
+          "loop": false
+        },
+        "error": {
+          "row": 5,
+          "frames": 6,
+          "fps": 9,
+          "loop": false
+        },
+        "sleeping": {
+          "row": 6,
+          "frames": 6,
+          "fps": 3,
+          "loop": true
+        },
+        "working": {
+          "row": 7,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "searching": {
+          "row": 8,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "held": {
+          "row": 9,
+          "frames": 6,
+          "fps": 10,
+          "loop": true
+        }
+      },
+      "acts": {
+        "phase_out": {
+          "row": 0,
+          "frames": 8,
+          "fps": 8
+        },
+        "glitch_dance": {
+          "row": 1,
+          "frames": 8,
+          "fps": 10
+        },
+        "boo": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8
+        },
+        "coin_flip": {
+          "row": 3,
+          "frames": 8,
+          "fps": 10
+        },
+        "juggle_bits": {
+          "row": 4,
+          "frames": 8,
+          "fps": 8
+        },
+        "loading": {
+          "row": 5,
+          "frames": 8,
+          "fps": 7
+        }
+      }
+    },
+    {
+      "id": "miso",
+      "name": "Miso",
+      "description": "A ginger cat whose ears perk up when you talk and who naps curled in a loaf.",
+      "frame_size": 48,
+      "animations": {
+        "idle": {
+          "row": 0,
+          "frames": 8,
+          "fps": 6,
+          "loop": true,
+          "accent_frames": 1,
+          "accent_every": 3
+        },
+        "listening": {
+          "row": 1,
+          "frames": 6,
+          "fps": 8,
+          "loop": true
+        },
+        "thinking": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "talking": {
+          "row": 3,
+          "frames": 4,
+          "fps": 10,
+          "loop": true
+        },
+        "success": {
+          "row": 4,
+          "frames": 8,
+          "fps": 10,
+          "loop": false
+        },
+        "error": {
+          "row": 5,
+          "frames": 6,
+          "fps": 9,
+          "loop": false
+        },
+        "sleeping": {
+          "row": 6,
+          "frames": 6,
+          "fps": 3,
+          "loop": true
+        },
+        "working": {
+          "row": 7,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "searching": {
+          "row": 8,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "held": {
+          "row": 9,
+          "frames": 6,
+          "fps": 10,
+          "loop": true
+        }
+      },
+      "acts": {
+        "yarn_play": {
+          "row": 0,
+          "frames": 8,
+          "fps": 8
+        },
+        "groom": {
+          "row": 1,
+          "frames": 8,
+          "fps": 8
+        },
+        "big_yawn": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8
+        },
+        "butterfly": {
+          "row": 3,
+          "frames": 8,
+          "fps": 8
+        },
+        "loaf": {
+          "row": 4,
+          "frames": 8,
+          "fps": 6
+        },
+        "knock_cup": {
+          "row": 5,
+          "frames": 8,
+          "fps": 8
+        }
+      }
+    },
+    {
+      "id": "brew",
+      "name": "Brew",
+      "description": "A little teapot that steams while it thinks and whistles when it answers.",
+      "frame_size": 48,
+      "animations": {
+        "idle": {
+          "row": 0,
+          "frames": 8,
+          "fps": 6,
+          "loop": true,
+          "accent_frames": 1,
+          "accent_every": 3
+        },
+        "listening": {
+          "row": 1,
+          "frames": 6,
+          "fps": 8,
+          "loop": true
+        },
+        "thinking": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "talking": {
+          "row": 3,
+          "frames": 4,
+          "fps": 10,
+          "loop": true
+        },
+        "success": {
+          "row": 4,
+          "frames": 8,
+          "fps": 10,
+          "loop": false
+        },
+        "error": {
+          "row": 5,
+          "frames": 6,
+          "fps": 9,
+          "loop": false
+        },
+        "sleeping": {
+          "row": 6,
+          "frames": 6,
+          "fps": 3,
+          "loop": true
+        },
+        "working": {
+          "row": 7,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "searching": {
+          "row": 8,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "held": {
+          "row": 9,
+          "frames": 6,
+          "fps": 10,
+          "loop": true
+        }
+      },
+      "acts": {
+        "lid_flip": {
+          "row": 0,
+          "frames": 8,
+          "fps": 10
+        },
+        "steam_heart": {
+          "row": 1,
+          "frames": 8,
+          "fps": 8
+        },
+        "pour_self": {
+          "row": 2,
+          "frames": 8,
+          "fps": 7
+        },
+        "whistle_tune": {
+          "row": 3,
+          "frames": 8,
+          "fps": 8
+        },
+        "bubble_hiccup": {
+          "row": 4,
+          "frames": 8,
+          "fps": 10
+        }
+      }
+    },
+    {
+      "id": "bolt",
+      "name": "Bolt",
+      "description": "A plucky battery that charges up while it thinks and runs flat when it sleeps.",
+      "frame_size": 48,
+      "animations": {
+        "idle": {
+          "row": 0,
+          "frames": 8,
+          "fps": 6,
+          "loop": true,
+          "accent_frames": 1,
+          "accent_every": 3
+        },
+        "listening": {
+          "row": 1,
+          "frames": 6,
+          "fps": 8,
+          "loop": true
+        },
+        "thinking": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "talking": {
+          "row": 3,
+          "frames": 4,
+          "fps": 10,
+          "loop": true
+        },
+        "success": {
+          "row": 4,
+          "frames": 8,
+          "fps": 10,
+          "loop": false
+        },
+        "error": {
+          "row": 5,
+          "frames": 6,
+          "fps": 9,
+          "loop": false
+        },
+        "sleeping": {
+          "row": 6,
+          "frames": 6,
+          "fps": 3,
+          "loop": true
+        },
+        "working": {
+          "row": 7,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "searching": {
+          "row": 8,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "held": {
+          "row": 9,
+          "frames": 6,
+          "fps": 10,
+          "loop": true
+        }
+      },
+      "acts": {
+        "power_surge": {
+          "row": 0,
+          "frames": 8,
+          "fps": 10
+        },
+        "drain_flop": {
+          "row": 1,
+          "frames": 8,
+          "fps": 8
+        },
+        "spark_juggle": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8
+        },
+        "robot_dance": {
+          "row": 3,
+          "frames": 8,
+          "fps": 8
+        },
+        "self_check": {
+          "row": 4,
+          "frames": 8,
+          "fps": 7
+        },
+        "static_hair": {
+          "row": 5,
+          "frames": 8,
+          "fps": 8
+        }
+      }
+    },
+    {
+      "id": "mochi",
+      "name": "Mochi",
+      "description": "A soft jelly blob that wobbles when it listens and squishes when it talks.",
+      "frame_size": 48,
+      "animations": {
+        "idle": {
+          "row": 0,
+          "frames": 8,
+          "fps": 6,
+          "loop": true,
+          "accent_frames": 1,
+          "accent_every": 3
+        },
+        "listening": {
+          "row": 1,
+          "frames": 6,
+          "fps": 8,
+          "loop": true
+        },
+        "thinking": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "talking": {
+          "row": 3,
+          "frames": 4,
+          "fps": 10,
+          "loop": true
+        },
+        "success": {
+          "row": 4,
+          "frames": 8,
+          "fps": 10,
+          "loop": false
+        },
+        "error": {
+          "row": 5,
+          "frames": 6,
+          "fps": 9,
+          "loop": false
+        },
+        "sleeping": {
+          "row": 6,
+          "frames": 6,
+          "fps": 3,
+          "loop": true
+        },
+        "working": {
+          "row": 7,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "searching": {
+          "row": 8,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "held": {
+          "row": 9,
+          "frames": 6,
+          "fps": 10,
+          "loop": true
+        }
+      },
+      "acts": {
+        "big_bounce": {
+          "row": 0,
+          "frames": 8,
+          "fps": 10
+        },
+        "split_merge": {
+          "row": 1,
+          "frames": 8,
+          "fps": 8
+        },
+        "bubble_blow": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8
+        },
+        "shape_shift": {
+          "row": 3,
+          "frames": 8,
+          "fps": 8
+        },
+        "melt_reform": {
+          "row": 4,
+          "frames": 8,
+          "fps": 8
+        },
+        "wiggle_dance": {
+          "row": 5,
+          "frames": 8,
+          "fps": 8
+        }
+      }
+    },
+    {
+      "id": "shelly",
+      "name": "Shelly",
+      "description": "A patient snail whose shell spins while it thinks and who hides inside to sleep.",
+      "frame_size": 48,
+      "animations": {
+        "idle": {
+          "row": 0,
+          "frames": 8,
+          "fps": 6,
+          "loop": true,
+          "accent_frames": 1,
+          "accent_every": 3
+        },
+        "listening": {
+          "row": 1,
+          "frames": 6,
+          "fps": 8,
+          "loop": true
+        },
+        "thinking": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "talking": {
+          "row": 3,
+          "frames": 4,
+          "fps": 10,
+          "loop": true
+        },
+        "success": {
+          "row": 4,
+          "frames": 8,
+          "fps": 10,
+          "loop": false
+        },
+        "error": {
+          "row": 5,
+          "frames": 6,
+          "fps": 9,
+          "loop": false
+        },
+        "sleeping": {
+          "row": 6,
+          "frames": 6,
+          "fps": 3,
+          "loop": true
+        },
+        "working": {
+          "row": 7,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "searching": {
+          "row": 8,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "held": {
+          "row": 9,
+          "frames": 6,
+          "fps": 10,
+          "loop": true
+        }
+      },
+      "acts": {
+        "turbo": {
+          "row": 0,
+          "frames": 8,
+          "fps": 10
+        },
+        "peek_hide": {
+          "row": 1,
+          "frames": 8,
+          "fps": 7
+        },
+        "leaf_munch": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8
+        },
+        "shell_polish": {
+          "row": 3,
+          "frames": 8,
+          "fps": 8
+        },
+        "rain_drop": {
+          "row": 4,
+          "frames": 8,
+          "fps": 8
+        },
+        "stalk_knot": {
+          "row": 5,
+          "frames": 8,
+          "fps": 8
+        }
+      }
+    },
+    {
+      "id": "ember",
+      "name": "Ember",
+      "description": "A baby dragon fresh from its egg who blows smoke rings and breathes tiny flames.",
+      "frame_size": 48,
+      "animations": {
+        "idle": {
+          "row": 0,
+          "frames": 8,
+          "fps": 6,
+          "loop": true,
+          "accent_frames": 1,
+          "accent_every": 3
+        },
+        "listening": {
+          "row": 1,
+          "frames": 6,
+          "fps": 8,
+          "loop": true
+        },
+        "thinking": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "talking": {
+          "row": 3,
+          "frames": 4,
+          "fps": 10,
+          "loop": true
+        },
+        "success": {
+          "row": 4,
+          "frames": 8,
+          "fps": 10,
+          "loop": false
+        },
+        "error": {
+          "row": 5,
+          "frames": 6,
+          "fps": 9,
+          "loop": false
+        },
+        "sleeping": {
+          "row": 6,
+          "frames": 6,
+          "fps": 3,
+          "loop": true
+        },
+        "working": {
+          "row": 7,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "searching": {
+          "row": 8,
+          "frames": 8,
+          "fps": 8,
+          "loop": true
+        },
+        "held": {
+          "row": 9,
+          "frames": 6,
+          "fps": 10,
+          "loop": true
+        }
+      },
+      "acts": {
+        "fire_burst": {
+          "row": 0,
+          "frames": 8,
+          "fps": 9
+        },
+        "smoke_rings": {
+          "row": 1,
+          "frames": 8,
+          "fps": 7
+        },
+        "wing_stretch": {
+          "row": 2,
+          "frames": 8,
+          "fps": 8
+        },
+        "tail_chase": {
+          "row": 3,
+          "frames": 8,
+          "fps": 10
+        },
+        "egg_peek": {
+          "row": 4,
+          "frames": 8,
+          "fps": 6
+        },
+        "sneeze": {
+          "row": 5,
+          "frames": 8,
+          "fps": 8
+        }
+      }
+    }
+  ]
+}

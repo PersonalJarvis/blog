@@ -1,0 +1,141 @@
+---
+title: "Personal Jarvis gets desktop pets that react while it works"
+description: "Seven pixel pets can now sit on your desktop and show what Jarvis is doing as it listens, thinks, talks and searches. 804 frames, all drawn in code, plus 41 idle tricks."
+pubDate: 2026-10-01
+category: features
+---
+
+import PetParade from "@/components/pets/PetParade.astro";
+import PetPlayer from "@/components/pets/PetPlayer.astro";
+import SheetAnatomy from "@/components/pets/SheetAnatomy.astro";
+import Figure from "@/components/Figure.astro";
+import PetFrameRates from "@/components/charts/PetFrameRates.astro";
+import pets from "@/data/pets.json";
+
+Personal Jarvis can now put a small pixel pet on your desktop. It floats above your other windows and shows what Jarvis is doing right now. Gigi, the default pet, cups its hands when Jarvis listens, scans while it thinks, lights up its bands when it talks, and gets out a magnifier when Jarvis looks something up. The pet is opt-in: the slim Jarvis bar stays the default, and you switch to a pet under **Settings → My Pets**. Pets ship with the next Personal Jarvis release; 2.4.4 does not have them yet.
+
+There are seven to choose from, and every one of them does little things on its own when nothing is going on. Click any pet below to see one.
+
+<PetParade
+  n={1}
+  title="Seven pets, each with its own idle tricks"
+  subtitle="Click a pet to make it play one of its idle acts. The row plays one every few seconds by itself."
+  source="sprite sheets in jarvis/ui/pets/builtin/ of the Personal Jarvis repo"
+>
+  <Fragment slot="caption">Drawn in your browser from the real sprite sheets the app ships, frame by frame, at each row's own speed. On the desktop a pet waits 14 to 40 seconds between acts; this row is sped up so you do not have to wait.</Fragment>
+</PetParade>
+
+This post covers what the pets show and why, the two things we changed our minds about while building them, what they cost your computer, and how to draw a pet of your own. "We" here means the people building Personal Jarvis, and the coding agents that did much of the typing.
+
+## Seven pets, ten states
+
+Each pet has ten states, one sprite row each. Gigi is the Jarvis ghost and the default. Miso is a ginger cat, Brew a teapot, Bolt a battery, Mochi a jelly blob, Shelly a snail and Ember a baby dragon. They all react to the same moments, each in its own way: Brew steams while Jarvis thinks, Bolt charges up, and Shelly spins its shell.
+
+Try it here. Pick a pet and a state, and the text under the buttons says what makes the pet switch to that state in the app.
+
+<PetPlayer
+  n={2}
+  title="Every state is one row of real frames"
+  subtitle="Pick a pet, then a state or one of its idle acts."
+  source="pet.json and sheet.png of each built-in pet; states from docs/pets.md"
+>
+  <Fragment slot="caption">The frame logic is a copy of the desktop renderer's: the idle blink every third breath, one-shots that hold their last frame, and acts that play once. Left on Idle, the pet here starts an act on the same 6 to 18 second timer as the app.</Fragment>
+</PetPlayer>
+
+Nothing in these states is acted. Every switch comes from a real event inside Jarvis: the wake word, the first sound of an answer, a tool step that starts or ends. When Jarvis runs a tool, the pet reads the tool's name. A name with a word like "search", "read", "fetch" or "list" in it means looking something up, and the pet switches to searching. Every other tool changes, sends or runs something, and the pet switches to working. If you drag the pet across the screen, it plays its own "being carried" row until you let go.
+
+The mouth deserves a word. The talking row is ordered from mouth closed to mouth wide open. While Jarvis speaks, the app reads the live loudness of its voice and picks the frame from it, so the mouth opens on loud syllables and closes in pauses. When no loudness arrives, the mouth swings open and shut instead.
+
+## When nothing happens, the pet does something
+
+A pet that only reacts would sit still most of the day. So every built-in pet has five or six idle acts, 41 in total. Ember spits a burst of fire, chases its tail and peeks out of its eggshell. Miso knocks over a cup. Mochi splits in two and merges again, and Shelly goes turbo.
+
+The timing is chosen to stay out of your way. The first act comes 6 to 18 seconds after the pet goes idle, the next one 14 to 40 seconds after that, and never the same act twice in a row. The moment Jarvis does anything, the act stops and the pet reacts to Jarvis instead. After five minutes without a single Jarvis event, the pet falls asleep.
+
+We drew none of this by hand in a paint program. Every frame is built in code: `scripts/pets/build_pets.py` in the Personal Jarvis repo turns pixel data into the sprite sheets, and a test fails if a committed sheet no longer matches what the script builds. That is 804 frames for the seven pets. If you want to change a pet, you change the script, not a picture.
+
+## The buttons and the thinking line
+
+Under the pet sits a small control strip, and it only shows when it is useful: while Jarvis listens, thinks or talks, and while your pointer is on the pet. From left to right it has a bell for notifications, a microphone mute, three short strokes that start or end a conversation, and a speaker mute.
+
+While Jarvis thinks, a single muted line appears under the strip and says what Jarvis is working on, such as the heading of its current thought or the tool step it is taking. When it is done with a job you gave it, a small card drops in: a check mark, what you asked, and the start of the answer.
+
+### What we got wrong first
+
+Our first version of those cards announced everything. Every coding agent in the Agentic IDE that finished, every agent that asked a question, every mission, routine, open approval and app error got its own card. On the machine we build Jarvis on, coding agents run all day, so that was a lot of cards about work we had not asked Jarvis to do. Thirty-three minutes after that version landed, we rebuilt it. Now a card appears for exactly three things: an answer to a chat you typed to Jarvis, a background task Jarvis finished, and a coding job Jarvis handed to an agent for you.
+
+**A companion should report what you asked it to do, not everything that happens on your computer.** Your coding agents already have their own place for that, the Agentic IDE. If you build anything that notifies, the same rule holds: count the cards a busy day would produce before you ship it.
+
+The thinking line follows the same rule. It shows what Jarvis is thinking and nothing else: never the words you said, never the reply as it comes in.
+
+### Six looks for one strip
+
+The strip took longer. Between noon and late afternoon on October 1, it went through six versions: a near-invisible strip with a round talk button, three strokes instead of the button, the strokes inside the button again, strokes drawn as a light-blue sky with white clouds, a strip with no background at all, and then back to the dark strip. The clouds stayed. The see-through strip lasted eleven minutes, because it looked worse than the dark one.
+
+## It hides from screenshots
+
+Jarvis can look at your screen when you ask it about something on it. A pet sitting on that screen would end up in the picture, and the model would describe a cartoon dragon instead of your spreadsheet. So on Windows the pet window asks the system to leave it out of every screenshot and screen recording. You still see it; the capture does not.
+
+That is also why this post has no screenshot of a pet on a real desktop. Figures 1, 2 and 4 are the real sprite sheets, played in your browser.
+
+## What a pet costs your computer
+
+A pet that runs all day must cost close to nothing while you work on something else. The pet window only redraws when the picture changes, and it sleeps until the next frame is due. At rest that means six new frames a second, asleep three, and while the pet is hidden none at all.
+
+<Figure
+  n={3}
+  title="At rest the pet draws 6 frames a second, asleep 3, hidden none"
+  subtitle="New frames per second the pet window draws, by state. The same for all seven built-in pets."
+  source="frame rates in each pet's pet.json; timer behaviour in ui/orb/pet_renderer.py"
+  table={{
+    head: ["State", "Frames per second"],
+    rows: [["Hidden", 0], ...Object.entries(pets.pets[0].animations).map(([s, a]) => [s === "held" ? "Being carried" : s.charAt(0).toUpperCase() + s.slice(1), a.fps])].sort((a, b) => Number(a[1]) - Number(b[1])),
+  }}
+>
+  <PetFrameRates />
+  <Fragment slot="caption">The amber bars are where a pet spends most of the day. Every frame is scaled once to its final size and kept, so redrawing is a copy, not a resize. Idle acts play at 6 to 10 frames a second.</Fragment>
+</Figure>
+
+Our target is less than one percent of one processor core for an idle pet. That is the budget written into the pet's contract, not a number we have measured across machines yet. If you see the app use more than that with a pet on screen, tell us.
+
+## Draw your own pet
+
+A pet is two files: a sprite sheet and an optional `pet.json`. The sheet is a grid of square frames, 32, 48 or 64 pixels each. Each row is one state, top to bottom in a fixed order, with up to eight frames from left to right. Here is Ember's sheet at its real size. Hover a row to see what it does.
+
+<Figure
+  n={4}
+  title="One row per state, up to eight frames per row"
+  subtitle="Ember's sprite sheet at 1:1, with each row's frame count and speed from its pet.json."
+  source="jarvis/ui/pets/builtin/ember/sheet.png and pet.json"
+  table={{
+    head: ["Row", "State", "Frames", "Frames per second", "Loops"],
+    rows: Object.entries(pets.pets.find((p) => p.id === "ember").animations).map(([s, a]) => [a.row, s, a.frames, a.fps, a.loop ? "yes" : "no"]),
+  }}
+>
+  <SheetAnatomy pet="ember" />
+  <Fragment slot="caption">Empty cells are rows with fewer frames: the talking row needs only four mouth shapes. Idle acts live on a second sheet with the same grid.</Fragment>
+</Figure>
+
+To add one, open **Settings → My Pets → Create pet**. Download the template, draw your frames into it, and upload the PNG with a name and one sentence about your pet. Without a `pet.json`, Jarvis reads the rows in order and counts the frames in each. With one, you set the speed of every row, which rows loop, and an accent such as a blink that plays only every few passes. The sheet can be up to 512 × 512 pixels and 2 MB. Rows you leave out borrow another one: a pet without a "searching" row uses its "working" row.
+
+One thing an uploaded pet cannot do yet is idle acts, because the upload takes a single sheet and acts need a second one. The built-in pets have them because they come from the build script.
+
+## Where it runs
+
+The pet is verified live on Windows. On macOS it runs in the same companion process as the Jarvis bar, over a protocol our tests cover, but we have not watched it on a Mac yet. On Linux with a compositing desktop it should work the same way; we have not run that live either. On Wayland, and on Linux without a compositor, the pet stays hidden, as every floating Jarvis overlay does there. On a headless server there is no window, but the My Pets page and its settings still work.
+
+Switching from the Jarvis bar to a pet needs one restart of the app, and the My Pets page offers it. Switching between pets afterwards happens live. If you like the office in [Jarvis Verse](../jarvis-verse/), where every agent has a desk, the pet is the same idea brought out of the app window: something you can see out of the corner of your eye that tells you Jarvis is busy.
+
+## What to take from this
+
+- **Get the pet:** Settings → My Pets, switch on **Pet on desktop**, then restart Personal Jarvis once.
+- **Pick a different pet** on the same page; the switch is live. **Customize** sets the size, the **Status bubble** (the thinking line) and **Always show the buttons**.
+- **Hide it for a while** with `Alt` + `Win` + `P` (`Cmd` + `Option` + `P` on a Mac). It comes back on the next start, or with the same keys.
+- **Drag it** anywhere. It remembers its place per monitor.
+- **Make your own:** Settings → My Pets → Create pet, starting from the template.
+
+You can get Personal Jarvis at [personaljarvis.ai](https://personaljarvis.ai). If you draw a pet of your own, we would like to see it: share it in an issue on [GitHub](https://github.com/PersonalJarvis/PersonalJarvis/issues).
+
+<div class="note">
+  <strong>How we made the figures.</strong> Figures 1, 2 and 4 show the sprite sheets and <code>pet.json</code> manifests of the seven built-in pets as they are in the Personal Jarvis source on October 1, 2026, copied unchanged. Figures 1 and 2 play them with a browser copy of the desktop renderer's frame logic (<code>ui/orb/pet_renderer.py</code>); figure 1 shortens the wait between idle acts, and in figure 2 the talking mouth swings instead of following a voice. Figure 3 takes its frame rates from the same manifests. States, events, timings and limits come from <code>docs/pets.md</code> and <code>jarvis/ui/pets/</code>; the story of the cards and the strip comes from the commit history of September 30 and October 1, 2026. The idle cost target is the contract's budget, not a measurement.
+</div>

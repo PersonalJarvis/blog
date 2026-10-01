@@ -1,0 +1,160 @@
+---
+/**
+ * All built-in pets side by side, idling, with one of them playing an idle
+ * act every few seconds. Click a pet to make it play one. Every pixel comes
+ * from the real sprite sheets (public/posts/desktop-pets/pets/<id>/).
+ */
+import data from "@/data/pets.json";
+import { href } from "@/lib";
+
+interface Props {
+  n: number;
+  title: string;
+  subtitle?: string;
+  source: string;
+}
+const { n, title, subtitle, source } = Astro.props;
+const pets = data.pets;
+---
+
+<figure class="figure">
+  <div class="figure-head">
+    <p class="figure-title">{title}</p>
+    {subtitle && <p class="figure-sub">{subtitle}</p>}
+  </div>
+  <div class="parade" data-pets={JSON.stringify(pets)} data-base={href("posts/desktop-pets/pets/")}>
+    <canvas aria-hidden="true"></canvas>
+    <div class="parade-names" style={`grid-template-columns: repeat(${pets.length}, 1fr)`}>
+      {
+        pets.map((p, i) => (
+          <button type="button" data-i={i} aria-label={`${p.name}: play one of its idle acts`} title={p.description}>
+            <span>{p.name}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <p class="parade-now small" aria-live="polite">&nbsp;</p>
+  <figcaption class="figure-foot small">
+    <span><strong style="color:var(--ink-2)">Figure {n}.</strong> <slot name="caption" /> Source: {source}.</span>
+  </figcaption>
+</figure>
+
+<style>
+  .parade {
+    position: relative;
+    user-select: none;
+  }
+  .parade canvas {
+    display: block;
+    width: 100%;
+  }
+  .parade-names {
+    position: absolute;
+    inset: 0;
+    display: grid;
+  }
+  .parade-names button {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0 0.1rem;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--ink-3);
+    font-family: var(--sans);
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+  .parade-names button:hover,
+  .parade-names button.on {
+    color: var(--ink);
+  }
+  .parade-names button:hover {
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
+  }
+  .parade-now {
+    margin: 0.5rem 0 0;
+    text-align: center;
+    min-height: 1.5em;
+  }
+</style>
+
+<script>
+  import { Actor, devicePixels, drawCell, fitCanvas, humanize, loadPet, reducedMotion, whileVisible, type Pet, type Sheets } from "./engine";
+
+  /** Seconds between two acts across the whole row (the app waits 14-40 s per pet). */
+  const DEMO_GAP_S = 2.6;
+  const LABEL_H = 26;
+
+  document.querySelectorAll<HTMLElement>(".parade").forEach(async (root) => {
+    const pets: Pet[] = JSON.parse(root.dataset.pets!);
+    const base = root.dataset.base!;
+    const canvas = root.querySelector("canvas")!;
+    const now = root.parentElement!.querySelector<HTMLElement>(".parade-now")!;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("button")];
+    const actors = pets.map((p) => new Actor(p));
+    const sheets: Sheets[] = await Promise.all(pets.map((p) => loadPet(base, p)));
+    const still = reducedMotion();
+    let nextDemo = 1.2;
+    let lastDemo = -1;
+    let clock = 0;
+
+    const say = (i: number, act: string) => {
+      now.textContent = `${pets[i].name}: ${humanize(act)}`;
+    };
+
+    const play = (i: number, t: number) => {
+      const act = actors[i].randomAct();
+      actors[i].playAct(act, t);
+      say(i, act);
+    };
+
+    const draw = (t: number) => {
+      clock = t;
+      const size = pets[0].frame_size;
+      // Largest whole number of device pixels per sprite pixel that fits a
+      // column, at most 3 CSS px per sprite pixel.
+      const dpr = devicePixels();
+      const colDev = (canvas.clientWidth * dpr) / pets.length;
+      const scale = Math.max(1, Math.min(Math.floor(colDev / (size * 0.92)), Math.floor(3 * dpr)));
+      fitCanvas(canvas, (size * scale) / dpr + LABEL_H);
+      const ctx = canvas.getContext("2d")!;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!still && t >= nextDemo) {
+        const free = actors.map((_, i) => i).filter((i) => !actors[i].busy && i !== lastDemo);
+        if (free.length) {
+          lastDemo = free[Math.floor(Math.random() * free.length)];
+          play(lastDemo, t);
+        }
+        nextDemo = t + DEMO_GAP_S;
+      }
+      actors.forEach((a, i) => {
+        const f = still && !a.busy ? { acts: false, row: 0, col: 0 } : a.frame(t);
+        const cx = ((i + 0.5) * canvas.width) / pets.length;
+        drawCell(ctx, f.acts ? sheets[i].acts : sheets[i].sheet, size, f.row, f.col, cx - (size * scale) / 2, 0, scale);
+        buttons[i].classList.toggle("on", a.busy);
+      });
+    };
+
+    buttons.forEach((b) =>
+      b.addEventListener("click", () => {
+        play(Number(b.dataset.i), clock || performance.now() / 1000);
+        if (still) {
+          // Reduced motion: animate only the act the reader asked for.
+          const stop = performance.now() / 1000 + 1.5;
+          const run = () => {
+            draw(performance.now() / 1000);
+            if (performance.now() / 1000 < stop) requestAnimationFrame(run);
+          };
+          requestAnimationFrame(run);
+        }
+      }),
+    );
+
+    draw(performance.now() / 1000);
+    if (!still) whileVisible(root, draw);
+    window.addEventListener("resize", () => draw(performance.now() / 1000));
+  });
+</script>

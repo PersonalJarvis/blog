@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- A desktop with a pet on it: one ghost bursts into bits above its control strip, a second one is carried by the mouse. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">
+<rect vector-effect="non-scaling-stroke" x="40" y="40" width="400" height="208" rx="10" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M226 248 V266 M254 248 V266 M190 268 H290"/>
+<g transform="translate(252 82) scale(1.05)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M28 52 Q35 60 42 52" fill="none"/></g>
+<rect vector-effect="non-scaling-stroke" x="246" y="196" width="86" height="24" rx="12" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M274 203 V213 M289 200 V216 M304 204 V212"/>
+<rect x="228" y="92" width="8" height="8" fill="#141413" stroke="none"/>
+<rect x="218" y="128" width="7" height="7" fill="#141413" stroke="none"/>
+<rect x="346" y="84" width="8" height="8" fill="#141413" stroke="none"/>
+<rect x="358" y="126" width="7" height="7" fill="#141413" stroke="none"/>
+<rect x="334" y="62" width="6" height="6" fill="#141413" stroke="none"/>
+<path vector-effect="non-scaling-stroke" d="M268 66 L262 56 M290 60 V48 M312 66 L318 56"/>
+<g transform="rotate(-12 120 150) translate(92 124) scale(0.66)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse vector-effect="non-scaling-stroke" cx="35" cy="56" rx="5" ry="6" fill="none"/></g>
+<path vector-effect="non-scaling-stroke" d="M128 104 V134 L135 127 L141 140 L147 137 L141 124 L151 124 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M70 214 C86 196 92 186 98 176" stroke-dasharray="1 11"/>
+  </g>
+</svg>
