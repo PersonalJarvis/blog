@@ -37,6 +37,11 @@
   --measure: 40rem;
   --gutter: clamp(1.25rem, 4vw, 2.5rem);
 
+  /* Page width: a floor plus a share of the window. A fixed 72rem squeezed
+   * the page into the middle half of a wide screen; 70vw lets it grow with
+   * the window and still leaves a calm margin on both sides. */
+  --wrap: max(72rem, 70vw);
+
   /* Index: the left column (pitch, filters) and the gap beside it. Hero and
    * library share both, so the category lines and the cards start on the
    * same vertical edge. */
@@ -116,7 +121,7 @@ a {
 /* ---------------------------------------------------------------- Chrome */
 
 .wrap {
-  max-width: 72rem;
+  max-width: var(--wrap);
   margin: 0 auto;
   padding: 0 var(--gutter);
 }
@@ -362,7 +367,7 @@ a {
   list-style: none;
   margin: 0;
   /* The first title lines up with the page's content edge. */
-  padding: 0 0 0 max(0px, calc(max(var(--gutter), (100% - 72rem) / 2 + var(--gutter)) - 1.5rem));
+  padding: 0 0 0 max(0px, calc(max(var(--gutter), (100% - var(--wrap)) / 2 + var(--gutter)) - 1.5rem));
 }
 
 .rail-track li {
