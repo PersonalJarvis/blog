@@ -1,0 +1,43 @@
+---
+/**
+ * The money that actually left an API key in September 2026, by where it went.
+ * Read from src/data/costs-september.json (`billed`, `totals.billed`).
+ */
+import data from "@/data/costs-september.json";
+
+const W = 640;
+const L = 0;
+const R = 70;
+const T = 8;
+const rowH = 52;
+const rows = data.billed;
+const H = T + rows.length * rowH + 6;
+const max = Math.max(...rows.map((r) => r.usd));
+const barX = 300;
+const barW = W - barX - R;
+const money = (v: number) => `$${v.toFixed(2)}`;
+const total = data.totals.billed;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Bar chart of the ${money(total)} billed to API keys in September 2026: ` + rows.map((r) => `${r.label} ${money(r.usd)}`).join("; ")}>
+  {
+    rows.map((r, i) => {
+      const y = T + i * rowH;
+      const w = Math.max((barW * r.usd) / max, 2);
+      const tip = `<b>${r.label}</b><br>${money(r.usd)}, ${((r.usd / total) * 100).toFixed(1)}% of the bill`;
+      return (
+        <g>
+          <rect class="hit" x={0} y={y} width={W} height={rowH - 6} data-tip={tip} />
+          <rect class="hl" x={0} y={y} width={W} height={rowH - 6} rx="5" fill="var(--ink)" fill-opacity="0.05" pointer-events="none" />
+          <text class="t-label" x={L} y={y + 27} pointer-events="none">
+            {r.label}
+          </text>
+          <rect x={barX} y={y + 10} width={w} height={24} rx="4" fill={i === 0 ? "var(--accent)" : "var(--mark-muted)"} pointer-events="none" />
+          <text class="t-strong" x={barX + w + 8} y={y + 27} pointer-events="none">
+            {money(r.usd)}
+          </text>
+        </g>
+      );
+    })
+  }
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- A long receipt for a month of work; Gigi reads it through a magnifier, a few coins beside it. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">
+<path vector-effect="non-scaling-stroke" d="M142 36 H274 V270 L262 280 L250 270 L238 280 L226 270 L214 280 L202 270 L190 280 L178 270 L166 280 L154 270 L142 280 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M162 62 H228 M162 86 H254 M162 110 H214 M162 134 H244 M162 158 H226 M162 182 H250"/>
+<path vector-effect="non-scaling-stroke" d="M162 212 H254" stroke-dasharray="1 9"/>
+<path vector-effect="non-scaling-stroke" d="M162 240 H196 M222 240 H254"/>
+<ellipse vector-effect="non-scaling-stroke" cx="92" cy="262" rx="30" ry="9" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M62 262 V248 M122 262 V248" />
+<ellipse vector-effect="non-scaling-stroke" cx="92" cy="248" rx="30" ry="9" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M62 248 V234 M122 248 V234" />
+<ellipse vector-effect="non-scaling-stroke" cx="92" cy="234" rx="30" ry="9" fill="#faf9f5"/>
+<g transform="translate(318 118) scale(1.05)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse vector-effect="non-scaling-stroke" cx="35" cy="55" rx="4.5" ry="5.5" fill="none"/></g>
+<path vector-effect="non-scaling-stroke" d="M300 170 L326 152"/>
+<circle vector-effect="non-scaling-stroke" cx="270" cy="190" r="36" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M281 178 C281 169 259 169 259 179 C259 189 281 188 281 199 C281 210 259 210 259 201 M270 164 V216"/>
+<path vector-effect="non-scaling-stroke" d="M398 108 L410 96 M404 128 L422 124"/>
+  </g>
+</svg>

@@ -1,0 +1,79 @@
+---
+/**
+ * What September's tokens were, and what their value was made of, as two
+ * 100 percent bars split into input, cache reads and output. The value split
+ * applies Jarvis' rate card to every model that has a rate.
+ * Read from src/data/costs-september.json (`totals`, `valueSplit`).
+ */
+import data from "@/data/costs-september.json";
+
+const t = data.totals;
+const v = data.valueSplit;
+const vTotal = v.input + v.cached + v.output;
+const W = 640;
+const H = 220;
+const L = 0;
+const barW = W - L;
+const kinds = [
+  { key: "cached", name: "cache reads", color: "var(--accent)" },
+  { key: "input", name: "input", color: "var(--s1)" },
+  { key: "output", name: "output", color: "var(--s3)" },
+] as const;
+const rows = [
+  {
+    title: `Tokens: ${(t.tokens / 1e9).toFixed(2)} billion`,
+    parts: { cached: t.tokensCached, input: t.tokensIn, output: t.tokensOut },
+    total: t.tokensCached + t.tokensIn + t.tokensOut,
+    fmt: (n: number) => `${(n / 1e9).toFixed(n >= 1e9 ? 2 : 3)} billion`,
+  },
+  {
+    title: `Value at API prices: $${Math.round(vTotal).toLocaleString("en-US")}`,
+    parts: { cached: v.cached, input: v.input, output: v.output },
+    total: vTotal,
+    fmt: (n: number) => `$${Math.round(n).toLocaleString("en-US")}`,
+  },
+];
+const pct = (a: number, b: number) => {
+  const p = (a / b) * 100;
+  return p < 1 ? `${p.toFixed(1)}%` : `${Math.round(p)}%`;
+};
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Two bars. Of ${(t.tokens / 1e9).toFixed(2)} billion tokens in September, ${pct(t.tokensCached, t.tokens)} were cache reads, ${pct(t.tokensIn, t.tokens)} input and ${pct(t.tokensOut, t.tokens)} output. Of the value at API prices, ${pct(v.cached, vTotal)} came from cache reads, ${pct(v.input, vTotal)} from input and ${pct(v.output, vTotal)} from output.`}>
+  {
+    rows.map((row, i) => {
+      const y0 = 26 + i * 100;
+      let acc = 0;
+      return (
+        <g>
+          <text class="t-strong" x={L} y={y0}>
+            {row.title}
+          </text>
+          {kinds.map((k) => {
+            const val = row.parts[k.key];
+            const x = L + (acc / row.total) * barW;
+            const w = (val / row.total) * barW;
+            acc += val;
+            const tip = `<b>${k.name[0].toUpperCase() + k.name.slice(1)}</b><br>${row.fmt(val)}<br>${pct(val, row.total)} of the bar`;
+            return (
+              <g>
+                <rect x={x} y={y0 + 12} width={Math.max(w - 2, 2)} height={34} fill={k.color} data-tip={tip} />
+                {w > 90 && (
+                  <text class="t-strong" x={x + 10} y={y0 + 34} style="fill: var(--paper)">
+                    {pct(val, row.total)} {k.name}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+          <text class="t-label" x={W} y={y0 + 66} text-anchor="end">
+            {kinds
+              .filter((k) => (row.parts[k.key] / row.total) * barW <= 90)
+              .map((k) => `${k.name} ${pct(row.parts[k.key], row.total)}`)
+              .join(" · ")}
+          </text>
+        </g>
+      );
+    })
+  }
+</svg>

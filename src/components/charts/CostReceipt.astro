@@ -1,0 +1,80 @@
+---
+/**
+ * One hour of one coding agent, priced the way Jarvis prices it: input at the
+ * model's input rate, cache reads at a tenth of it, output at the output rate.
+ * Read from src/data/costs-september.json (`receipt`).
+ */
+import data from "@/data/costs-september.json";
+
+const r = data.receipt;
+const n = (v: number) => v.toLocaleString("en-US");
+const usd = (v: number) => `$${v.toFixed(2)}`;
+const rows = [
+  {
+    name: "Input",
+    detail: `${n(r.tokensIn)} tokens × $${r.rateIn} per million`,
+    usd: (r.tokensIn * r.rateIn) / 1e6,
+    color: "var(--s1)",
+  },
+  {
+    name: "Cache reads",
+    detail: `${n(r.tokensCached)} tokens × $${r.rateIn * r.cacheFraction} per million`,
+    usd: (r.tokensCached * r.rateIn * r.cacheFraction) / 1e6,
+    color: "var(--accent)",
+  },
+  {
+    name: "Output",
+    detail: `${n(r.tokensOut)} tokens × $${r.rateOut} per million`,
+    usd: (r.tokensOut * r.rateOut) / 1e6,
+    color: "var(--s3)",
+  },
+];
+const total = rows.reduce((a, b) => a + b.usd, 0);
+const W = 640;
+const H = 268;
+const barX = 400;
+const barW = W - barX - 70;
+const max = Math.max(...rows.map((x) => x.usd));
+const rowY = (i: number) => 24 + i * 58;
+const stackY = 214;
+let acc = 0;
+const stack = rows.map((x) => {
+  const seg = { ...x, x: (acc / total) * W, w: (x.usd / total) * W };
+  acc += x.usd;
+  return seg;
+});
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`One hour of one Claude Code session on ${r.model}, priced: input ${usd(rows[0].usd)}, cache reads ${usd(rows[1].usd)}, output ${usd(rows[2].usd)}, ${usd(total)} in total. The app recorded ${usd(r.appUsd)}.`}>
+  {
+    rows.map((x, i) => (
+      <g>
+        <text class="t-strong" x={0} y={rowY(i) + 12}>
+          {x.name}
+        </text>
+        <text class="t-label" x={0} y={rowY(i) + 32}>
+          {x.detail}
+        </text>
+        <rect x={barX} y={rowY(i) + 4} width={(barW * x.usd) / max} height={26} rx="4" fill={x.color} />
+        <text class="t-strong" x={barX + (barW * x.usd) / max + 8} y={rowY(i) + 22}>
+          {usd(x.usd)}
+        </text>
+      </g>
+    ))
+  }
+  <line x1={0} x2={W} y1={stackY - 22} y2={stackY - 22} stroke="var(--rule)" />
+  <text class="t-strong" x={0} y={stackY - 4}>= {usd(total)} for one hour of one agent</text>
+  <text class="t-label" x={W} y={stackY - 4} text-anchor="end">the app recorded {usd(r.appUsd)}</text>
+  {
+    stack.map((s) => (
+      <g>
+        <rect x={s.x} y={stackY + 8} width={Math.max(s.w - 2, 1)} height={18} fill={s.color} />
+        {s.w > 70 && (
+          <text class="t-label" x={s.x + 6} y={stackY + 44}>
+            {Math.round((s.usd / total) * 100)}% {s.name.toLowerCase()}
+          </text>
+        )}
+      </g>
+    ))
+  }
+</svg>

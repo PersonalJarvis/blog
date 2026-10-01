@@ -1,0 +1,64 @@
+---
+/**
+ * Every day of September 2026: what the day's work was worth at API prices,
+ * with the part that was actually billed to an API key drawn on top.
+ * Read from src/data/costs-september.json (`days`).
+ */
+import data from "@/data/costs-september.json";
+import { barUp } from "./util";
+
+const W = 640;
+const H = 300;
+const L = 52;
+const R = 8;
+const T = 48;
+const B = 34;
+const base = H - B;
+const yMax = 2200;
+const band = (W - L - R) / 30;
+const bw = Math.max(band - 6, 4);
+const x = (day: number) => L + band * (day - 1) + (band - bw) / 2;
+const y = (v: number) => base - ((base - T) * v) / yMax;
+const byDay = new Map(data.days.map((d) => [Number(d.date.slice(8, 10)), d]));
+const days = Array.from({ length: 30 }, (_, i) => {
+  const d = byDay.get(i + 1);
+  return { day: i + 1, value: d?.value ?? 0, billed: d?.billed ?? 0, tokens: d?.tokens ?? 0 };
+});
+const money = (v: number) => (v >= 100 ? `$${Math.round(v).toLocaleString("en-US")}` : `$${v.toFixed(2)}`);
+const peak = days.reduce((a, b) => (b.billed > a.billed ? b : a));
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Bar chart of the 30 days of September 2026. Each bar is what that day's work was worth at API prices, up to ${money(Math.max(...days.map((d) => d.value)))}. The part billed to API keys is highlighted and is visible on only a few days; the largest was September ${peak.day} with ${money(peak.billed)} of ${money(peak.value)}.`}>
+  {
+    [0, 500, 1000, 1500, 2000].map((v) => (
+      <g>
+        <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
+        <text class="t-axis" x={L - 8} y={y(v) + 4} text-anchor="end">
+          {v === 0 ? "$0" : `$${v.toLocaleString("en-US")}`}
+        </text>
+      </g>
+    ))
+  }
+  {
+    [1, 8, 15, 22, 29].map((d) => (
+      <text class="t-axis" x={x(d) + bw / 2} y={base + 20} text-anchor="middle">
+        Sep {d}
+      </text>
+    ))
+  }
+  {
+    days.map((d) => {
+      const tip = `<b>Sep ${d.day}</b><br>Worth at API prices: ${money(d.value)}<br>Billed to API keys: ${money(d.billed)}<br>${(d.tokens / 1e6).toFixed(0)} million tokens`;
+      return (
+        <g>
+          <path d={barUp(x(d.day), y(d.value), bw, base, 3)} fill="var(--mark-muted)" />
+          {d.billed >= 0.5 && <path d={barUp(x(d.day), y(d.billed), bw, base, 2)} fill="var(--accent)" />}
+          <rect class="hit" x={L + band * (d.day - 1)} y={T} width={band} height={base - T} data-tip={tip} />
+          <rect class="hl" x={L + band * (d.day - 1) + 1} y={T} width={band - 2} height={base - T} rx="3" fill="var(--ink)" fill-opacity="0.06" pointer-events="none" />
+        </g>
+      );
+    })
+  }
+  <path d={`M${x(peak.day) + bw / 2},${y(peak.value) - 6} V18`} fill="none" stroke="var(--ink-3)" />
+  <text class="t-note" x={x(peak.day) + bw / 2 - 6} y={14} text-anchor="end">Sep {peak.day}: {money(peak.billed)} billed, one evening on our own key</text>
+</svg>

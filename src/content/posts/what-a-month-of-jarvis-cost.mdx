@@ -1,0 +1,231 @@
+---
+title: "What a month of Personal Jarvis actually cost"
+description: "In September our work in Jarvis was worth $15,224 at API prices, and our API keys were billed $216.65. How Jarvis prices every token, where you see it, and where the money went."
+pubDate: 2026-10-01
+category: engineering
+featured: true
+---
+
+import Figure from "@/components/Figure.astro";
+import Shot from "@/components/Shot.astro";
+import WorthVsBilled from "@/components/charts/WorthVsBilled.astro";
+import CostReceipt from "@/components/charts/CostReceipt.astro";
+import TokensVsValue from "@/components/charts/TokensVsValue.astro";
+import SurfaceLadder from "@/components/charts/SurfaceLadder.astro";
+import BilledSplit from "@/components/charts/BilledSplit.astro";
+import costs from "@/data/costs-september.json";
+import overview from "@/assets/posts/what-a-month-of-jarvis-cost/overview.webp";
+import breakdown from "@/assets/posts/what-a-month-of-jarvis-cost/breakdown.webp";
+import billed from "@/assets/posts/what-a-month-of-jarvis-cost/billed.webp";
+import dayView from "@/assets/posts/what-a-month-of-jarvis-cost/day.webp";
+
+In September we used Personal Jarvis to build Personal Jarvis, all day, most days. If you price every token of that month the way the AI providers price their APIs, the work was worth $15,224.
+
+Our API keys were billed $216.65. And $189.45 of that came from one coding agent that runs on our own key, most of it in a single evening.
+
+The other $15,007 ran on flat monthly plans, and Jarvis still prices every token of it. This post covers where you see those numbers in the app, how a token becomes a price, what all those tokens actually were, and what broke while we taught Jarvis to count. In this post, "we" means the people building Personal Jarvis and the coding agents that do much of the typing.
+
+## Where you see it
+
+Everything below comes from one place in the app: **Settings → Activity → Spend**, a section called **Spend & Tokens**. The same section runs live on the "Spend" monitor in Mission Control, the room for the whole agent fleet in the Jarvis Verse office.
+
+<Shot
+  n={1}
+  src={overview}
+  alt="The Spend & Tokens section: range buttons 7d, 30d, 90d and All, USD and EUR, an area switch with Overall, the assistant, its voice and Agentic IDE, a billing switch with All, Billed to keys and On subscriptions, a notice that the coding CLI transcripts are still being read, and four tiles: Total spend $16,302 with $217 billed to API keys, Tokens 23.72B, Biggest spender codex-cli, Unpriced tokens 7.84M."
+  title="The month at a glance: $16,302 worth of work, $217 of it billed"
+  subtitle="Spend & Tokens, last 30 days, as it looked on October 1."
+  source="Personal Jarvis desktop app, Settings → Spend, October 1, 2026"
+>
+  <Fragment slot="caption">The 30-day window runs from the afternoon of September 1 to October 1, so it is a little larger than the calendar month we use in the text. On this machine the assistant is called George, which is why the area switch says so. The dashed notice means Jarvis was still reading the newest coding-agent transcripts while we took the picture.</Fragment>
+</Shot>
+
+The controls are the whole story in small. The **range** picks 7, 30 or 90 days or everything. The **area switch** narrows the numbers to the assistant, its voice, or the Agentic IDE. The **billing switch** is the important one: **Billed to keys** shows money that actually left an API key, **On subscriptions** shows work done on a flat plan, and **All** shows both. Dollars can be shown in euros at a fixed exchange rate.
+
+## Two numbers for every day
+
+Every call Jarvis records gets two answers: what it would cost through the provider's API, and whether that money was actually billed. Work on a subscription, such as a Claude Code or Codex login, is not shown as zero. It is priced at what the same tokens would cost through the API and labelled as covered by a plan. That is what lets you see what a plan is worth to you.
+
+<Figure
+  n={2}
+  title="Every day was worth something; almost no day was billed"
+  subtitle="Each bar is what a day's work was worth at API prices. The highlighted part was billed to an API key."
+  source="Personal Jarvis cost data, September 1 to 30, 2026"
+  legend={[
+    { label: "Worth at API prices", color: "var(--mark-muted)" },
+    { label: "Billed to an API key", color: "var(--accent)" },
+  ]}
+  table={{
+    head: ["Day", "Worth", "Billed"],
+    rows: costs.days.map((d) => [d.date, `$${d.value.toFixed(2)}`, `$${d.billed.toFixed(2)}`]),
+  }}
+>
+  <WorthVsBilled />
+  <Fragment slot="caption">The busiest day, September 10, was worth $2,122 and was billed $1.43. Three days had no recorded work at all.</Fragment>
+</Figure>
+
+**Price the work you don't pay for.** A bill of $216 tells you nothing about how hard your plans are working. The $15,007 next to it does.
+
+## How a token becomes a price
+
+Jarvis prices a call with three counts and a rate card. **Input** is new text the model reads. **Cache reads** are text the provider kept from the call before and lets the model read again at a discount: a tenth of the input rate for most models, a quarter for Gemini and Grok. **Output** is what the model writes. Here is the most valuable single hour of the month, one Claude Code session on September 1:
+
+<Figure
+  n={3}
+  title="One hour of one coding agent, worth $187"
+  subtitle="The three parts of the price, with the token counts and rates Jarvis used."
+  source="Personal Jarvis cost data, September 1, 2026, 16:00 to 17:00; Jarvis rate card"
+  table={{
+    head: ["Part", "Tokens", "Rate per million", "Price"],
+    rows: [
+      ["Input", costs.receipt.tokensIn.toLocaleString("en-US"), "$10", `$${((costs.receipt.tokensIn * 10) / 1e6).toFixed(2)}`],
+      ["Cache reads", costs.receipt.tokensCached.toLocaleString("en-US"), "$1", `$${((costs.receipt.tokensCached * 1) / 1e6).toFixed(2)}`],
+      ["Output", costs.receipt.tokensOut.toLocaleString("en-US"), "$50", `$${((costs.receipt.tokensOut * 50) / 1e6).toFixed(2)}`],
+    ],
+  }}
+>
+  <CostReceipt />
+  <Fragment slot="caption">The arithmetic gives exactly the $187.16 the app recorded for that hour.</Fragment>
+</Figure>
+
+Where the price comes from depends on what the tool tells us. When a tool reports its own price for a call, as Grok Build does, Jarvis keeps that number. Otherwise it applies its rate card. A local model, through Ollama for example, costs nothing. A model Jarvis has no rate for is counted as **unpriced**, never as free: in September that was 7.8 million tokens across 50 calls, and the Spend section shows them on their own tile so a gap cannot hide inside a small total.
+
+## Most of it is the agent re-reading
+
+The receipt above has a pattern that holds for the whole month. A coding agent sends its conversation to the model on every step, so the same text is read again and again. The cache makes each of those reads cheap, but there are a lot of them.
+
+<Figure
+  n={4}
+  title="97% of our tokens were re-reads, and they made up 73% of the value"
+  subtitle="September's tokens, and their value at API prices, split into cache reads, input and output."
+  source="Personal Jarvis cost data, September 1 to 30, 2026; value computed with the Jarvis rate card"
+  legend={[
+    { label: "Cache reads", color: "var(--accent)" },
+    { label: "Input", color: "var(--s1)" },
+    { label: "Output", color: "var(--s3)" },
+  ]}
+  table={{
+    head: ["", "Cache reads", "Input", "Output"],
+    rows: [
+      ["Tokens", costs.totals.tokensCached.toLocaleString("en-US"), costs.totals.tokensIn.toLocaleString("en-US"), costs.totals.tokensOut.toLocaleString("en-US")],
+      ["Value", `$${Math.round(costs.valueSplit.cached).toLocaleString("en-US")}`, `$${Math.round(costs.valueSplit.input).toLocaleString("en-US")}`, `$${Math.round(costs.valueSplit.output).toLocaleString("en-US")}`],
+    ],
+  }}
+>
+  <TokensVsValue />
+  <Fragment slot="caption">Applying the rate card model by model gives $15,286, within half a percent of the $15,224 the app reports.</Fragment>
+</Figure>
+
+Output, the part that feels like "the work", was a quarter of one percent of the tokens and a tenth of the value. If you want to make an agent cheaper, shorter conversations do more than shorter answers.
+
+## Where the value went
+
+Almost all of it went to the coding agents in the Agentic IDE. The parts of Jarvis you talk to are tiny next to them, so the next chart uses a log scale: each step to the right is a hundred times more.
+
+<Figure
+  n={5}
+  title="Coding agents were 98% of the value; voice and background work cost dollars"
+  subtitle="Ring: what each part of the app was worth at API prices. Dot: what was billed to an API key."
+  source="Personal Jarvis cost data, September 1 to 30, 2026"
+  table={{
+    head: ["Part of the app", "Worth", "Billed", "Tokens"],
+    rows: costs.surfaces.map((s) => [s.key, `$${s.value.toFixed(2)}`, `$${s.billed.toFixed(2)}`, s.tokens.toLocaleString("en-US")]),
+  }}
+>
+  <SurfaceLadder />
+  <Fragment slot="caption">For voice and background work the dot sits inside the ring: they ran entirely on API keys, so worth and billed are the same number.</Fragment>
+</Figure>
+
+A month of talking to Jarvis cost $13.22. Most of that was realtime voice on Gemini Live ($9.70), which hears and speaks in one model; the few calls that used a separate speech recognizer ran it on a local Whisper model for nothing. The background jobs that keep the wiki and memory up to date made 724 calls for $7.90. And 612 million tokens ran on local and free models at no cost at all.
+
+The coding agents split by tool. In the app, the Breakdown panel shows it:
+
+<Shot
+  n={6}
+  src={breakdown}
+  alt="The Breakdown panel grouped by provider: codex-cli 57% $9,257, claude-cli 39% $6,339, antigravity 1.7% $285, grok-cli 1.2% $189, agy-cli 0.8% $138, claude-api $61.96, gemini-live $9.70, grok-build $5.69, vertex $5.56, openai-codex $3.27, openai $2.77, codex $1.22, each with tokens in and out and the number of calls."
+  title="Codex and Claude Code did 96% of the work"
+  subtitle="Breakdown, grouped by provider, last 30 days. Click a row and the whole section filters to it."
+  source="Personal Jarvis desktop app, Settings → Spend, October 1, 2026"
+>
+  <Fragment slot="caption">The same panel groups by model, by role (what the model was doing) or by surface (where in the app it ran).</Fragment>
+</Shot>
+
+## What actually got billed
+
+Switch to **Billed to keys** and the section shrinks to the money that left an API key. For September that is $216.65, and one row dominates it.
+
+<Shot
+  n={7}
+  src={billed}
+  alt="The Spend & Tokens section with Billed to keys selected: Total spend $217 at $7.22 per day on average, Tokens 1.14B, Biggest spender grok-cli at $189 or 87% of the total, and an Over time chart that is almost empty except for a bar of about $123 on September 21 and smaller ones around September 8, 17 and 18."
+  title="Billed to keys: $217, and 87% of it is one tool"
+  subtitle="The same section with the billing switch on Billed to keys, last 30 days."
+  source="Personal Jarvis desktop app, Settings → Spend, October 1, 2026"
+/>
+
+<Figure
+  n={8}
+  title="Where the $216.65 went"
+  subtitle="Everything billed to an API key in September, by what it was for."
+  source="Personal Jarvis cost data, September 1 to 30, 2026"
+  table={{
+    head: ["What", "Billed"],
+    rows: costs.billed.map((b) => [b.label, `$${b.usd.toFixed(2)}`]),
+  }}
+>
+  <BilledSplit />
+</Figure>
+
+Grok Build is the coding agent from xAI, and it runs on our own API key instead of a plan. Jarvis records the price Grok reports for each call, so its row is real money, not an estimate. Most of it came from one evening. Open September 21 in the Daily report and the day tells you exactly that:
+
+<Shot
+  n={9}
+  src={dayView}
+  alt="The day view for Monday, September 21, 2026: 71 calls, 9 models, 9 providers, 18:08 to 20:12. Tiles: What the day was worth $213, Billed to API keys $123, Covered by a seat $89.73, Tokens 551.74M. An hourly chart with bars at 18:00, 19:00 and 20:00, the highest about $120. A model table led by Grok with 57% and $122, then Antigravity with 42% and $89.73."
+  title="September 21: two hours, $123 billed"
+  subtitle="Daily report → Monday, September 21. Every day of the range opens like this."
+  source="Personal Jarvis desktop app, Settings → Spend → Daily report, October 1, 2026"
+>
+  <Fragment slot="caption">Below this, the day view lists where in the app the tokens went and every single call of the day, sortable by cost.</Fragment>
+</Shot>
+
+Nine Grok calls between 18:08 and 20:12 were billed $122. A Google Antigravity agent read more tokens than Grok that evening, $89.73 worth, and billed nothing, because it runs on a plan.
+
+**The expensive agent is the one on a key, not the one doing the most work.** The highest value we saw all month was a $2,122 day. The highest bill was a two-hour evening with a tool we pay per token.
+
+## What a subscription number does not tell you
+
+The $15,007 covered by plans is not money we spent. It is what the same tokens would have cost through the API. Jarvis cannot know what your plan costs or how close you are to its limits in dollars, so it does not pretend to: it shows the list price of the work and leaves the comparison to you. If a plan costs you a fixed amount per month and Jarvis shows you ten times that in covered work, the plan is paying for itself.
+
+## What broke on the way
+
+Counting tokens sounds like adding numbers. It took several rounds to get right, and each one changed the total by a lot.
+
+**A $37,000 bill that never existed.** On August 24 the Spend section showed one machine a month of roughly $37,000. Two Codex habits caused it. Codex counts cached tokens inside its input number, where Claude Code reports them separately, so the cache was priced twice. And a forked Codex thread replays its whole history into a new file, so every fork looked like hours of fresh work. Jarvis now subtracts the cached share and recognises a replayed call by Codex's own running total.
+
+**Twice the tokens from the same answer.** Claude Code writes one model response as several lines, one per content block, and each line repeats the same usage numbers. On a sample transcript that was 64 lines for 31 responses. Jarvis now counts a response by the id the API gave it, not by the line.
+
+**A fifth of all Claude Code calls were invisible.** When Claude Code starts a subagent, that subagent writes its own transcript in a subfolder. Until August 27 nothing read those files. On the machine we measured, they held 14,466 of 68,937 responses.
+
+**The past shrank every night.** Claude Code deletes old sessions after 25 days on that machine, and when a transcript disappeared, its cost disappeared with it. The lifetime total got a little smaller every night. Jarvis now keeps what it has read as a ledger, so deleting a transcript no longer deletes the money it cost.
+
+**A rebuild showed $8,000 of a $13,600 month.** An early version threw its index away and re-read everything when a counting rule changed, and showed the half-built number in the meantime. Now it corrects rows in place, and while it is still reading it says so. That is the dashed notice in figure 1.
+
+**A voice key paid for the wiki.** On September 29, an OpenAI key added for voice paid about $0.30 of background wiki calls after a two-minute chat. Small, but nobody had asked for it. Since then, background work only runs on subscriptions or local models while a subscription is connected, and waits rather than falling back to a key.
+
+**Make a gap visible, never zero.** Every one of these bugs made a number quietly wrong rather than loudly missing. The section now shows unpriced tokens on their own tile and says when it is still counting, because a confident wrong total is worse than an honest incomplete one.
+
+## If you run Jarvis yourself
+
+- **Open Settings → Activity → Spend.** Leave it on 30 days, switch to **Billed to keys** once to see what you actually pay, then to **On subscriptions** to see what your plans cover.
+- **Check the Unpriced tile.** If it is not zero, some model has no rate yet, and its work is missing from every dollar figure.
+- **Open your most expensive day** in the Daily report. It usually names one tool and one evening.
+- **Look for keys in the coding agents.** A coding agent on a pay-per-token key costs far more than voice and background work together.
+- **A chat shows its own receipt.** Under each agent turn that reported a cost, the chat shows its tokens and price.
+
+If a number in your Spend section looks wrong, open an issue on [GitHub](https://github.com/PersonalJarvis/PersonalJarvis/issues) with the day it happened.
+
+<div class="note">
+  <strong>How we measured.</strong> All numbers come from the Spend section's own data on the Windows machine Personal Jarvis is built on, for the calendar month of September 2026 in Central European time, read on October 1. The screenshots show the app's 30-day range on that day, which starts on the afternoon of September 1 and runs into October 1, so their totals are slightly larger than the text's. The split into cache reads, input and output in figure 4 applies the Jarvis rate card model by model and lands within half a percent of the app's total. Subscription figures are list prices of the same tokens through the API, not money paid. Work done in the minutes before we read the numbers may still have been on its way into the index. Chats with agents that run through Claude Code or Codex may also appear in those tools' own transcripts; we have not ruled out that such a turn is counted twice, which would put at most $341 of the value, about 2 percent, too high and none of the bill.
+</div>

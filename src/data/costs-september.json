@@ -1,0 +1,359 @@
+{
+ "_about": "Personal Jarvis spend, calendar September 2026 (Europe/Berlin), read from the app's own /api/costs on the maintainer's machine on 2026-10-01. Aggregates only.",
+ "totals": {
+  "value": 15223.89,
+  "subscription": 15007.24,
+  "billed": 216.65,
+  "tokens": 22240187705,
+  "tokensIn": 658653662,
+  "tokensCached": 21521588111,
+  "tokensOut": 59945932,
+  "freeTokens": 611786050,
+  "gapTokens": 7835702,
+  "gapEntries": 50,
+  "entries": 2711
+ },
+ "valueSplit": {
+  "input": 2528.63,
+  "cached": 11194.36,
+  "output": 1562.77
+ },
+ "surfaces": [
+  {
+   "key": "agentic-ide",
+   "value": 14861.27,
+   "billed": 189.45,
+   "tokens": 21153743993,
+   "entries": 1489
+  },
+  {
+   "key": "agent-chat",
+   "value": 341.48,
+   "billed": 6.07,
+   "tokens": 1064265292,
+   "entries": 239
+  },
+  {
+   "key": "voice",
+   "value": 13.22,
+   "billed": 13.22,
+   "tokens": 14659904,
+   "entries": 253
+  },
+  {
+   "key": "background",
+   "value": 7.9,
+   "billed": 7.9,
+   "tokens": 7518516,
+   "entries": 724
+  },
+  {
+   "key": "jarvis-voice",
+   "value": 0.01,
+   "billed": 0.01,
+   "tokens": 0,
+   "entries": 6
+  }
+ ],
+ "providers": [
+  {
+   "key": "codex-cli",
+   "value": 8689.25,
+   "subscription": 8689.25,
+   "entries": 601
+  },
+  {
+   "key": "claude-cli",
+   "value": 5844.23,
+   "subscription": 5844.23,
+   "entries": 566
+  },
+  {
+   "key": "antigravity",
+   "value": 284.75,
+   "subscription": 284.75,
+   "entries": 126
+  },
+  {
+   "key": "grok-cli",
+   "value": 189.45,
+   "subscription": 0.0,
+   "entries": 86
+  },
+  {
+   "key": "agy-cli",
+   "value": 138.34,
+   "subscription": 138.34,
+   "entries": 86
+  },
+  {
+   "key": "claude-api",
+   "value": 47.4,
+   "subscription": 47.4,
+   "entries": 19
+  },
+  {
+   "key": "gemini-live",
+   "value": 9.7,
+   "subscription": 0.0,
+   "entries": 101
+  },
+  {
+   "key": "grok-build",
+   "value": 5.69,
+   "subscription": 0.0,
+   "entries": 39
+  },
+  {
+   "key": "vertex",
+   "value": 5.56,
+   "subscription": 0.0,
+   "entries": 236
+  },
+  {
+   "key": "openai-codex",
+   "value": 3.27,
+   "subscription": 3.27,
+   "entries": 51
+  },
+  {
+   "key": "openai",
+   "value": 2.77,
+   "subscription": 0.0,
+   "entries": 142
+  },
+  {
+   "key": "codex",
+   "value": 1.22,
+   "subscription": 0.0,
+   "entries": 41
+  },
+  {
+   "key": "grok",
+   "value": 1.21,
+   "subscription": 0.0,
+   "entries": 158
+  },
+  {
+   "key": "openai-live",
+   "value": 0.91,
+   "subscription": 0.0,
+   "entries": 46
+  },
+  {
+   "key": "gemini",
+   "value": 0.12,
+   "subscription": 0.0,
+   "entries": 97
+  },
+  {
+   "key": "gemini-flash-tts",
+   "value": 0.01,
+   "subscription": 0.0,
+   "entries": 1
+  }
+ ],
+ "billed": [
+  {
+   "key": "grok-cli",
+   "label": "Grok Build, coding agent on our own xAI key",
+   "usd": 189.45
+  },
+  {
+   "key": "voice",
+   "label": "Voice: realtime, pipeline and tool models",
+   "usd": 13.22
+  },
+  {
+   "key": "background",
+   "label": "Background jobs: wiki, curation, awareness",
+   "usd": 7.9
+  },
+  {
+   "key": "agent-chat",
+   "label": "Chats with agents on API keys",
+   "usd": 6.07
+  },
+  {
+   "key": "speech",
+   "label": "Speech-to-text and text-to-speech",
+   "usd": 0.01
+  }
+ ],
+ "days": [
+  {
+   "date": "2026-09-01",
+   "value": 611.08,
+   "billed": 0.05,
+   "tokens": 533461749
+  },
+  {
+   "date": "2026-09-02",
+   "value": 1101.53,
+   "billed": 1.72,
+   "tokens": 988561334
+  },
+  {
+   "date": "2026-09-03",
+   "value": 611.6,
+   "billed": 0.82,
+   "tokens": 848433590
+  },
+  {
+   "date": "2026-09-04",
+   "value": 17.0,
+   "billed": 5.59,
+   "tokens": 57780014
+  },
+  {
+   "date": "2026-09-05",
+   "value": 34.6,
+   "billed": 0.6,
+   "tokens": 23262549
+  },
+  {
+   "date": "2026-09-06",
+   "value": 23.79,
+   "billed": 2.29,
+   "tokens": 20846481
+  },
+  {
+   "date": "2026-09-07",
+   "value": 244.4,
+   "billed": 0.0,
+   "tokens": 187675920
+  },
+  {
+   "date": "2026-09-08",
+   "value": 370.86,
+   "billed": 19.75,
+   "tokens": 414635066
+  },
+  {
+   "date": "2026-09-09",
+   "value": 277.92,
+   "billed": 8.16,
+   "tokens": 389909087
+  },
+  {
+   "date": "2026-09-10",
+   "value": 2122.45,
+   "billed": 1.43,
+   "tokens": 1785520606
+  },
+  {
+   "date": "2026-09-11",
+   "value": 0.0,
+   "billed": 0.0,
+   "tokens": 65264663
+  },
+  {
+   "date": "2026-09-12",
+   "value": 1281.2,
+   "billed": 0.89,
+   "tokens": 999065222
+  },
+  {
+   "date": "2026-09-13",
+   "value": 4.98,
+   "billed": 0.01,
+   "tokens": 109304566
+  },
+  {
+   "date": "2026-09-14",
+   "value": 3.02,
+   "billed": 0.0,
+   "tokens": 34413317
+  },
+  {
+   "date": "2026-09-17",
+   "value": 29.47,
+   "billed": 29.47,
+   "tokens": 101864519
+  },
+  {
+   "date": "2026-09-18",
+   "value": 18.02,
+   "billed": 17.39,
+   "tokens": 53465498
+  },
+  {
+   "date": "2026-09-19",
+   "value": 1429.43,
+   "billed": 0.16,
+   "tokens": 1109441071
+  },
+  {
+   "date": "2026-09-20",
+   "value": 75.34,
+   "billed": 0.81,
+   "tokens": 400779141
+  },
+  {
+   "date": "2026-09-21",
+   "value": 213.11,
+   "billed": 123.38,
+   "tokens": 551740695
+  },
+  {
+   "date": "2026-09-22",
+   "value": 0.15,
+   "billed": 0.0,
+   "tokens": 4779029
+  },
+  {
+   "date": "2026-09-23",
+   "value": 1339.08,
+   "billed": 0.79,
+   "tokens": 1555425508
+  },
+  {
+   "date": "2026-09-25",
+   "value": 105.56,
+   "billed": 0.17,
+   "tokens": 388720527
+  },
+  {
+   "date": "2026-09-26",
+   "value": 516.01,
+   "billed": 0.1,
+   "tokens": 1185668072
+  },
+  {
+   "date": "2026-09-27",
+   "value": 801.24,
+   "billed": 0.02,
+   "tokens": 2458261728
+  },
+  {
+   "date": "2026-09-28",
+   "value": 854.5,
+   "billed": 0.06,
+   "tokens": 1723194181
+  },
+  {
+   "date": "2026-09-29",
+   "value": 1161.75,
+   "billed": 3.0,
+   "tokens": 2163350414
+  },
+  {
+   "date": "2026-09-30",
+   "value": 1975.79,
+   "billed": 0.0,
+   "tokens": 4085363158
+  }
+ ],
+ "receipt": {
+  "when": "2026-09-01, 16:00 to 17:00",
+  "agent": "Claude Code",
+  "model": "claude-fable-5",
+  "rateIn": 10.0,
+  "rateOut": 50.0,
+  "cacheFraction": 0.1,
+  "tokensIn": 4260943,
+  "tokensCached": 128306379,
+  "tokensOut": 324964,
+  "appUsd": 187.16
+ }
+}
