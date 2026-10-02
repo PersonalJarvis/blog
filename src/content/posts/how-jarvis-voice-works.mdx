@@ -16,30 +16,77 @@ import data from "@/data/jarvis-voice.json";
 
 Between August 3 and October 1 we dictated 7,078 times into Personal Jarvis: 225,995 words, a little over 25 hours of speech. Almost none of it went to Jarvis as a question. It went into code editors, chat boxes, terminals and emails, because that is what Jarvis Voice is for. You hold a shortcut, you talk, you let go, and the text appears where your cursor is, in any app.
 
-Jarvis Voice is the dictation half of Personal Jarvis. It does not answer you; it writes for you. Out of the box the shortcut is `Ctrl` + `Right Alt` + `J`: hold it while you speak. `Ctrl` + `Right Alt` + `Space` starts and stops a longer, hands-free dictation, and `Ctrl` + `Alt` + `V` pastes the last dictation again if it landed in the wrong place. You can change all three under **Voice → Shortcuts**.
+Jarvis Voice is the dictation half of Personal Jarvis. It does not answer you; it writes for you. While you talk, a small companion on your desktop shows that Jarvis is listening: since Personal Jarvis 2.5.0 that can be a pixel pet instead of the slim Jarvis bar.
 
 <Video
   n={1}
+  src="posts/how-jarvis-voice-works/jarvis-pet-dictation.mp4"
+  poster="posts/how-jarvis-voice-works/poster-pet.webp"
+  width={1280}
+  height={720}
+  label="Ember, the baby dragon pet, during one dictation: idle, then listening with sound waves at its ears while the three strokes in its control strip move with the voice, then a highlight sweeping across the strokes after the key is released, then idle again."
+  title="One dictation, as the desktop pet shows it"
+  subtitle="Ember idles, listens while you hold the key, works while the text is made, and rests again."
+  source="rendered frame by frame with the app's own pet and strip code, ui/orb/pet_renderer.py and ui/orb/controls.py, October 2, 2026"
+>
+  <Fragment slot="caption">Nine and a half seconds, no sound. The voice level that drives the strokes is a made-up speech curve, and the transcribing phase is held longer than the real median of 0.42 seconds so you can see it. The labels and the timeline are added for this post.</Fragment>
+</Video>
+
+This post walks through the keys you press, what you see while you dictate, the path your words take from the microphone to the text field, the three times we got it wrong, and what we keep on your disk. "We" means the people building Personal Jarvis and the coding agents that do much of the typing. Every file we name is open source, and the grey chips like <Gh path="jarvis/dictation/insert.py" /> link straight to it on GitHub.
+
+## The keys you press
+
+Dictation lives on global shortcuts, so it works in whatever app is in front. These are the defaults:
+
+| Keys | What happens |
+|---|---|
+| Hold `Ctrl` + `Right Alt` + `J` | Records while you hold the keys. Let go, and the text is inserted at your cursor. |
+| `Ctrl` + `Right Alt` + `Space` | Hands-free: press once to start, press again to stop. For anything longer than a sentence or two. |
+| `Ctrl` + `Alt` + `V` | Pastes your last dictation again, without recording. For a paste that landed in the wrong window. |
+| `Alt` + `Win` + `P` | Hides the desktop pet, or brings it back to the front. |
+
+`Right Alt` means the Alt key to the right of the space bar; on German keyboards it is labelled `Alt Gr`. You change the first three under **Voice → Shortcuts** and the pet key under **Settings → My Pets → Customize**. A new combination saves the moment you record it, and the page warns you when it collides with another shortcut. On a Mac you record your own combination with `Cmd`. On Linux under Wayland the system does not let apps own global keys; there you start a dictation with the button in the app.
+
+During a voice call with Jarvis, the dictation key used to hang up the call. Since October 2 it pauses the call's microphone instead, writes your text into the field, and hands the microphone back. That change is on GitHub and ships with the next release.
+
+## What you see while you talk
+
+Dictation has no window of its own. What tells you it is running is the companion you picked under **Settings → My Pets**: one of the pets, or the Jarvis bar.
+
+### The pet and its buttons
+
+A pet floats above your other windows and switches state with Jarvis. While you hold the dictation key it listens (Ember gets sound waves at its ears), and after you let go it works until the text is in your field. The control strip under it shows up while something is happening and when your pointer is on the pet. From left to right:
+
+| Control | What it does |
+|---|---|
+| Bell | Turns the pet's "done" cards on or off for this session. |
+| Microphone | Mutes Jarvis's microphone. |
+| Three strokes | Stand still at rest, follow your voice while you dictate or talk, and carry a sweeping highlight while the text is being made. A click starts a conversation with Jarvis or ends it. |
+| Speaker | Silences Jarvis's voice for this session. |
+| Phone | Calls Jarvis or hangs up. It turns green under the pointer when a click would call and red when it would hang up. |
+
+The bell and the phone button are the newest parts. They are in figure 1 and in the app we build Jarvis with, and they arrive with the next release; Personal Jarvis 2.5.0 has the pets with the microphone, the three strokes and the speaker. If you want the buttons on screen all the time, switch on **Always show the buttons** under **Settings → My Pets → Customize**. The pets themselves, and how to draw your own, are in [our post about them](../desktop-pets/).
+
+### The Jarvis bar
+
+The bar is the quieter choice and still the default: a small pill at the bottom of your screen. It carries no text, so every state has to be readable from its shape and colour alone.
+
+<Video
+  n={2}
   src="posts/how-jarvis-voice-works/jarvis-bar-dictation.mp4"
   poster="posts/how-jarvis-voice-works/poster.webp"
   width={1280}
   height={720}
   label="The Jarvis bar during one dictation: a resting pill, gold bars moving with a voice while the key is held, a highlight sweeping along the bars after the key is released, and the resting pill again."
-  title="One dictation, as the Jarvis bar shows it"
+  title="The same dictation on the Jarvis bar"
   subtitle="Resting, recording while you hold the key, transcribing after you let go, done."
   source="rendered frame by frame with the bar's own drawing code, jarvis/ui/jarvisbar/renderer.py, October 2, 2026"
 >
-  <Fragment slot="caption">Nine seconds, no sound. The voice level that drives the bars is a made-up speech curve, and the transcribing phase is held for 1.2 seconds so you can see it; in October the median was 0.42 seconds. The labels and the timeline under the bar are added for this post.</Fragment>
+  <Fragment slot="caption">Nine seconds, no sound. As in figure 1, the voice curve is made up and the transcribing phase is held longer than it really takes.</Fragment>
 </Video>
 
-This post walks through what you see while you dictate, the path your words take from the microphone to the text field, the three times we got it wrong, and what we keep on your disk. "We" means the people building Personal Jarvis and the coding agents that do much of the typing. Every file we name is open source, and the grey chips like <Gh path="jarvis/dictation/insert.py" /> link straight to it on GitHub.
-
-## What the bar tells you
-
-Dictation has no window of its own. The only thing on screen is the Jarvis bar, a small pill that floats at the bottom of your screen above every other window. It carries no text, so every state has to be readable from its shape and colour alone.
-
 <BarStates
-  n={2}
+  n={3}
   title="Five looks, each with one meaning"
   subtitle="The Jarvis bar around a dictation, at the size each look has on screen relative to the others."
   source="jarvis/ui/jarvisbar/renderer.py and modes.py in the Personal Jarvis repo"
@@ -47,7 +94,7 @@ Dictation has no window of its own. The only thing on screen is the Jarvis bar, 
   <Fragment slot="caption">Rendered with the bar's own drawing code, enlarged. Gold only appears while something is happening.</Fragment>
 </BarStates>
 
-Two of these looks exist because the obvious version lied. Dictation first borrowed the bar's voice-conversation looks: "listening" while you spoke and "thinking" afterwards. But a listening bar has a hang-up button, and a click on it during a dictation would have ended a call that did not exist. So dictation got two modes of its own, `dictate` and `dictate_transcribing`, and both ignore clicks. The rule is written into <Gh path="jarvis/ui/jarvisbar/modes.py" />: a dictation mode claims the microphone is recording, so it may never be shown when it is not.
+Two of these looks exist because the obvious version lied. Dictation first borrowed the bar's voice-conversation looks: "listening" while you spoke and "thinking" afterwards. But a listening bar has a hang-up button, and a click on it during a dictation would have ended a call that did not exist. So dictation got two modes of its own, `dictate` and `dictate_transcribing`, and both ignore clicks. The rule is written into <Gh path="jarvis/ui/jarvisbar/modes.py" />: a dictation mode claims the microphone is recording, so it may never be shown when it is not. The pets read the same two modes and play their own "listening" and "thinking" rows for them, in <Gh path="jarvis/ui/pets/state_machine.py" />.
 
 The red cross came later, for the same reason. If you pressed the shortcut while something blocked a dictation, nothing happened at all, and the reason went to a log file you could not see. Now the bar answers every key press, even with "that did not happen".
 
@@ -58,7 +105,7 @@ The red cross came later, for the same reason. If you pressed the shortcut while
 Here is the whole path. The first three steps, and the live preview beside them, run while you are still talking. The rest happen after you let go, and that part is what you wait for.
 
 <Figure
-  n={3}
+  n={4}
   title="Your audio stays on this computer unless you choose otherwise"
   subtitle="The steps of one dictation and where each one runs. Hover a step for its source file."
   source="jarvis/speech/pipeline.py and jarvis/dictation/ in the Personal Jarvis repo; median wait from src/data/jarvis-voice.json"
@@ -104,7 +151,7 @@ Since September 2 the final pass also runs on your computer when it can, on Whis
 The wait you feel is the time between letting go of the key and the text appearing. In August that wait grew with every second you spoke, because the final pass only started when you let go and read one window after another. On August 22 we changed it to read each window as soon as the recording has grown past it, while you are still talking, and to read whatever is left at release in parallel where the provider allows it.
 
 <Figure
-  n={4}
+  n={5}
   title="The wait after you let go no longer grows with length"
   subtitle="Median time from releasing the key to the finished transcript, by length of the dictation."
   source="August: the medians in commit c34fd84dd, August 22, 2026. October: dictation history, October 1-2, 2026"
@@ -162,7 +209,7 @@ A successful dictation keeps no audio at all. A failed one keeps its recording s
 We use Jarvis Voice all day to talk to the coding agents that build Personal Jarvis. These are the counts from the statistics file on the machine we build it on.
 
 <Figure
-  n={5}
+  n={6}
   title="We dictated 7,078 times in 60 days, 497 times on October 1 alone"
   subtitle="Dictations per day, August 3 to October 1, 2026."
   source="dictation_stats.json on the machine Personal Jarvis is built on; counts only"
@@ -200,6 +247,7 @@ The full table and every setting are in the <Gh path="docs/product/everyday-use/
 ## What to take from this
 
 - **Start with the defaults:** hold `Ctrl` + `Right Alt` + `J`, speak, let go. Change keys under **Voice → Shortcuts**.
+- **Pick what shows your dictation** under **Settings → My Pets**: a pet or the Jarvis bar. `Alt` + `Win` + `P` hides the pet when it is in the way.
 - **Use hands-free for anything long:** `Ctrl` + `Right Alt` + `Space` starts, the same keys stop.
 - **When a paste goes nowhere,** press `Ctrl` + `Alt` + `V`, or copy the text from **Voice → Dictation**.
 - **Teach it your names** under **Voice → Dictionary** instead of correcting the same word every day.
@@ -208,5 +256,5 @@ The full table and every setting are in the <Gh path="docs/product/everyday-use/
 The code is in <Gh path="jarvis/dictation/" label="PersonalJarvis/PersonalJarvis" />, and you can get the app at [personaljarvis.ai](https://personaljarvis.ai). If dictation drops a word or pastes into the wrong place for you, tell us in an issue on [GitHub](https://github.com/PersonalJarvis/PersonalJarvis/issues), with the outcome badge from the history row.
 
 <div class="note">
-  <strong>How we measured.</strong> Figure 5 and the totals come from <code>dictation_stats.json</code> on the machine Personal Jarvis is built on, which stores per-day counts and durations without any text, from August 3 (its first day) to October 1, 2026, in local days. The wait times and the outcome and language counts come from the {data.recent.n} most recent entries of the local dictation history, recorded between October 1 and 2, 2026; every one that was transcribed ran on the on-device recognizer; wait times count only dictations that reached a text field and use the history's own <code>release_wait_ms</code> measurement. The August medians are quoted from the message of commit c34fd84dd, which read them from the history at the time; the commit does not define "short", so we put it next to our under-25-seconds group. Preview latencies and request counts are the measurements written into <code>local_preview.py</code> and <code>preview_budget.py</code>. Figures 1 and 2 are rendered with the bar's drawing code from the source as of October 2, 2026; the voice level in figure 1 is synthetic. No dictated text was read for this post.
+  <strong>How we measured.</strong> Figure 6 and the totals come from <code>dictation_stats.json</code> on the machine Personal Jarvis is built on, which stores per-day counts and durations without any text, from August 3 (its first day) to October 1, 2026, in local days. The wait times and the outcome and language counts come from the {data.recent.n} most recent entries of the local dictation history, recorded between October 1 and 2, 2026; every one that was transcribed ran on the on-device recognizer; wait times count only dictations that reached a text field and use the history's own <code>release_wait_ms</code> measurement. The August medians are quoted from the message of commit c34fd84dd, which read them from the history at the time; the commit does not define "short", so we put it next to our under-25-seconds group. Preview latencies and request counts are the measurements written into <code>local_preview.py</code> and <code>preview_budget.py</code>. Figures 1 to 3 are rendered with the app's own drawing code for the pets, their control strip and the bar, from the source on the machine we build Jarvis on as of October 2, 2026; the voice level in figures 1 and 2 is synthetic. No dictated text was read for this post.
 </div>
