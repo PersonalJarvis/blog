@@ -1,0 +1,139 @@
+---
+title: "Jarvis agents now keep working when you close Personal Jarvis"
+description: "Routines and Telegram chats no longer stop with the window. In one minute this morning three processes held them in turn, and 15 coding agents never noticed."
+pubDate: 2026-10-02
+category: engineering
+version: "2.3.2"
+---
+
+import Figure from "@/components/Figure.astro";
+import HandoverTimeline from "@/components/charts/HandoverTimeline.astro";
+import handover from "@/data/handover-oct2.json";
+
+At 8:46:26 this morning the Personal Jarvis window was closed. Twelve routines were armed in it, a Telegram bot was answering through it, and 15 coding agents were working in its panes. One minute and eight seconds later the app was open again. In between, the routines and the Telegram bot had moved to a small background process and back, and the coding agents had not noticed anything at all.
+
+Until this week, closing the window ended everything except the coding agents. Routines did not fire and a message to Jarvis on Telegram went unanswered until someone opened the app again. Now Jarvis agents keep working while the app is closed, and after a restart of the PC they can start without the window ever opening.
+
+This post covers why Personal Jarvis now has two different client-server designs for its two kinds of agents, how the newer one hands work back and forth, what that minute looked like in our logs, and what broke while we built it. In this post, "we" means the people building Personal Jarvis and the coding agents that do much of the typing.
+
+## Two kinds of agents, two lifetimes
+
+Personal Jarvis runs two quite different kinds of agents.
+
+**Coding agents** are command-line programs such as Claude Code or Codex, each running in its own terminal pane of the Agentic IDE (the part of the app where you work with several coding agents side by side). Each one is a separate process that does its own work.
+
+**Jarvis agents** are the assistant's own helpers: an agent you chat with in the app, the routines you give it ("every weekday at 8, summarise my unread mail"), and the chat channels it answers on, such as Telegram and Discord. They have no process of their own. They are tasks inside the app's backend, next to the voice pipeline, the wake word and the on-screen overlay.
+
+Since September 28 the coding agents live in a separate terminal host, and the app is only a client that attaches to it. We wrote about that [in an earlier post](https://personaljarvis.ai/blog/agents-outlive-the-app/). The Jarvis agents stayed inside the app, so they still ended with the window.
+
+**Look at where your agents actually live before you decide how they should survive.** Ours lived in two very different places, and that decided everything that follows.
+
+## Why we did not give Jarvis agents a host of their own
+
+The goal was simple: closing the window should not stop a routine or leave a Telegram message unanswered.
+
+The obvious fix was to copy the terminal host: move the Jarvis agents into a long-lived process and make the app a client of it. It would have been the cleanest design. We did not do it, because the Jarvis agents are not separable the way terminals are. The scheduler, the chat channels, the agent runtime, the voice pipeline, the wake word and the overlay all share one event bus and one process. The voice pipeline needs the microphone and the window; the agents need the same brain, tools and memory the voice uses. Splitting them would have meant rebuilding the desktop app around a remote backend, and every voice feature would have had to learn to talk across a process boundary.
+
+Instead, we built a hand-off. Personal Jarvis already has a headless mode: the same backend without a window, which people run on a server. That backend can already run routines, chat channels, the agent runtime and the terminal host connection. So when you close the app, Jarvis starts that headless backend as a background service, without microphone, wake word or overlay, and gives it the work. When you open the app again, the service gives the work back.
+
+What it costs: exactly one of the two may run at a time, so there is a short gap at each hand-off. We measured it below. A routine reply that is in the middle of being written at the moment you close the window is interrupted, as it always was.
+
+**If a clean split would mean rebuilding half of your app, a hand-off between two copies of the same backend gets you most of the way for a fraction of the risk.**
+
+## How the hand-off works
+
+Both the app and the background service use the same start lock, a file that only one process can hold. That lock is what guarantees there is never a second copy answering Telegram or firing the same routine twice.
+
+1. **You close the window.** If there is something to keep, Jarvis starts the background service. "Something to keep" means an armed routine, a routine run in progress, or a chat channel from outside that is switched on. With nothing to keep, closing still stops everything, as before.
+2. **The service waits for the app to exit,** then takes the start lock before it does anything else. It never pushes a running app aside.
+3. **The service runs the work.** It loads the routines, starts polling Telegram, and re-attaches to the terminal host, just as the app would. A tray icon says that agents keep running in the background, with **Open Personal Jarvis** and **Stop background agents**.
+4. **You open the app.** Instead of reporting "already running", the app leaves a small request file for the service. The service checks for it twice a second, lets a routine run that is still in progress finish (up to 30 seconds), shuts down and releases the lock. The app takes the lock and starts normally.
+
+We used a file for that request, not a network call, because it also works while the service is still starting up and needs no credentials. The service also watches its own usefulness: when no routine, channel or run is left, it exits by itself after two checks five minutes apart.
+
+This is what the logs said this morning, shortened:
+
+```text
+08:46:26  desktop     started the background service to keep 12 armed routine(s)
+08:46:33  host        client detached — 15 terminal(s) keep running
+08:46:33  background  agent service starting
+08:46:46  background  TaskStack live (hydrated=12 scheduled)
+08:46:49  background  PTY host attached — 15 terminal(s) still running
+08:46:52  background  TelegramChannel started
+08:47:36  background  the desktop app is opening — handing the agents back
+08:47:41  host        client detached — 15 terminal(s) keep running
+08:48:08  desktop     TelegramChannel started
+```
+
+## One minute this morning
+
+Every bar below starts and ends at one of those log lines. The colour shows which process held the job at that moment.
+
+<Figure
+  n={1}
+  title="Routines and Telegram moved to the background and back; the coding agents never moved"
+  subtitle="Who held each job between 8:46:20 and 8:48:20 on October 2, while the app was closed and opened again."
+  source="Personal Jarvis desktop log, background service log and terminal host log, October 2, 2026"
+  legend={[
+    { label: "Desktop app", color: "var(--s1)" },
+    { label: "Background service", color: "var(--s2)" },
+    { label: "Terminal host", color: "var(--mark-muted)" },
+  ]}
+  table={{
+    head: ["Job", "Held by", "From", "To"],
+    rows: handover.lanes.flatMap((lane) =>
+      lane.spans.map((sp) => [lane.job, handover.owners[sp.owner], `${sp.from} s`, `${sp.to} s`]),
+    ),
+  }}
+>
+  <HandoverTimeline />
+  <Fragment slot="caption">Seconds are counted from 8:46:20. The dots on the bottom lane are the moments the app or the service detached from or attached to the terminal host; each time, all 15 coding agents were still running.</Fragment>
+</Figure>
+
+Three things stand out.
+
+The coding agents did not move at all. The terminal host kept all 15 running while first the app, then the service, then the app again attached to it. That is the client-server design doing exactly what it is for.
+
+The hand-back itself was quick: the service started handing back 2.3 seconds after the app was opened. On a separate test setup we measured the same step at 2.4 to 2.5 seconds on Windows 11 and 3.1 seconds on a bare Linux server container.
+
+The gaps are not that short. Telegram was not polled for 21.1 seconds after the window closed and for 27.2 seconds after the app reopened, because each side needs that long to start its backend. Nothing is lost in a gap: Telegram keeps the messages until someone asks for them, and Jarvis answers them as soon as polling starts. A routine that falls due in a gap fires late rather than not at all, because Jarvis still runs a routine whose time passed less than 30 minutes ago.
+
+**Measure the gap, not just the hand-off.** "Hand-back in 2.3 seconds" was true and would still have been the wrong number to tell you.
+
+## What broke on the way
+
+**The service would not die.** In our first test, the service handed back, released the lock, closed its port and then stayed alive for more than a minute. A background task that builds the assistant's brain was still running, and Python waits for such threads before a process exits. An invisible process that nobody can see is exactly what this feature must never leave behind. Now the service gives its exit hooks five seconds and then ends; a shutdown that takes longer than 30 seconds is ended hard.
+
+**A quick reopen looked like a stuck app.** An independent review of the code found that the service took the start lock several seconds before it wrote down who it was. If you reopened the app in that window, the app found a lock holder it could not identify and asked whether it should stop a stuck process. Now the service writes its marker in the same moment it takes the lock, and removes it before it lets go.
+
+**Every quit started the service.** While switching the login setting on for ourselves, we noticed the service believed it had three chat channels to keep: Discord, Telegram and "web". The web channel is the app's own connection to its windows, and Discord was switched off; both were counted because the channel manager lists every channel it has touched. The result would have been a background service after every single quit, on every machine, and one that never exited by itself. Only switched-on channels from outside now count.
+
+## Side by side
+
+| | Coding agents (Agentic IDE) | Jarvis agents (routines, chats) |
+|---|---|---|
+| Where they run | in a terminal host, a separate process | in the app's backend, or in the background service while the app is closed |
+| What closing the app does | the app detaches; the agents keep running | the work is handed to the background service |
+| Gap | none | about 20 to 30 seconds per hand-off; messages and routines wait, nothing is lost |
+| Work in progress | continues | a reply being written at that moment is interrupted |
+| After a PC restart | each agent resumes its own conversation | the service or the app starts at login and loads the routines |
+
+## After a restart
+
+Nothing can keep a process alive through a reboot, so after a restart something has to start again. If **Launch app at login** is on, Personal Jarvis opens its window when you log in, and the Jarvis agents are back with it. If you would rather not see a window, turn on **At login, start only the background agents** as well: then only the background service starts, with its tray icon, and you open the window when you want it.
+
+Both start when you log in to your user account, not before. That is deliberate: a system service that runs before login would have no access to your microphone, your keyring or your desktop.
+
+## If you run agents yourself
+
+- **Nothing to switch on.** **Settings → App settings → Keep agents running after closing** is on by default. The same card tells you what closing the app would keep right now.
+- **To quit completely,** use **Quit and stop background agents** in the app's tray menu, or **Stop background agents** in the tray menu of the background service.
+- **For a PC that should answer without a window,** turn on **Launch app at login** and **At login, start only the background agents**. Windows may ask once for permission to update its startup task.
+- **Expect a short pause around each hand-off.** A Telegram message sent in those 20 to 30 seconds is answered right after it.
+- **Spoken routines need the app open.** The background service has no voice, so a routine that only speaks a sentence fails there. Routines that let an agent do work are unaffected.
+
+Tell us if an agent of yours stops answering after you close the app: open an issue on [GitHub](https://github.com/PersonalJarvis/PersonalJarvis/issues) with the time it happened.
+
+<div class="note">
+  <strong>How we measured.</strong> Figure 1 and the log excerpt come from the desktop log, the background service log and the terminal host log of the machine Personal Jarvis is built on, October 2, 2026, between 8:46:20 and 8:48:20, rounded to 0.1 seconds; the bot's name is removed. The 2.4 to 2.5 second hand-back times come from an isolated test copy of the app on the same Windows 11 machine (own data folder and port, chat channels off); the 3.1 seconds from the same test in a <code>python:3.11-slim</code> Linux container without a display. The hand-off has run live only on Windows; macOS goes through the same code and tests but has not been tried live, and it shows no menu-bar icon for the background service. Status: the background service runs on the machine Personal Jarvis is developed on since October 1, 2026, and is not in a published release yet.
+</div>

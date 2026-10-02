@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-02",
+  "origin": "08:46:20",
+  "windowSeconds": 120,
+  "source": "Personal Jarvis desktop log, background service log and terminal host log, October 2, 2026; seconds after 08:46:20 local time, rounded to 0.1 s",
+  "owners": {
+    "desktop": "Desktop app",
+    "service": "Background service",
+    "host": "Terminal host"
+  },
+  "lanes": [
+    {
+      "job": "Holds the app",
+      "spans": [
+        { "owner": "desktop", "from": 0, "to": 13.4, "note": "window open until 6.4 s, then shutting down" },
+        { "owner": "service", "from": 13.9, "to": 81.3, "note": "takes the start lock 0.5 s after the app is gone" },
+        { "owner": "desktop", "from": 81.3, "to": 120, "note": "reopened at 74.3 s; window painted at 82.9 s" }
+      ]
+    },
+    {
+      "job": "12 routines armed",
+      "spans": [
+        { "owner": "desktop", "from": 0, "to": 6.5, "note": "armed until the app starts shutting down" },
+        { "owner": "service", "from": 26.6, "to": 76.5, "note": "12 scheduled routines loaded; stops on the hand-back" },
+        { "owner": "desktop", "from": 103.0, "to": 120, "note": "12 scheduled routines loaded again" }
+      ]
+    },
+    {
+      "job": "Telegram answering",
+      "spans": [
+        { "owner": "desktop", "from": 0, "to": 11.2, "note": "polling stops during shutdown" },
+        { "owner": "service", "from": 32.3, "to": 81.3, "note": "polling" },
+        { "owner": "desktop", "from": 108.5, "to": 120, "note": "polling" }
+      ]
+    },
+    {
+      "job": "15 coding agents running",
+      "spans": [
+        { "owner": "host", "from": 0, "to": 120, "note": "one terminal host the whole time" }
+      ]
+    }
+  ],
+  "events": [
+    { "t": 6.4, "label": "Window closed" },
+    { "t": 74.3, "label": "App opened again" }
+  ],
+  "attaches": [
+    { "t": 13.4, "who": "desktop", "kind": "detached", "agents": 15 },
+    { "t": 29.7, "who": "service", "kind": "attached", "agents": 15 },
+    { "t": 81.3, "who": "service", "kind": "detached", "agents": 15 },
+    { "t": 104.4, "who": "desktop", "kind": "attached", "agents": 15 }
+  ],
+  "gaps": {
+    "telegramOffline": [21.1, 27.2],
+    "routinesUnarmed": [20.1, 26.5],
+    "handBackAfterLaunch": 2.3
+  }
+}

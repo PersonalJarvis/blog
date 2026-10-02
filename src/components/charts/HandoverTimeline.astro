@@ -1,0 +1,98 @@
+---
+/**
+ * Two minutes on October 2: who held each job while the desktop app was
+ * closed and opened again. Every span starts and ends at a real log line
+ * (desktop log, background service log, terminal host log).
+ */
+import data from "@/data/handover-oct2.json";
+
+const W = 640;
+const L = 0;
+const R = 8;
+const T = 46;
+const laneH = 46;
+const barH = 18;
+const labelW = 0;
+const H = T + laneH * data.lanes.length + 40;
+const x0 = L + labelW;
+const x = (s: number) => x0 + ((W - x0 - R) * s) / data.windowSeconds;
+const laneTop = (i: number) => T + i * laneH;
+const barY = (i: number) => laneTop(i) + 20;
+const ownerColor: Record<string, string> = {
+  desktop: "var(--s1)",
+  service: "var(--s2)",
+  host: "var(--mark-muted)",
+};
+const owners = data.owners as Record<string, string>;
+const [hh, mm, ss] = data.origin.split(":").map(Number);
+const clockAt = (s: number) => {
+  const total = hh * 3600 + mm * 60 + ss + Math.round(s);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const sec = total % 60;
+  return `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+};
+const ticks = [0, 20, 40, 60, 80, 100, 120];
+const axisY = T + laneH * data.lanes.length + 8;
+const hostLane = data.lanes.length - 1;
+const fmt = (v: number) => v.toFixed(1);
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Timeline of two minutes on October 2. The desktop app held routines, Telegram and the app until the window closed at ${clockAt(6.4)}. The background service took the app at ${clockAt(13.9)}, armed the 12 routines at ${clockAt(26.6)} and answered Telegram from ${clockAt(32.3)}. The app was opened again at ${clockAt(74.3)}; the service handed back and the desktop armed the routines at ${clockAt(103)} and answered Telegram from ${clockAt(108.5)}. One terminal host kept 15 coding agents running the whole time.`}>
+  {
+    ticks.map((s) => (
+      <g>
+        <line x1={x(s)} x2={x(s)} y1={T - 4} y2={axisY - 6} stroke="var(--grid)" />
+        <text class="t-axis" x={x(s)} y={axisY + 10} text-anchor={s === 0 ? "start" : s === 120 ? "end" : "middle"}>
+          {clockAt(s)}
+        </text>
+      </g>
+    ))
+  }
+
+  {
+    data.events.map((e) => (
+      <g>
+        <line x1={x(e.t)} x2={x(e.t)} y1={T - 14} y2={axisY - 6} stroke="var(--ink-3)" stroke-dasharray="3 3" />
+        <text class="t-note" x={x(e.t) + 4} y={T - 18}>{e.label}</text>
+      </g>
+    ))
+  }
+
+  {
+    data.lanes.map((lane, i) => (
+      <g>
+        <text class="t-label" x={x0} y={laneTop(i) + 12} style="fill: var(--ink-2)">{lane.job}</text>
+        {lane.spans.map((sp) => {
+          const tip = `<b>${lane.job}</b><br>${owners[sp.owner]}<br>${clockAt(sp.from)} to ${clockAt(sp.to)}<br>${sp.note}`;
+          const w = Math.max(2, x(sp.to) - x(sp.from) - 2);
+          return (
+            <g>
+              <rect class="hit" x={x(sp.from)} y={barY(i) - 4} width={w} height={barH + 8} data-tip={tip} fill="transparent" />
+              <rect class="hl" x={x(sp.from) - 2} y={barY(i) - 2} width={w + 4} height={barH + 4} rx="5" fill="none" stroke="var(--ink)" stroke-width="1.5" pointer-events="none" />
+              <rect x={x(sp.from) + 1} y={barY(i)} width={w} height={barH} rx="4" fill={ownerColor[sp.owner]} pointer-events="none" />
+            </g>
+          );
+        })}
+      </g>
+    ))
+  }
+
+  {
+    data.attaches.map((a) => {
+      const cx = x(a.t);
+      const cy = barY(hostLane) + barH / 2;
+      const tip = `<b>${clockAt(a.t)}</b><br>${owners[a.who]} ${a.kind}<br>${a.agents} coding agents still running`;
+      return (
+        <g>
+          <circle class="hit" cx={cx} cy={cy} r="10" data-tip={tip} />
+          <circle class="hl" cx={cx} cy={cy} r="9" fill="none" stroke="var(--ink)" stroke-width="1.5" pointer-events="none" />
+          <circle cx={cx} cy={cy} r="5" fill={ownerColor[a.who]} stroke="var(--paper)" stroke-width="2" pointer-events="none" />
+        </g>
+      );
+    })
+  }
+
+  <text class="t-note" x={x(data.lanes[2].spans[0].to) + 4} y={barY(2) + 13}>{fmt(data.gaps.telegramOffline[0])} s</text>
+  <text class="t-note" x={x(data.lanes[2].spans[1].to) + 4} y={barY(2) + 13}>{fmt(data.gaps.telegramOffline[1])} s</text>
+</svg>

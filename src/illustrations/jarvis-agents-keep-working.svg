@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- The app window closes; a ghost carries the routine clock and a chat reply on into the background. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">
+<rect vector-effect="non-scaling-stroke" x="48" y="112" width="168" height="124" rx="12" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M48 140 H216"/>
+<path vector-effect="non-scaling-stroke" d="M64 126 H64.01 M78 126 H78.01"/>
+<path vector-effect="non-scaling-stroke" d="M190 120 L202 132 M202 120 L190 132"/>
+<path vector-effect="non-scaling-stroke" d="M70 168 H160 M70 190 H182 M70 212 H136"/>
+<path vector-effect="non-scaling-stroke" d="M232 196 C262 196 284 186 300 170" stroke-dasharray="1 11"/>
+<g transform="translate(306 120) scale(0.95)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><path vector-effect="non-scaling-stroke" d="M30 52 Q35 56 40 52" fill="none"/></g>
+<path vector-effect="non-scaling-stroke" d="M352 64 H420 Q430 64 430 74 V96 Q430 106 420 106 H372 L360 116 L362 106 H352 Q342 106 342 96 V74 Q342 64 352 64 Z" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M358 80 H414 M358 92 H396"/>
+<circle vector-effect="non-scaling-stroke" cx="404" cy="232" r="26" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M404 216 V232 L416 240"/>
+  </g>
+</svg>
