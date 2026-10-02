@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- Gigi speaks to a connected account, drawn in the blog's existing ink style. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(54 100) scale(1.45)">
+      <path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/>
+      <ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/>
+      <ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/>
+      <ellipse vector-effect="non-scaling-stroke" cx="35" cy="55" rx="4" ry="5" fill="#faf9f5"/>
+    </g>
+    <path d="M176 144 Q188 160 176 176 M193 130 Q214 160 193 190"/>
+    <rect x="245" y="76" width="171" height="175" rx="15" fill="#faf9f5"/>
+    <circle cx="330" cy="132" r="23"/>
+    <path d="M292 193 C296 173 308 164 330 164 C351 164 364 173 368 193"/>
+    <path d="M285 221 H338"/>
+    <circle cx="400" cy="239" r="29" fill="#faf9f5"/>
+    <path d="M387 239 L397 249 L415 229"/>
+    <path d="M120 77 C151 40 210 39 242 63 M226 44 L244 63 L222 71"/>
+    <path d="M286 275 C242 294 189 283 162 258 M165 277 L161 257 L181 259"/>
+  </g>
+</svg>

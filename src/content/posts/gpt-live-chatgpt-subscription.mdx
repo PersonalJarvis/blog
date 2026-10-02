@@ -1,0 +1,98 @@
+---
+title: "Personal Jarvis can use a ChatGPT subscription for voice"
+description: "An experimental GPT Subscription option connects voice and reasoning to a Codex account. We checked a real call, disabled API credentials in a second test, and kept API-key mode available."
+pubDate: 2026-10-02
+category: voice
+---
+
+On October 2, we completed a Personal Jarvis voice conversation through a ChatGPT subscription. The voice connection and all six reasoning requests used the connected Codex account. Our session and request logs showed no project-API-key requests for that call.
+
+That is the new **GPT Subscription** option in Jarvis. It gives people who already use ChatGPT another way to connect their voice assistant, alongside the existing **OpenAI GPT-Live** API-key option. You can keep your saved API configuration and choose which access method to use.
+
+The implementation is [merged into the app's source](https://github.com/PersonalJarvis/PersonalJarvis/pull/322). **The subscription voice connection is experimental.** It uses a private upstream Codex voice protocol, so availability can change. This post describes the merged implementation and the Windows call we verified; it does not announce a new packaged release or promise that every ChatGPT account can use it.
+
+## One account for the voice and the thinking
+
+A useful voice assistant has more to do than answer aloud. It needs to understand a request, work through it, use tools when appropriate, and tell you what happened.
+
+Jarvis keeps those responsibilities separate:
+
+| Part | Responsibility in a subscription call |
+|---|---|
+| Live voice | Carries the spoken conversation through the selected Codex account. |
+| Reasoning | Uses that account for the requests that work through the task and produce tool calls. |
+| Jarvis | Applies permissions and confirmations, executes allowed actions, handles cancellation, and returns the results to the conversation. |
+
+The audio connection uses WebRTC, while reasoning responses stream back to Jarvis separately. A tool request still goes through Jarvis's own executor. Connecting a subscription does not hand control of the computer to an independent coding-agent session.
+
+This also defines the scope of the feature. A coding agent you launch, or another service you connect to Jarvis, can have its own account and costs. **GPT Subscription selects access for this voice conversation and its delegated reasoning.** It does not move every service in the app onto your ChatGPT plan.
+
+## A login from inside Jarvis
+
+The provider list now has a **GPT Subscription** row above **OpenAI GPT-Live**. Choosing it opens the account setup, where you can select a connected Codex account or sign in through the guided flow. The account, voice and thinking-model choices are saved separately from the API-key profile.
+
+An existing Codex installation can handle sign-in. If it is missing, **Set up ChatGPT sign-in** prepares a private native login helper. That setup does not require you to install Node.js or npm. Jarvis checks the downloaded executable against a pinned checksum before making it available to the login flow.
+
+The helper stays inside Jarvis's own data directory. It is used for authentication and does not appear as a newly installed coding agent elsewhere on the machine.
+
+We also fixed an easily missed login bug. A command-line tool can print a long sign-in URL across several chunks of output. Publishing the first chunk immediately gives the user a broken link. Jarvis now waits for a complete URL and makes sure an earlier documentation link cannot take the place of the actual sign-in link.
+
+## How we checked the account behind the call
+
+Hearing an answer establishes that a voice connection worked. To check which access method it used, we inspected the session record together with the requests made during the call.
+
+| Observation | What it establishes |
+|---|---|
+| The session recorded the subscription provider | Jarvis selected the subscription mode. |
+| Voice allocation succeeded through the Codex realtime route | The voice connection used the Codex account route. |
+| Six reasoning requests succeeded through the Codex Responses route | The task's reasoning followed the same account path. |
+| No project-key requests appeared in the examined window | We found no API-key fallback during that call. |
+
+The local cost ledger recorded zero API cost, but that entry alone would have been weak evidence. These checks establish the application's authentication and request routing; they are not an independent OpenAI invoice.
+
+We then ran a separate, bounded test against the final voice implementation with project API credential access disabled. Synthetic speech reached the voice connection, one harmless test tool ran, and the assistant spoke the verified result. Both user and assistant transcripts arrived. That gave us a second check in which the normal API-key path was unavailable.
+
+## A subscription failure must keep its billing choice
+
+One review finding mattered more than a successful call: an older explicit fallback setting could survive after someone selected subscription mode. If the subscription account then failed, that retained setting could allow a different provider to take over.
+
+We closed that path. **A missing account, exhausted subscription allowance or failed subscription connection must not silently switch the conversation to an API key.** Jarvis reports the problem and leaves the choice of another access method to you.
+
+API-key mode remains available, with its own saved settings. The change is that a subscription choice remains a subscription choice when something goes wrong.
+
+## What OpenAI documents, and what remains experimental
+
+[OpenAI's authentication documentation](https://learn.chatgpt.com/docs/auth) distinguishes signing into Codex with ChatGPT for subscription access from signing in with an API key for usage-based access.
+
+OpenAI also documents [ChatGPT plan usage for open-source apps](https://developers.openai.com/siwc/quickstart). Eligible users can authorize supported Responses API requests through their ChatGPT plan. That documented integration has its own authorization flow and limits.
+
+The [current preview limitations](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations) explicitly exclude audio/video input and the transcription API from that flow. **Jarvis's experimental Codex voice connection is a separate integration.** A working call through it does not establish that the public Sign in with ChatGPT flow supports audio, or that OpenAI guarantees this private voice protocol for third-party applications.
+
+Subscription use is still subject to the account's access and allowances. We are not claiming unlimited voice use, universal plan support or a fixed saving over API billing.
+
+## What we verified before merging
+
+Two independent deep reviews covered the implementation and the CI/CD pipeline. The work also added strict tests for authentication, account selection, reasoning, voice transport, result delivery, login setup and cancellation. Those tests passed on Windows, macOS, Linux and a slim Linux container without a system audio library.
+
+The complete frontend run passed **5,774 tests**. The [final PR pipeline](https://github.com/PersonalJarvis/PersonalJarvis/actions/runs/37035056709) finished with 47 successful jobs and three intentional skips, including a successful required CI gate.
+
+There is a qualification behind that green gate: the broad Linux suite reported 33,632 passes, 181 failures permitted by the existing baseline, and 188 skips. We did not change the baseline. A comparison of the relevant failing cases with the base revision found no new or worsened cause; all 209 selected cases in the affected feature and caller surfaces passed without skips.
+
+The real voice evidence is from Windows. Automated checks on the other platforms do not establish physical microphone and speaker behavior there. Long sessions, recovery through real network failures, and latency parity with API mode still need further measurement. In particular, the successful synthetic call is not a latency benchmark.
+
+## Trying the new option
+
+Use a Jarvis build that includes [PR #322](https://github.com/PersonalJarvis/PersonalJarvis/pull/322), then:
+
+1. Open **Settings → API Keys** and the realtime provider settings.
+2. Select **GPT Subscription**.
+3. Choose a connected Codex subscription account or complete the guided sign-in. Use **Set up ChatGPT sign-in** if Jarvis offers it.
+4. Choose your voice and thinking model, save the profile, and confirm that the subscription option is active before starting a call.
+
+If the option is absent, check whether your build includes the change. If the account or connection is unavailable, Jarvis should show that state without charging a saved API key as a fallback.
+
+The [implementation and review are public](https://github.com/PersonalJarvis/PersonalJarvis/pull/322). If you try it and encounter a problem, [open an issue](https://github.com/PersonalJarvis/PersonalJarvis/issues) with your operating system, Jarvis build and the visible error. Keep credentials and private conversation text out of the report.
+
+<div class="note">
+  <strong>Evidence and scope.</strong> The call observations come from one real Windows session on October 2, 2026, followed by one synthetic native voice test with API credential access disabled and a harmless test tool. No credentials, account identifiers or conversation text are reproduced here. Test totals refer to the linked PR pipeline and overlap with its focused suites; they must not be added together. OpenAI documentation was checked on October 2. This article describes source merged that day and does not claim that a packaged release, every account or every physical audio setup has been qualified.
+</div>
