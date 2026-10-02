@@ -1,0 +1,436 @@
+{
+ "query": {
+  "stats": "dictation_stats.json per-day counts, 2026-08-03 to 2026-10-01 (local days); no text",
+  "history": "dictation_history.json, the 220 most recent dictations from 2026-10-01T13:55Z to 2026-10-02T08:55Z; wait times count delivered outcomes only",
+  "before": "medians quoted in commit c34fd84dd (2026-08-22), read from the live history before that change"
+ },
+ "totals": {
+  "dictations": 7078,
+  "words": 225995,
+  "hours": 25.3,
+  "activeDays": 52,
+  "days": 60
+ },
+ "days": [
+  {
+   "date": "2026-08-03",
+   "dictations": 51,
+   "words": 1609,
+   "minutes": 10.8
+  },
+  {
+   "date": "2026-08-04",
+   "dictations": 46,
+   "words": 2808,
+   "minutes": 17.8
+  },
+  {
+   "date": "2026-08-05",
+   "dictations": 108,
+   "words": 3126,
+   "minutes": 19.8
+  },
+  {
+   "date": "2026-08-06",
+   "dictations": 90,
+   "words": 2661,
+   "minutes": 17.4
+  },
+  {
+   "date": "2026-08-07",
+   "dictations": 154,
+   "words": 5423,
+   "minutes": 35.0
+  },
+  {
+   "date": "2026-08-08",
+   "dictations": 266,
+   "words": 8805,
+   "minutes": 58.4
+  },
+  {
+   "date": "2026-08-09",
+   "dictations": 202,
+   "words": 5878,
+   "minutes": 38.6
+  },
+  {
+   "date": "2026-08-10",
+   "dictations": 251,
+   "words": 6333,
+   "minutes": 40.3
+  },
+  {
+   "date": "2026-08-11",
+   "dictations": 186,
+   "words": 5382,
+   "minutes": 33.8
+  },
+  {
+   "date": "2026-08-12",
+   "dictations": 226,
+   "words": 5950,
+   "minutes": 48.2
+  },
+  {
+   "date": "2026-08-13",
+   "dictations": 291,
+   "words": 10406,
+   "minutes": 79.1
+  },
+  {
+   "date": "2026-08-14",
+   "dictations": 228,
+   "words": 7917,
+   "minutes": 54.5
+  },
+  {
+   "date": "2026-08-15",
+   "dictations": 76,
+   "words": 3066,
+   "minutes": 19.5
+  },
+  {
+   "date": "2026-08-16",
+   "dictations": 0,
+   "words": 0,
+   "minutes": 0.0
+  },
+  {
+   "date": "2026-08-17",
+   "dictations": 0,
+   "words": 0,
+   "minutes": 0.0
+  },
+  {
+   "date": "2026-08-18",
+   "dictations": 0,
+   "words": 0,
+   "minutes": 0.0
+  },
+  {
+   "date": "2026-08-19",
+   "dictations": 0,
+   "words": 0,
+   "minutes": 0.0
+  },
+  {
+   "date": "2026-08-20",
+   "dictations": 0,
+   "words": 0,
+   "minutes": 0.0
+  },
+  {
+   "date": "2026-08-21",
+   "dictations": 0,
+   "words": 0,
+   "minutes": 0.0
+  },
+  {
+   "date": "2026-08-22",
+   "dictations": 177,
+   "words": 6679,
+   "minutes": 40.9
+  },
+  {
+   "date": "2026-08-23",
+   "dictations": 383,
+   "words": 14349,
+   "minutes": 85.6
+  },
+  {
+   "date": "2026-08-24",
+   "dictations": 278,
+   "words": 11270,
+   "minutes": 76.1
+  },
+  {
+   "date": "2026-08-25",
+   "dictations": 265,
+   "words": 10417,
+   "minutes": 64.3
+  },
+  {
+   "date": "2026-08-26",
+   "dictations": 55,
+   "words": 2690,
+   "minutes": 17.4
+  },
+  {
+   "date": "2026-08-27",
+   "dictations": 204,
+   "words": 9116,
+   "minutes": 64.8
+  },
+  {
+   "date": "2026-08-28",
+   "dictations": 164,
+   "words": 6578,
+   "minutes": 41.7
+  },
+  {
+   "date": "2026-08-29",
+   "dictations": 346,
+   "words": 10787,
+   "minutes": 65.6
+  },
+  {
+   "date": "2026-08-30",
+   "dictations": 152,
+   "words": 3528,
+   "minutes": 24.1
+  },
+  {
+   "date": "2026-08-31",
+   "dictations": 53,
+   "words": 1281,
+   "minutes": 9.0
+  },
+  {
+   "date": "2026-09-01",
+   "dictations": 133,
+   "words": 6369,
+   "minutes": 43.0
+  },
+  {
+   "date": "2026-09-02",
+   "dictations": 209,
+   "words": 8605,
+   "minutes": 55.5
+  },
+  {
+   "date": "2026-09-03",
+   "dictations": 81,
+   "words": 2747,
+   "minutes": 18.7
+  },
+  {
+   "date": "2026-09-04",
+   "dictations": 39,
+   "words": 883,
+   "minutes": 6.5
+  },
+  {
+   "date": "2026-09-05",
+   "dictations": 58,
+   "words": 811,
+   "minutes": 7.5
+  },
+  {
+   "date": "2026-09-06",
+   "dictations": 103,
+   "words": 2224,
+   "minutes": 17.7
+  },
+  {
+   "date": "2026-09-07",
+   "dictations": 117,
+   "words": 3330,
+   "minutes": 25.2
+  },
+  {
+   "date": "2026-09-08",
+   "dictations": 103,
+   "words": 3145,
+   "minutes": 20.3
+  },
+  {
+   "date": "2026-09-09",
+   "dictations": 146,
+   "words": 3678,
+   "minutes": 26.4
+  },
+  {
+   "date": "2026-09-10",
+   "dictations": 107,
+   "words": 2807,
+   "minutes": 19.4
+  },
+  {
+   "date": "2026-09-11",
+   "dictations": 29,
+   "words": 440,
+   "minutes": 4.2
+  },
+  {
+   "date": "2026-09-12",
+   "dictations": 32,
+   "words": 499,
+   "minutes": 3.8
+  },
+  {
+   "date": "2026-09-13",
+   "dictations": 45,
+   "words": 1531,
+   "minutes": 10.2
+  },
+  {
+   "date": "2026-09-14",
+   "dictations": 11,
+   "words": 132,
+   "minutes": 1.0
+  },
+  {
+   "date": "2026-09-15",
+   "dictations": 0,
+   "words": 0,
+   "minutes": 0.0
+  },
+  {
+   "date": "2026-09-16",
+   "dictations": 0,
+   "words": 0,
+   "minutes": 0.0
+  },
+  {
+   "date": "2026-09-17",
+   "dictations": 44,
+   "words": 1026,
+   "minutes": 6.4
+  },
+  {
+   "date": "2026-09-18",
+   "dictations": 34,
+   "words": 632,
+   "minutes": 4.6
+  },
+  {
+   "date": "2026-09-19",
+   "dictations": 4,
+   "words": 59,
+   "minutes": 0.4
+  },
+  {
+   "date": "2026-09-20",
+   "dictations": 50,
+   "words": 1496,
+   "minutes": 10.2
+  },
+  {
+   "date": "2026-09-21",
+   "dictations": 113,
+   "words": 3004,
+   "minutes": 20.1
+  },
+  {
+   "date": "2026-09-22",
+   "dictations": 4,
+   "words": 69,
+   "minutes": 0.4
+  },
+  {
+   "date": "2026-09-23",
+   "dictations": 49,
+   "words": 612,
+   "minutes": 4.7
+  },
+  {
+   "date": "2026-09-24",
+   "dictations": 18,
+   "words": 138,
+   "minutes": 1.6
+  },
+  {
+   "date": "2026-09-25",
+   "dictations": 57,
+   "words": 892,
+   "minutes": 7.0
+  },
+  {
+   "date": "2026-09-26",
+   "dictations": 16,
+   "words": 285,
+   "minutes": 2.2
+  },
+  {
+   "date": "2026-09-27",
+   "dictations": 56,
+   "words": 1292,
+   "minutes": 8.5
+  },
+  {
+   "date": "2026-09-28",
+   "dictations": 220,
+   "words": 8762,
+   "minutes": 59.3
+  },
+  {
+   "date": "2026-09-29",
+   "dictations": 266,
+   "words": 8225,
+   "minutes": 54.5
+  },
+  {
+   "date": "2026-09-30",
+   "dictations": 185,
+   "words": 4164,
+   "minutes": 32.4
+  },
+  {
+   "date": "2026-10-01",
+   "dictations": 497,
+   "words": 12079,
+   "minutes": 81.4
+  }
+ ],
+ "wait": {
+  "before": [
+   {
+    "bucket": "Short",
+    "medianMs": 660
+   },
+   {
+    "bucket": "25 to 50 s",
+    "medianMs": 2200
+   },
+   {
+    "bucket": "Over 50 s",
+    "medianMs": 4600
+   }
+  ],
+  "after": [
+   {
+    "bucket": "Short",
+    "n": 177,
+    "medianMs": 407
+   },
+   {
+    "bucket": "25 to 50 s",
+    "n": 19,
+    "medianMs": 562
+   },
+   {
+    "bucket": "Over 50 s",
+    "n": 4,
+    "medianMs": 360
+   }
+  ],
+  "allMedianMs": 422,
+  "allP90Ms": 813
+ },
+ "recent": {
+  "n": 220,
+  "delivered": 200,
+  "outcomes": {
+   "chat": 182,
+   "empty": 18,
+   "paste_sent": 17,
+   "clipboard_only": 1,
+   "partial": 2
+  },
+  "languages": {
+   "de": 183,
+   "en": 25,
+   "none": 8,
+   "ru": 1,
+   "ko": 2,
+   "fr": 1
+  },
+  "medianSeconds": 6.2,
+  "medianWords": 18.0,
+  "providers": {
+   "faster-whisper": 212,
+   "none": 8
+  }
+ }
+}

@@ -1,0 +1,212 @@
+---
+title: "How Jarvis Voice turns speech into text in any app"
+description: "Hold a key, talk, let go, and the words land where your cursor is. We dictated 225,995 words this way in two months. This is how it works, step by step."
+pubDate: 2026-10-02
+category: voice
+---
+
+import Figure from "@/components/Figure.astro";
+import Video from "@/components/Video.astro";
+import Gh from "@/components/Gh.astro";
+import BarStates from "@/components/charts/BarStates.astro";
+import VoicePipeline from "@/components/charts/VoicePipeline.astro";
+import ReleaseWait from "@/components/charts/ReleaseWait.astro";
+import VoiceDays from "@/components/charts/VoiceDays.astro";
+import data from "@/data/jarvis-voice.json";
+
+Between August 3 and October 1 we dictated 7,078 times into Personal Jarvis: 225,995 words, a little over 25 hours of speech. Almost none of it went to Jarvis as a question. It went into code editors, chat boxes, terminals and emails, because that is what Jarvis Voice is for. You hold a shortcut, you talk, you let go, and the text appears where your cursor is, in any app.
+
+Jarvis Voice is the dictation half of Personal Jarvis. It does not answer you; it writes for you. Out of the box the shortcut is `Ctrl` + `Right Alt` + `J`: hold it while you speak. `Ctrl` + `Right Alt` + `Space` starts and stops a longer, hands-free dictation, and `Ctrl` + `Alt` + `V` pastes the last dictation again if it landed in the wrong place. You can change all three under **Voice → Shortcuts**.
+
+<Video
+  n={1}
+  src="posts/how-jarvis-voice-works/jarvis-bar-dictation.mp4"
+  poster="posts/how-jarvis-voice-works/poster.webp"
+  width={1280}
+  height={720}
+  label="The Jarvis bar during one dictation: a resting pill, gold bars moving with a voice while the key is held, a highlight sweeping along the bars after the key is released, and the resting pill again."
+  title="One dictation, as the Jarvis bar shows it"
+  subtitle="Resting, recording while you hold the key, transcribing after you let go, done."
+  source="rendered frame by frame with the bar's own drawing code, jarvis/ui/jarvisbar/renderer.py, October 2, 2026"
+>
+  <Fragment slot="caption">Nine seconds, no sound. The voice level that drives the bars is a made-up speech curve, and the transcribing phase is held for 1.2 seconds so you can see it; in October the median was 0.42 seconds. The labels and the timeline under the bar are added for this post.</Fragment>
+</Video>
+
+This post walks through what you see while you dictate, the path your words take from the microphone to the text field, the three times we got it wrong, and what we keep on your disk. "We" means the people building Personal Jarvis and the coding agents that do much of the typing. Every file we name is open source, and the grey chips like <Gh path="jarvis/dictation/insert.py" /> link straight to it on GitHub.
+
+## What the bar tells you
+
+Dictation has no window of its own. The only thing on screen is the Jarvis bar, a small pill that floats at the bottom of your screen above every other window. It carries no text, so every state has to be readable from its shape and colour alone.
+
+<BarStates
+  n={2}
+  title="Five looks, each with one meaning"
+  subtitle="The Jarvis bar around a dictation, at the size each look has on screen relative to the others."
+  source="jarvis/ui/jarvisbar/renderer.py and modes.py in the Personal Jarvis repo"
+>
+  <Fragment slot="caption">Rendered with the bar's own drawing code, enlarged. Gold only appears while something is happening.</Fragment>
+</BarStates>
+
+Two of these looks exist because the obvious version lied. Dictation first borrowed the bar's voice-conversation looks: "listening" while you spoke and "thinking" afterwards. But a listening bar has a hang-up button, and a click on it during a dictation would have ended a call that did not exist. So dictation got two modes of its own, `dictate` and `dictate_transcribing`, and both ignore clicks. The rule is written into <Gh path="jarvis/ui/jarvisbar/modes.py" />: a dictation mode claims the microphone is recording, so it may never be shown when it is not.
+
+The red cross came later, for the same reason. If you pressed the shortcut while something blocked a dictation, nothing happened at all, and the reason went to a log file you could not see. Now the bar answers every key press, even with "that did not happen".
+
+**If you build anything that listens, give every state its own look, and make the "no" visible too.** A shortcut that silently does nothing teaches people the feature is broken.
+
+## From key press to text, in nine steps
+
+Here is the whole path. The first three steps, and the live preview beside them, run while you are still talking. The rest happen after you let go, and that part is what you wait for.
+
+<Figure
+  n={3}
+  title="Your audio stays on this computer unless you choose otherwise"
+  subtitle="The steps of one dictation and where each one runs. Hover a step for its source file."
+  source="jarvis/speech/pipeline.py and jarvis/dictation/ in the Personal Jarvis repo; median wait from src/data/jarvis-voice.json"
+  legend={[
+    { label: "Runs on this computer by default", color: "var(--accent)" },
+    { label: "Sends text to a provider you pick", color: "var(--accent)", ring: true },
+  ]}
+>
+  <VoicePipeline />
+  <Fragment slot="caption">The dashed step is the live preview: it only exists to show you words while you talk, and its result is thrown away on the next update. The on-device recognizer steps aside when the graphics card has less than 1.5 GB free, when there is no supported graphics card, or when the local model is missing; then the speech provider you configured does steps 3 and 4.</Fragment>
+</Figure>
+
+A few of these steps deserve a closer look.
+
+**The microphone signal is not filtered.** <Gh path="jarvis/dictation/audio_preprocessing.py" /> records 16 kHz mono and keeps it byte for byte. The libraries we use for capture offer no echo cancellation or noise suppression that works the same on Windows, macOS and Linux, and a filter added just because a setting exists can delete quiet speech. So the history records honestly that these are unavailable, instead of pretending.
+
+**Silence is never uploaded.** A recording is cut into pieces at the quietest moment near every eight seconds, so no word is cut in half. A piece with no speech energy in it is dropped before any model sees it. That matters more than it sounds: speech models fed silence like to invent a sentence, and "Thank you for watching" in the middle of your email is the classic. <Gh path="jarvis/dictation/segment.py" /> judges this on loudness only, never on the text that came back, because a made-up sentence and a real one are both just words.
+
+**Long recordings are read in overlapping windows.** The final text comes from 25-second windows that share 1.5 seconds of audio, so a word on the boundary is heard whole at least once. <Gh path="jarvis/dictation/merge.py" /> then removes the doubled words at each seam. It compares a normalised copy (no capitals, no punctuation) and keeps your original text. For Chinese, Japanese, Thai and other languages written without spaces, it compares characters instead of words.
+
+**Inserting is the part that breaks.** <Gh path="jarvis/dictation/insert.py" /> follows one rule: the text is on the clipboard before the first keystroke, and it stays there if pasting fails. Then it sends the paste shortcut and, a moment later, puts your previous clipboard back. The rule exists because the failures are silent. On Windows, an app running as administrator ignores keystrokes from a normal app, and the system reports success anyway. On macOS, a password field blocks keystrokes from other programs. On Wayland, sending keystrokes into another app is blocked by design. None of these give an error we could catch, so Jarvis tells you which of two things happened: inserted, or left on your clipboard.
+
+## Two models: one for the screen, one for the page
+
+The live preview and the final text want opposite things. The preview has to be on screen now and is replaced a second later. The final text has to be right and can take a moment longer. We learned that the hard way.
+
+### What broke first: the preview ate the transcript
+
+Our first version sent both to the same cloud speech provider. On July 29 we read our own logs: a dictation used about 40 requests per minute of speech, and 85 % of them were preview updates that were thrown away a second later. The provider allows 20 requests a minute, on its paid plan too. A 137-second dictation hit that limit, five requests were refused, and 367 characters came back for over two minutes of talking.
+
+The preview now runs on your own computer, on Whisper's small `base` model, in a process of its own (<Gh path="jarvis/dictation/local_preview.py" />). On the machine we build Jarvis on it reads the last second of speech in 34 ms and the last eight seconds in 137 ms, against 400 to 1,500 ms for a cloud round trip. The final text never comes from it. If a preview word is wrong, it is gone a second later; that is the trade.
+
+**Spend your best model on the words that stay, and the cheapest one on the words that disappear.** If you build live captions or a preview of any kind, count how many of your requests produce text the user keeps.
+
+### What broke second: German came out half English
+
+Short pieces caused a different problem. A speech model given eight seconds of audio is often unsure which language it hears, and an unsure model does not just mislabel the language: it translates. One continuous German dictation arrived half in German and half in English. The final pass now reads the long 25-second windows instead, and it asks the model to detect the language per window, so you can switch languages within one dictation.
+
+Since September 2 the final pass also runs on your computer when it can, on Whisper `large-v3-turbo` (<Gh path="jarvis/dictation/local_final.py" />). It lives in the same separate process as the preview, for a reason we come to below. If it cannot run, the dictation falls back to the speech provider you configured. That fallback always moves to a different provider family, never to a second model at the same company, because an account that is rate-limited is rate-limited for all of its models.
+
+## You wait about half a second
+
+The wait you feel is the time between letting go of the key and the text appearing. In August that wait grew with every second you spoke, because the final pass only started when you let go and read one window after another. On August 22 we changed it to read each window as soon as the recording has grown past it, while you are still talking, and to read whatever is left at release in parallel where the provider allows it.
+
+<Figure
+  n={4}
+  title="The wait after you let go no longer grows with length"
+  subtitle="Median time from releasing the key to the finished transcript, by length of the dictation."
+  source="August: the medians in commit c34fd84dd, August 22, 2026. October: dictation history, October 1-2, 2026"
+  legend={[
+    { label: "August, before the change", color: "var(--mark-muted)" },
+    { label: "October 1-2", color: "var(--accent)" },
+  ]}
+  table={{
+    head: ["Length", "August median", "October median", "October dictations"],
+    rows: data.wait.before.map((b, i) => [b.bucket === "Short" ? "Short (under 25 s)" : b.bucket, `${(b.medianMs / 1000).toFixed(2)} s`, `${(data.wait.after[i].medianMs / 1000).toFixed(2)} s`, data.wait.after[i].n]),
+  }}
+>
+  <ReleaseWait />
+  <Fragment slot="caption">Two changes are in the October numbers: reading windows while you talk (August 22) and the on-device final pass (September 2). The "over 50 seconds" group has only {data.wait.after[2].n} dictations in October, so treat it as a hint. Formatting and pasting added less than a millisecond at the median.</Fragment>
+</Figure>
+
+Across the {data.recent.delivered} dictations that reached a text field on October 1 and 2, the median wait was {(data.wait.allMedianMs / 1000).toFixed(2)} seconds, and nine in ten were done within {(data.wait.allP90Ms / 1000).toFixed(2)} seconds.
+
+## Cleaning up without changing your words
+
+A dictation tool promises one thing: these are your words. Everything between recognition and insertion is built around keeping that promise.
+
+First, your **Speech Dictionary** (Voice → Dictionary) fixes names and terms the recognizer keeps getting wrong. Its rules run on your computer, on the finished text.
+
+Then a fixed set of rules removes hesitation sounds, in <Gh path="jarvis/dictation/cleanup.py" />. No model is involved. The lists are short on purpose, and today they exist for English, German and Spanish: "uh", "umm", "hmm", "äh", "ähm" and a few more. Words that carry meaning in normal speech stay, even when style guides call them filler: "like", "actually" and "basically" in English, "also" and "halt" in German. If the rules would remove more than a quarter of the words, the text is passed through unchanged. For any other language, nothing is removed.
+
+On top of that you can switch on three optional passes, each done by a text model you choose under **Voice → Language**:
+
+- **Clean up my wording** adds punctuation and capital letters, fixes self-corrections ("at 2, no, at 3" becomes "at 3") and can turn a spoken list into a list.
+- **Always write in one language** translates and cleans up in the same request, so a translation costs one round trip, not two.
+- **Prompt Mode** turns what you said into a finished request for a coding agent. A short answer like "yes, do it" is left alone.
+
+Six provider families can do this, one of them your own local models through Ollama. The model's answer is only a proposal. <Gh path="jarvis/dictation/polish_guards.py" /> checks it with fixed rules, with no second model involved, and throws it away if it shrank or grew too much, switched language, or started answering instead of formatting. In that case you get your raw words. The same happens when the model is slow: the time budget starts at 1.2 seconds and grows with length up to 2 seconds.
+
+### What broke third: a dictionary word nobody said
+
+At the end of August, short dictations sometimes typed a lone "IDE." that nobody had spoken. Our dictionary was the cause. We passed its words to the cloud recognizer as a hint, and over a pause the recognizer simply recited the hint list. Since September 1, no recognizer gets the dictionary as a hint any more; it only corrects the finished text.
+
+**Give a model only the input it needs for its job.** A hint that helps on a clear sentence turns into the output on silence.
+
+## What stays on your disk, and for how long
+
+Dictated text is some of the most private data the app holds, because it is whatever you were writing. So everything here is local, capped and deletable:
+
+| What | Default | Where you change it |
+|---|---|---|
+| History: what you said and what was delivered, side by side | Up to 200 entries, 30 days | Voice → Dictation |
+| Recordings, only for dictations that failed or came back partly empty | Up to 20 files, 7 days | Voice → Dictation |
+| Statistics: counts and durations per day, no text | Kept, so your totals keep growing | Delete all, in the same place |
+
+A successful dictation keeps no audio at all. A failed one keeps its recording so that **Restore** can transcribe it again once your provider works, instead of losing what you said. **Delete all** removes history, recordings and statistics in one step.
+
+## Two months of our own dictation
+
+We use Jarvis Voice all day to talk to the coding agents that build Personal Jarvis. These are the counts from the statistics file on the machine we build it on.
+
+<Figure
+  n={5}
+  title="We dictated 7,078 times in 60 days, 497 times on October 1 alone"
+  subtitle="Dictations per day, August 3 to October 1, 2026."
+  source="dictation_stats.json on the machine Personal Jarvis is built on; counts only"
+  table={{
+    head: ["Day", "Dictations", "Words", "Minutes of speech"],
+    rows: data.days.filter((d) => d.dictations > 0).map((d) => [d.date, d.dictations, d.words, d.minutes]),
+  }}
+>
+  <VoiceDays />
+  <Fragment slot="caption">{data.totals.activeDays} of {data.totals.days} days had at least one dictation. October 1 was the day we built the desktop pets, mostly by talking to coding agents.</Fragment>
+</Figure>
+
+In the {data.recent.n} most recent dictations, the median one lasted {data.recent.medianSeconds} seconds and delivered {data.recent.medianWords} words. {data.recent.outcomes.chat} of them went into Jarvis's own window, mostly into coding-agent terminals, {data.recent.outcomes.paste_sent} were pasted into other apps, and one stayed on the clipboard because the target refused it. {data.recent.outcomes.empty} were empty, usually a key pressed without speaking. Most were in German ({data.recent.languages.de}) and English ({data.recent.languages.en}).
+
+## The bug that made the fix slower than the problem
+
+Moving recognition onto the graphics card brought two problems of its own. The first: loading the graphics libraries inside the desktop app froze its window for 15 to 30 seconds on the first dictation after a cold start, because Windows holds a lock while it loads them. Since September 1, both local models live in a separate worker process. If that worker gets stuck, Jarvis ends it and starts a fresh one, which is the only real recovery a stuck native engine has.
+
+The second was a single word. Our settings store the language as "auto", and every cloud provider treats that as "detect it yourself". The local engine did not: it rejected "auto", crashed on every key press, and locked itself out for a minute before the cloud took over, after a 45-second wait. The cloud behind it answered in 0.57 seconds. The local pass we built to remove lag had become the lag. The fix on September 3 was one mapping, and a test fake that now behaves like the real library.
+
+**When you put a faster path in front of a slower one, test what happens when the faster one fails.** Ours failed slowly, and that was worse than not having it.
+
+## Where it runs
+
+Jarvis Voice runs on Windows, macOS and Linux, with limits the operating systems set:
+
+- **Windows:** an app running as administrator ignores the paste from a normal app. The text stays on your clipboard.
+- **macOS:** Jarvis needs Accessibility and Input Monitoring access, and password fields block it. The text stays on your clipboard.
+- **Linux with X11:** global shortcuts need the optional desktop hotkey support. Without it, start a dictation with the button in the app.
+- **Linux with Wayland:** global shortcuts and typing into other apps are blocked by design. Use the button and paste.
+- **Headless server:** there is no microphone and no text field, and dictation says so.
+
+The full table and every setting are in the <Gh path="docs/product/everyday-use/dictation.md" label="dictation guide" /> in the repo.
+
+## What to take from this
+
+- **Start with the defaults:** hold `Ctrl` + `Right Alt` + `J`, speak, let go. Change keys under **Voice → Shortcuts**.
+- **Use hands-free for anything long:** `Ctrl` + `Right Alt` + `Space` starts, the same keys stop.
+- **When a paste goes nowhere,** press `Ctrl` + `Alt` + `V`, or copy the text from **Voice → Dictation**.
+- **Teach it your names** under **Voice → Dictionary** instead of correcting the same word every day.
+- **Keep the audio on your machine:** with a graphics card and the local model installed, recognition runs on your computer. Turn on a wording pass only if you are fine sending the text to the provider you pick.
+
+The code is in <Gh path="jarvis/dictation/" label="PersonalJarvis/PersonalJarvis" />, and you can get the app at [personaljarvis.ai](https://personaljarvis.ai). If dictation drops a word or pastes into the wrong place for you, tell us in an issue on [GitHub](https://github.com/PersonalJarvis/PersonalJarvis/issues), with the outcome badge from the history row.
+
+<div class="note">
+  <strong>How we measured.</strong> Figure 5 and the totals come from <code>dictation_stats.json</code> on the machine Personal Jarvis is built on, which stores per-day counts and durations without any text, from August 3 (its first day) to October 1, 2026, in local days. The wait times and the outcome and language counts come from the {data.recent.n} most recent entries of the local dictation history, recorded between October 1 and 2, 2026; every one that was transcribed ran on the on-device recognizer; wait times count only dictations that reached a text field and use the history's own <code>release_wait_ms</code> measurement. The August medians are quoted from the message of commit c34fd84dd, which read them from the history at the time; the commit does not define "short", so we put it next to our under-25-seconds group. Preview latencies and request counts are the measurements written into <code>local_preview.py</code> and <code>preview_budget.py</code>. Figures 1 and 2 are rendered with the bar's drawing code from the source as of October 2, 2026; the voice level in figure 1 is synthetic. No dictated text was read for this post.
+</div>

@@ -1,0 +1,94 @@
+---
+/**
+ * Every look the Jarvis bar takes around a dictation, rendered by the bar's
+ * own drawing code (jarvis/ui/jarvisbar/renderer.py) at a large size and shown
+ * at their true size relative to each other. Only the mic level behind the
+ * "Recording" frame is synthetic.
+ */
+import { Image } from "astro:assets";
+import idle from "@/assets/posts/how-jarvis-voice-works/bar-idle.png";
+import dictate from "@/assets/posts/how-jarvis-voice-works/bar-dictate.png";
+import transcribing from "@/assets/posts/how-jarvis-voice-works/bar-transcribing.png";
+import notice from "@/assets/posts/how-jarvis-voice-works/bar-notice.png";
+import prompt from "@/assets/posts/how-jarvis-voice-works/bar-prompt.png";
+
+interface Props {
+  n: number;
+  title: string;
+  subtitle?: string;
+  source: string;
+}
+const { n, title, subtitle, source } = Astro.props;
+
+/** Display width per source pixel: keeps the resting pill smaller than the active one, as on screen. */
+const K = 0.2;
+const STATES = [
+  { src: idle, name: "Resting", text: "A slim pill with muted dots. Nothing is recording." },
+  { src: dictate, name: "Recording", text: "Gold bars that rise and fall with your voice while you hold the key." },
+  { src: transcribing, name: "Transcribing", text: "A highlight sweeps along the row: you let go and the text is on its way." },
+  { src: notice, name: "Did not happen", text: "A red cross that breathes, then clears: Jarvis could not start what you asked." },
+  { src: prompt, name: "Prompt Mode on", text: "A sparkle in the resting pill. Click it to pause Prompt Mode." },
+];
+---
+
+<figure class="figure">
+  <div class="figure-head">
+    <p class="figure-title">{title}</p>
+    {subtitle && <p class="figure-sub">{subtitle}</p>}
+  </div>
+  <div class="states">
+  {
+    STATES.map((s) => (
+      <div class="state">
+        <div class="pad">
+          <Image src={s.src} alt={`The Jarvis bar, ${s.name.toLowerCase()}`} width={Math.round(s.src.width * K)} densities={[1, 2]} />
+        </div>
+        <p class="name">{s.name}</p>
+        <p class="text small">{s.text}</p>
+      </div>
+    ))
+  }
+  </div>
+  <figcaption class="figure-foot small">
+    <span><strong style="color:var(--ink-2)">Figure {n}.</strong> <slot name="caption" /> Source: {source}.</span>
+  </figcaption>
+</figure>
+
+<style>
+  .states {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .state {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: var(--paper);
+  }
+  .pad {
+    display: grid;
+    place-items: center;
+    height: 92px;
+    border-radius: 6px;
+    background: var(--panel);
+  }
+  .pad :global(img) {
+    display: block;
+    height: auto;
+    max-width: 100%;
+  }
+  .name {
+    margin: 0.6rem 0 0.15rem;
+    font-family: var(--sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .text {
+    margin: 0;
+    color: var(--ink-3);
+    line-height: 1.45;
+  }
+</style>

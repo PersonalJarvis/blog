@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" fill="none">
+  <!-- Gigi speaks; the words land as lines in a text window, the bar's equalizer below. -->
+  <g stroke="#141413" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke">
+<g transform="translate(52 88) scale(1.45)"><path vector-effect="non-scaling-stroke" d="M4 38 C4 18 19 4 35 4 C51 4 66 18 66 38 L66 86 L55 77 L45 86 L35 77 L25 86 L15 77 L4 86 Z" fill="#faf9f5"/><ellipse cx="25" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse cx="45" cy="36" rx="4.5" ry="6" fill="#141413" stroke="none"/><ellipse vector-effect="non-scaling-stroke" cx="35" cy="55" rx="4" ry="5" fill="#faf9f5"/></g>
+<path vector-effect="non-scaling-stroke" d="M172 132 Q182 148 172 164 M188 120 Q204 148 188 176 M204 108 Q226 148 204 188"/>
+<rect vector-effect="non-scaling-stroke" x="240" y="84" width="190" height="136" rx="10" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M240 108 H430"/>
+<path vector-effect="non-scaling-stroke" d="M260 134 H404 M260 158 H388 M260 182 H330"/>
+<path vector-effect="non-scaling-stroke" d="M344 172 V192"/>
+<rect vector-effect="non-scaling-stroke" x="196" y="242" width="150" height="32" rx="16" fill="#faf9f5"/>
+<path vector-effect="non-scaling-stroke" d="M232 252 V264 M250 248 V268 M268 254 V262 M286 249 V267 M304 253 V263"/>
+  </g>
+</svg>

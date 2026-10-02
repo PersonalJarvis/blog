@@ -1,0 +1,65 @@
+---
+/**
+ * Dictations per day on the machine Personal Jarvis is built on, August 3 to
+ * October 1, 2026. One bar per local day, the busiest day in the accent.
+ * Read from src/data/jarvis-voice.json (`days`, counts only, no text).
+ */
+import data from "@/data/jarvis-voice.json";
+import { barUp } from "./util";
+
+const W = 640;
+const H = 250;
+const top = 24;
+const base = H - 40;
+const left = 34;
+const max = 500;
+const days = data.days;
+const slot = (W - left) / days.length;
+const bw = Math.max(2, slot * 0.7);
+const y = (v: number) => base - ((base - top) * v) / max;
+const peak = days.reduce((a, b) => (b.dictations > a.dictations ? b : a));
+const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const nice = (iso: string) => {
+  const [, m, d] = iso.split("-").map(Number);
+  return `${MONTH[m - 1]} ${d}`;
+};
+const ticks = ["2026-08-03", "2026-08-17", "2026-09-01", "2026-09-15", "2026-10-01"];
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Dictations per day from August 3 to October 1, 2026. ${data.totals.dictations} in total; the busiest day was ${nice(peak.date)} with ${peak.dictations}.`}>
+  {
+    [0, 100, 200, 300, 400, 500].map((v) => (
+      <g>
+        <line x1={left} x2={W} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
+        <text class="t-axis" x={0} y={y(v) + 4}>{v}</text>
+      </g>
+    ))
+  }
+  {
+    days.map((d, i) => {
+      const x = left + i * slot + (slot - bw) / 2;
+      const tip = `<b>${nice(d.date)}</b><br>${d.dictations} dictations<br>${d.words.toLocaleString("en-US")} words, ${Math.round(d.minutes)} min of speech`;
+      return (
+        <g>
+          <rect class="hit" x={left + i * slot} y={top - 10} width={slot} height={base - top + 10} data-tip={tip} />
+          <rect class="hl" x={left + i * slot} y={top - 10} width={slot} height={base - top + 10} fill="var(--ink)" fill-opacity="0.06" pointer-events="none" />
+          {d.dictations > 0 && <path d={barUp(x, y(d.dictations), bw, base, 2)} fill={d.date === peak.date ? "var(--accent)" : "var(--mark-muted)"} pointer-events="none" />}
+        </g>
+      );
+    })
+  }
+  {
+    ticks.map((t) => {
+      const i = days.findIndex((d) => d.date === t);
+      const x = left + i * slot + slot / 2;
+      return (
+        <text class="t-axis" x={x} y={base + 18} text-anchor={i === days.length - 1 ? "end" : "middle"}>
+          {nice(t)}
+        </text>
+      );
+    })
+  }
+  <text class="t-strong" x={left + days.indexOf(peak) * slot + slot / 2 - 6} y={y(peak.dictations) - 8} text-anchor="end">
+    {nice(peak.date)}: {peak.dictations}
+  </text>
+</svg>

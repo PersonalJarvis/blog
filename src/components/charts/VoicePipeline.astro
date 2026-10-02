@@ -1,0 +1,99 @@
+---
+/**
+ * The path a dictation takes, from the key press to the history row, as the
+ * Personal Jarvis source implements it (jarvis/speech/pipeline.py drives the
+ * lane, jarvis/dictation/ holds the steps). Each row says where the step runs.
+ * The release marker's median comes from src/data/jarvis-voice.json.
+ */
+import data from "@/data/jarvis-voice.json";
+import { esc } from "./util";
+
+type Row = {
+  title: string;
+  sub: string;
+  where: string[];
+  local: boolean;
+  file: string;
+  branch?: boolean;
+};
+const before: Row[] = [
+  { title: "Hold the shortcut", sub: "Ctrl + Right Alt + J. The bar switches to recording.", where: ["This computer"], local: true, file: "jarvis/speech/pipeline.py" },
+  { title: "Capture the microphone", sub: "16 kHz mono, kept byte for byte, no filters.", where: ["This computer"], local: true, file: "jarvis/dictation/audio_preprocessing.py" },
+  { title: "Live preview", sub: "Whisper base re-reads the open tail every 1.2 s.", where: ["This computer,", "its own process"], local: true, file: "jarvis/dictation/local_preview.py", branch: true },
+  { title: "Read final windows while you talk", sub: "25 s windows, 1.5 s overlap, cut where it is quiet.", where: ["This computer, own process;", "your provider as fallback"], local: true, file: "jarvis/dictation/local_final.py" },
+];
+const after: Row[] = [
+  { title: "Read the last window, join the seams", sub: "Shared audio is matched; its repeated words dropped.", where: ["Same recognizer"], local: true, file: "jarvis/dictation/merge.py" },
+  { title: "Apply your Speech Dictionary", sub: "Your names and terms, fixed by local rules.", where: ["This computer"], local: true, file: "jarvis/speech/stt_dictionary.py" },
+  { title: "Remove filler sounds", sub: "Short curated lists; never more than 25 % of words.", where: ["This computer"], local: true, file: "jarvis/dictation/cleanup.py" },
+  { title: "Optional: wording, translation, Prompt Mode", sub: "A text model proposes; fixed guards decide.", where: ["Provider you pick,", "or a local model"], local: false, file: "jarvis/dictation/polish_guards.py" },
+  { title: "Put it into the field", sub: "Clipboard first, paste key, old clipboard back.", where: ["This computer"], local: true, file: "jarvis/dictation/insert.py" },
+  { title: "Write history and statistics", sub: "Both versions locally; counts kept without text.", where: ["This computer"], local: true, file: "jarvis/dictation/history.py" },
+];
+
+const W = 640;
+const rowH = 52;
+const boxH = 42;
+const spineX = 12;
+const boxX = 32;
+const boxR = 426;
+const whereX = 446;
+const dividerH = 44;
+const top = 8;
+const rows = [
+  ...before.map((r, i) => ({ ...r, y: top + i * rowH })),
+  ...after.map((r, i) => ({ ...r, y: top + (before.length + i) * rowH + dividerH })),
+];
+const H = top + rows.length * rowH + dividerH + 4;
+const dividerY = top + before.length * rowH + dividerH / 2 - 4;
+const median = data.wait.allMedianMs;
+let n = 0;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={"How a dictation travels, step by step: " + rows.map((r) => `${r.title} (${r.where.join(" ")})`).join("; ")}>
+  <line x1={spineX} x2={spineX} y1={rows[0].y + boxH / 2} y2={rows[rows.length - 1].y + boxH / 2} stroke="var(--rule-strong)" stroke-width="2" />
+  {
+    rows.map((r) => {
+      const cy = r.y + boxH / 2;
+      const x0 = r.branch ? boxX + 34 : boxX;
+      const num = r.branch ? "" : String(++n);
+      const tip = `<b>${esc(r.title)}</b><br>${esc(r.sub)}<br>Source: ${esc(r.file)}`;
+      return (
+        <g>
+          <rect class="hit" x={0} y={r.y - 4} width={W} height={rowH - 2} data-tip={tip} />
+          <rect class="hl" x={0} y={r.y - 4} width={W} height={rowH - 2} rx="6" fill="var(--ink)" fill-opacity="0.05" pointer-events="none" />
+          {r.branch ? (
+            <path d={`M${spineX} ${cy - rowH} C ${spineX + 20} ${cy - rowH} ${x0 - 22} ${cy} ${x0} ${cy}`} fill="none" stroke="var(--ink-4)" stroke-dasharray="3 3" pointer-events="none" />
+          ) : (
+            <line x1={spineX} x2={boxX} y1={cy} y2={cy} stroke="var(--rule-strong)" stroke-width="2" pointer-events="none" />
+          )}
+          <rect
+            x={x0}
+            y={r.y}
+            width={boxR - x0}
+            height={boxH}
+            rx="7"
+            fill="var(--paper)"
+            stroke={r.branch ? "var(--ink-4)" : "var(--rule-strong)"}
+            stroke-dasharray={r.branch ? "4 3" : undefined}
+            pointer-events="none"
+          />
+          {!r.branch && (
+            <g pointer-events="none">
+              <circle cx={spineX} cy={cy} r="10" fill={r.local ? "var(--accent)" : "var(--paper)"} stroke="var(--accent)" stroke-width="2" />
+              <text x={spineX} y={cy + 4} text-anchor="middle" font-size="11" font-weight="600" fill={r.local ? "var(--paper)" : "var(--accent)"}>{num}</text>
+            </g>
+          )}
+          <text class="t-strong" x={x0 + 12} y={r.y + 17} pointer-events="none">{r.title}</text>
+          <text class="t-axis" x={x0 + 12} y={r.y + 33} pointer-events="none">{r.sub}</text>
+          {r.where.map((w, j) => (
+            <text class="t-label" x={whereX} y={cy + 4 + (j - (r.where.length - 1) / 2) * 15} pointer-events="none">{w}</text>
+          ))}
+        </g>
+      );
+    })
+  }
+  <line x1={0} x2={W} y1={dividerY} y2={dividerY} stroke="var(--accent)" stroke-dasharray="5 4" />
+  <rect x={boxX - 4} y={dividerY - 11} width={402} height={22} fill="var(--paper)" />
+  <text class="t-strong" x={boxX + 4} y={dividerY + 4} style="fill:var(--accent)">You let go: median {(median / 1000).toFixed(2)} s from here to finished text</text>
+</svg>
